@@ -17,7 +17,7 @@ export default function Home() {
       <SynthMoon />
 
       {/* 3. scrollable content layer (todo, fix space in between) */}
-      <div className="relative z-20 w-full max-w-6xl mx-auto pt-48 px-6 pb-24 space-y-96">
+      <div className="relative z-20 w-full max-w-6xl mx-auto pt-80 px-6 pb-24 space-y-8">
         
         {/* Section 1: top */}
         <section className="w-fit mx-auto p-8 bg-black/50 backdrop-blur-md border border-cyan-500/30 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.15)]">

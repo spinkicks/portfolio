@@ -33,3 +33,12 @@ html {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* custom cursor */
+* {
+  cursor: url('/cursor-main.cur'), auto;
+}
+
+a, button {
+  cursor: url('/cursor-hover.cur'), pointer;
+}
