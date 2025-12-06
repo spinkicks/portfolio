@@ -6,7 +6,7 @@ export default function Home() {
       
       {/* background is the synth-bg image*/}
       <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-80"
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-95"
         style={{ backgroundImage: "url('/moonless-bg.png')" }}
       >
         {/*dark overlay so text pops */}
