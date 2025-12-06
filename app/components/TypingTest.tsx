@@ -1,17 +1,63 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 
-const baseWords = [
-  "that",
-  "person",
-  "test",
-  "one",
-  "point",
-  "who",
-  "develop",
-  "because",
+const WORD_BANK = [
+  "program",
+  "follow",
+  "general",
+  "child",
+  "present",
   "then",
-  "choose",
+  "year",
+  "right",
+  "through",
+  "just",
+  "also",
+  "it",
+  "take",
+  "set",
+  "more",
+  "course",
+  "say",
+  "who",
+  "these",
+  "house",
+  "since",
+  "during",
+  "order",
+  "head",
+  "some",
+  "want",
+  "time",
+  "one",
+  "hand",
+  "between",
+  "be",
+  "well",
+  "show",
+  "own",
+  "into",
+  "we",
+  "with",
+  "little",
+  "late",
+  "way",
+  "help",
+  "right",
+  "most",
+  "first",
+  "stand",
+  "public",
+  "possible",
+  "point",
+  "down",
+  "of",
+  "around",
+  "time",
+  "man",
+  "possible",
+  "from",
+  "point",
 ];
 
 function shuffle<T>(array: T[]): T[] {
@@ -23,8 +69,12 @@ function shuffle<T>(array: T[]): T[] {
   return arr;
 }
 
+function pickWords(count: number) {
+  return shuffle(WORD_BANK).slice(0, count);
+}
+
 export default function TypingTest() {
-  const promptWords = useMemo(() => shuffle(baseWords), []);
+  const [promptWords, setPromptWords] = useState<string[]>(() => pickWords(10));
   const prompt = useMemo(() => promptWords.join(" "), [promptWords]);
   const targetWords = promptWords.length;
   const [input, setInput] = useState("");
@@ -117,20 +167,18 @@ export default function TypingTest() {
     setStartTime(null);
     setFinishTime(null);
     setFinishChars(null);
+    setPromptWords(pickWords(10));
   };
 
   return (
     <section className="p-8 bg-black/50 backdrop-blur-md border border-cyan-500/30 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.15)] space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-cyan-300 font-semibold">
-            Typing Duel
-          </p>
           <h3 className="text-3xl font-bold text-cyan-100">
-            Beat my <span className="text-purple-400">200 WPM</span>
+            Beat my <span className="text-purple-900">200 WPM</span>
           </h3>
           <p className="text-sm text-zinc-400">
-            Perfect accuracy auto-submits—no need to hit "Done."
+            Type this with 100% accuracy, and it will auto-submit.
           </p>
         </div>
         <div className="text-right">
@@ -152,8 +200,8 @@ export default function TypingTest() {
         <textarea
           value={input}
           onChange={(e) => handleChange(e.target.value)}
-          placeholder="Start typing the phrase above..."
-          className="w-full min-h-[120px] p-4 text-lg rounded-lg bg-black/60 border border-cyan-700/50 focus:border-cyan-400 outline-none text-cyan-50 font-mono placeholder:text-cyan-300/60 resize-none"
+          placeholder="Type the words above..."
+          className="w-full min-h-[120px] p-4 text-lg rounded-lg bg-black/80 border border-cyan-700/50 focus:border-cyan-400 outline-none text-cyan-50 font-mono placeholder:text-cyan-300/60 resize-none"
         />
         <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-baseline gap-2">
@@ -175,11 +223,11 @@ export default function TypingTest() {
           </div>
           {isComplete ? (
             <span className="text-emerald-300 text-sm">
-              Perfect match! Ready to log that score.
+              Perfect! Logged the score.
             </span>
           ) : (
-            <span className="text-amber-300 text-sm">
-              Keep it clean—every extra space counts.
+            <span className="text-blue-300 text-sm">
+              Type accurately. Everything counts.
             </span>
           )}
         </div>

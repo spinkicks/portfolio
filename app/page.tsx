@@ -23,7 +23,7 @@ export default function Home() {
         {/* Section 1: top */}
         <section className="w-fit mx-auto p-8 bg-black/50 backdrop-blur-md border border-cyan-500/30 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.15)]">
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 tracking-tighter">
-            David "Spinkicks"
+            David
           </h1>
           <p className="mt-4 text-cyan-100 font-mono text-lg">
             Austin, TX
