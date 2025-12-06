@@ -108,3 +108,62 @@ a, button {
     transform: translate3d(300px, 150px, 0) rotate(45deg);
   }
 }
+
+.flip-card {
+  perspective: 1200px;
+  position: relative;
+  min-height: 240px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s ease;
+  transform-style: preserve-3d;
+}
+
+.flip-card.tall {
+  min-height: 280px;
+}
+
+.reveal-card {
+  position: relative;
+  overflow: visible;
+}
+
+.reveal-front {
+  position: relative;
+  z-index: 1;
+}
+
+.reveal-back {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: max(100%, 360px);
+  opacity: 0;
+  transform: translate(-50%, 10px) scale(0.98);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  z-index: 2;
+}
+
+.reveal-card:hover .reveal-back {
+  opacity: 1;
+  transform: translate(-50%, -6px) scale(1.02);
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+}
