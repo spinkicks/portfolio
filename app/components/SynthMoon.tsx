@@ -7,24 +7,25 @@ export default function SynthMoon() {
 
   // 2. map scroll to X coordinate (Moves Right -> Left)
   // Starts at 85% of screen width, ends at 15%
-  const x = useTransform(scrollYProgress, [0, 1], ["85vw", "15vw"]);
+  const x = useTransform(scrollYProgress, [0, 1], ["71vw", "15vw"]);
 
-  // 3. map scroll to Y coordinate; the arc
+  // 3. map scroll to Y coordinate; the
   // [start, middle, end] -> [low, high, low]
   // create parabola: starts at 200px from top, rises to 50px, drops back to 300px
-  const y = useTransform(scrollYProgress, [0, 0.5, 1], ["20vh", "5vh", "30vh"]);
+  const y = useTransform(scrollYProgress, [0, 0.5, 1], ["21vh", "5vh", "30vh"]);
 
   // 4. scale it a little as it rises
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.2, 0.8]);
 
   return (
-    <motion.div
-      style={{ x, y, scale }}
-      className="fixed top-0 left-0 z-10 pointer-events-none"
-    >
-      {/* moon graphic */}
-      {/* CSS box-shadow to create synthwave neon glow (testing) */}
-      <div className="w-16 h-16 rounded-full bg-cyan-300 shadow-[0_0_20px_5px_rgba(34,211,238,0.6)]" />
+    <motion.div 
+        style={{ x, y, scale }} 
+        className="fixed top-0 left-0 z-10">
+      <img 
+        src="/moon-overlay.png" 
+        alt="Synth Moon" 
+        className="w-55 h-55 drop-shadow-[0_0_15px_rgba(100,200,255,0.6)]" 
+      />
     </motion.div>
   );
 }
