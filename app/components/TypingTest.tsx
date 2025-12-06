@@ -171,21 +171,20 @@ export default function TypingTest() {
   };
 
   return (
-    <section className="p-8 bg-black/50 backdrop-blur-md border border-cyan-500/30 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.15)] space-y-4">
+    <section className="p-8 glass-card rounded-xl space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h3 className="text-3xl font-bold text-cyan-100">
-            Beat my <span className="text-purple-900">200 WPM</span>
+          <h3 className="text-3xl font-mono text-cyan-200 glow-cyan">
+            Beat my <span className="text-cyan-700 font-mono">200 WPM</span>
           </h3>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-400 font-mono">
             Type this with 100% accuracy, and it will auto-submit.
           </p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-zinc-400">Target</p>
-          <p className="text-2xl font-mono text-cyan-200">200 wpm</p>
+          <p className="text-2xl font-mono text-cyan-700">Target: 200 wpm</p>
           {bestWpm !== null && (
-            <p className="text-sm text-emerald-300">
+            <p className="text-sm text-emerald-300 font-mono">
               Best: {bestWpm.toFixed(1)} wpm
             </p>
           )}
@@ -193,7 +192,7 @@ export default function TypingTest() {
       </div>
 
       <div className="p-4 bg-gradient-to-r from-cyan-900/40 via-black to-purple-900/30 border border-cyan-800/40 rounded-lg">
-        <p className="text-zinc-200 font-mono text-lg">{prompt}</p>
+        <p className="text-zinc-400 font-mono text-lg">{prompt}</p>
       </div>
 
       <div className="space-y-3">
@@ -218,15 +217,15 @@ export default function TypingTest() {
             <span className="text-sm text-zinc-500">wpm</span>
           </div>
         )}
-          <div className="text-sm text-zinc-400">
+          <div className="text-sm text-zinc-400 font-mono">
             Words: {wordsTyped}/{targetWords}
           </div>
           {isComplete ? (
-            <span className="text-emerald-300 text-sm">
+            <span className="text-emerald-300 text-sm font-mono">
               Perfect! Logged the score.
             </span>
           ) : (
-            <span className="text-blue-300 text-sm">
+            <span className="text-cyan-700 text-sm font-mono">
               Type accurately. Everything counts.
             </span>
           )}
@@ -236,7 +235,7 @@ export default function TypingTest() {
       <div className="flex gap-3">
         <button
           onClick={handleReset}
-          className="px-4 py-2 rounded-lg bg-cyan-700/50 text-cyan-50 border border-cyan-400/40 hover:border-cyan-200 transition"
+          className="px-4 py-2 rounded-lg bg-cyan-700/50 text-cyan-50 border border-cyan-400/40 hover:border-cyan-200 transition btn-glow"
         >
           Reset
         </button>
@@ -248,7 +247,7 @@ export default function TypingTest() {
               setFinishChars(charactersTyped);
             }}
             disabled={!startTime}
-            className="px-4 py-2 rounded-lg bg-purple-700/50 text-purple-50 border border-purple-400/40 hover:border-purple-200 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg bg-purple-700/50 text-purple-50 border border-purple-400/40 hover:border-purple-200 transition disabled:opacity-40 disabled:cursor-not-allowed btn-glow"
           >
             I&apos;m Done
           </button>

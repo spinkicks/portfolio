@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds */
+  --bg-main: #050511;
+  --bg-card: rgba(18, 18, 37, 0.7);
+
+  /* Accents */
+  --color-cyan: #00f3ff;
+  --color-magenta: #bc13fe;
+  --color-pink: #ff2a6d;
+
+  /* Text */
+  --text-main: #eaeaea;
+  --text-muted: #8f9baf;
+
+  /* Legacy fallback hooks */
+  --background: var(--bg-main);
+  --foreground: var(--text-main);
 }
 
 @theme inline {
@@ -12,16 +26,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg-main);
+  color: var(--text-main);
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -41,4 +48,23 @@ html {
 
 a, button {
   cursor: url('/cursor-hover.cur'), pointer;
+}
+
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 243, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+}
+
+.glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 15px rgba(188, 19, 254, 0.5);
+}
+
+.bg-radial-accent {
+  background: radial-gradient(circle, rgba(188, 19, 254, 0.2) 0%, rgba(5, 5, 17, 0) 70%);
 }

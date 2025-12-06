@@ -22,10 +22,10 @@ export default function Home() {
         
         {/* Section 1: top */}
         <section className="w-fit mx-auto p-8 bg-black/50 backdrop-blur-md border border-cyan-500/30 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-          <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 tracking-tighter">
-            David
+          <h1 className="text-5xl font-extrabold font-mono text-white-500 tracking-tighter text-center">
+            David O.
           </h1>
-          <p className="mt-4 text-cyan-100 font-mono text-lg">
+          <p className="mt-4 text-cyan-100 font-mono text-lg text-center">
             Austin, TX
           </p>
         </section>
@@ -33,21 +33,26 @@ export default function Home() {
         {/* Section 2 & 3: Projects and Contact side by side */}
         <div className="flex gap-8 justify-center flex-wrap">
           <section className="w-fit p-8 bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-            <h2 className="text-3xl font-bold text-purple-400 mb-4 font-mono">
-              &gt; Projects
+            <h2 className="text-3xl font-bold text-white-400 mb-4 font-mono">
+              Projects
             </h2>
-            <div className="space-y-4 text-zinc-300">
-              <p>1. Illuminate [Next.js]</p>
-              <p>2. Tendir (Typescript)</p>
+            <div className="space-y-4 text-cyan-300 font-mono">
+              <p>1. <a href="https://illuminate.projectempower.io/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-200 hover:underline">Illuminate</a> [Next.js]</p>
+              <p>2. <a href="https://devpost.com/software/tender-d70yp5" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-200 hover:underline">Tendir</a> (Typescript)</p>
               <p>3. PintOS Kernel [C]</p>
             </div>
           </section>
 
           <section className="w-fit p-8 bg-black/50 backdrop-blur-md border border-pink-500/30 rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.15)]">
-            <h2 className="text-3xl font-bold text-pink-500 mb-4 font-mono">
-              &gt; Contact
+            <h2 className="text-3xl font-bold text-white-400 mb-4 font-mono">
+              Contact
             </h2>
-            <a href="https://github.com/spinkicks" className="text-blue-600 hover:underline"> GitHub: spinkicks </a>
+            <div className="space-y-2">
+              <a href="https://github.com/spinkicks" target="_blank" rel="noopener noreferrer" className="block text-cyan-400 hover:text-cyan-200 hover:underline font-mono">GitHub</a>
+              <a href="https://www.linkedin.com/in/calmguy/" target="_blank" rel="noopener noreferrer" className="block text-cyan-400 hover:text-cyan-200 hover:underline font-mono">LinkedIn</a>
+              <a href="https://monkeytype.com/profile/Dipslox" target="_blank" rel="noopener noreferrer" className="block text-cyan-400 hover:text-cyan-200 hover:underline font-mono">MonkeyType</a>
+              <a href="https://open.spotify.com/user/cxxo2nymwpjcgw7kz5cttbrhj?si=8a890bb5b6584942" target="_blank" rel="noopener noreferrer" className="block text-cyan-400 hover:text-cyan-200 hover:underline font-mono">Spotify</a>
+            </div>
             
           </section>
         </div>
