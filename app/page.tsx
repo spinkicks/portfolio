@@ -111,7 +111,7 @@ export default function Home() {
               Experience
             </h2>
             <p className="text-sm text-cyan-200 font-mono">
-              From AI/ML to operations — highlights of my recent work.
+              Highlights of my recent work.
             </p>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
