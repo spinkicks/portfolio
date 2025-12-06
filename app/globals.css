@@ -68,3 +68,43 @@ a, button {
 .bg-radial-accent {
   background: radial-gradient(circle, rgba(188, 19, 254, 0.2) 0%, rgba(5, 5, 17, 0) 70%);
 }
+
+.card-hover {
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 0 25px rgba(0, 243, 255, 0.18);
+  border-color: rgba(0, 243, 255, 0.25);
+}
+
+.shooting-star {
+  position: absolute;
+  top: var(--top);
+  left: var(--left);
+  width: 2px;
+  height: 90px;
+  background: linear-gradient(180deg, rgba(0, 243, 255, 0.8), transparent);
+  filter: drop-shadow(0 0 6px rgba(0, 243, 255, 0.6));
+  transform: rotate(45deg);
+  animation: shoot var(--duration) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes shoot {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(45deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(300px, 150px, 0) rotate(45deg);
+  }
+}
