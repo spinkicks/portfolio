@@ -1,4 +1,5 @@
 import SynthMoon from "./components/SynthMoon";
+import TypingTest from "./components/TypingTest";
 
 export default function Home() {
   return (
@@ -30,7 +31,7 @@ export default function Home() {
         </section>
 
         {/* Section 2 & 3: Projects and Contact side by side */}
-        <div className="flex gap-8 justify-center">
+        <div className="flex gap-8 justify-center flex-wrap">
           <section className="w-fit p-8 bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.15)]">
             <h2 className="text-3xl font-bold text-purple-400 mb-4 font-mono">
               &gt; Projects
@@ -50,6 +51,9 @@ export default function Home() {
             
           </section>
         </div>
+
+        {/* Typing test section */}
+        <TypingTest />
 
       </div>
     </main>
