@@ -34,9 +34,9 @@ export default function Home() {
           </p>
         </section>
 
-        {/* Section 2 & 3: Projects and Contact side by side */}
-        <div className="flex gap-8 justify-center flex-wrap">
-          <section className="w-fit p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
+        {/* Section 2-4: Projects, Skills, Contact aligned */}
+        <div className="grid gap-8 md:grid-cols-3 items-start justify-items-center">
+          <section className="w-full max-w-sm p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Projects
             </h2>
@@ -66,10 +66,39 @@ export default function Home() {
                 (Typescript)
               </p>
               <p>3. PintOS Kernel [C]</p>
+              <p>
+                4.{" "}
+                <a
+                  href="https://sciencehowitworks.wixsite.com/my-site-1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-300 hover:text-cyan-100 hover:underline"
+                >
+                  Project STEM Today
+                </a>{" "}
+                [HTML/CSS]
+              </p>
             </div>
           </section>
 
-          <section className="w-fit p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
+          <section className="w-full max-w-sm p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
+            <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
+              Skills
+            </h2>
+            <div className="space-y-3 font-mono text-cyan-200 text-sm leading-relaxed">
+              <p>
+                <span className="text-cyan-300">Languages:</span> Python, Java, C, C++, SQL, JavaScript, [Tailwind] CSS, LaTeX, Spanish (Fluent)
+              </p>
+              <p>
+                <span className="text-cyan-300">Frameworks & Libraries:</span> MongoDB, Next.js, React, Node.js, NumPy, Matplotlib, Bootstrap
+              </p>
+              <p>
+                <span className="text-cyan-300">Tools & Technologies:</span> Supabase, Google Cloud VM, Cloudflare R2, Git, Google Analytics (GA4), Google Tag Manager, Excel
+              </p>
+            </div>
+          </section>
+
+          <section className="w-full max-w-sm p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Contact
             </h2>
