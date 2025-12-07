@@ -28,6 +28,12 @@ export default function Home() {
           </p>
         </section>
 
+        <section className="w-full max-w-4xl mx-auto p-6 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
+          <p className="text-cyan-200 font-mono text-base leading-relaxed">
+            I&apos;m a CS student at the University of Texas at Austin, minoring in Statistics & Data Science. My technical background spans AI/ML engineering and full-stack development. I&apos;m passionate about scalable solutions.
+          </p>
+        </section>
+
         {/* Section 2 & 3: Projects and Contact side by side */}
         <div className="flex gap-8 justify-center flex-wrap">
           <section className="w-fit p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
