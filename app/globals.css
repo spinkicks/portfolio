@@ -3,16 +3,16 @@
 :root {
   /* Backgrounds */
   --bg-main: #050511;
-  --bg-card: rgba(18, 18, 37, 0.7);
+  --bg-card: rgba(12, 12, 20, 0.72);
 
   /* Accents */
-  --color-cyan: #00f3ff;
-  --color-magenta: #bc13fe;
-  --color-pink: #ff2a6d;
+  --color-cyan: #9ab8d6;
+  --color-magenta: #9b88c6;
+  --color-pink: #c8a2b8;
 
   /* Text */
-  --text-main: #eaeaea;
-  --text-muted: #8f9baf;
+  --text-main: #d5dae4;
+  --text-muted: #929aad;
 
   /* Legacy fallback hooks */
   --background: var(--bg-main);
@@ -53,20 +53,20 @@ a, button {
 .glass-card {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 243, 255, 0.1);
-  box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+  border: 1px solid rgba(154, 184, 214, 0.14);
+  box-shadow: 0 0 18px rgba(154, 184, 214, 0.14);
 }
 
 .glow-cyan {
-  text-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
+  text-shadow: 0 0 8px rgba(154, 184, 214, 0.32);
 }
 
 .btn-glow:hover {
-  box-shadow: 0 0 15px rgba(188, 19, 254, 0.5);
+  box-shadow: 0 0 12px rgba(155, 136, 198, 0.28);
 }
 
 .bg-radial-accent {
-  background: radial-gradient(circle, rgba(188, 19, 254, 0.2) 0%, rgba(5, 5, 17, 0) 70%);
+  background: radial-gradient(circle, rgba(155, 136, 198, 0.18) 0%, rgba(5, 5, 17, 0) 70%);
 }
 
 .card-hover {
@@ -85,8 +85,8 @@ a, button {
   left: var(--left);
   width: 2px;
   height: 90px;
-  background: linear-gradient(180deg, rgba(0, 243, 255, 0.8), transparent);
-  filter: drop-shadow(0 0 6px rgba(0, 243, 255, 0.6));
+  background: linear-gradient(180deg, rgba(154, 184, 214, 0.55), transparent);
+  filter: drop-shadow(0 0 6px rgba(154, 184, 214, 0.38));
   transform: rotate(45deg);
   animation: shoot var(--duration) ease-in-out infinite;
   animation-delay: var(--delay);
@@ -171,3 +171,11 @@ a, button {
 .flip-back {
   transform: rotateY(180deg);
 }
+.text-cyan-100 { color: #d0d9e4 !important; }
+.text-cyan-200 { color: #bdc8d6 !important; }
+.text-cyan-300 { color: #a7b5c5 !important; }
+.text-cyan-400 { color: #8fa0b2 !important; }
+.text-cyan-700 { color: #71829a !important; }
+.text-purple-400 { color: #b3a1d1 !important; }
+.text-pink-500 { color: #c9a5b9 !important; }
+.text-emerald-300 { color: #84b18a !important; }

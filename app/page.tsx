@@ -19,7 +19,7 @@ export default function Home() {
       {/* 3. scrollable content layer (todo, fix space in between) */}
       <div className="relative z-20 w-full max-w-6xl mx-auto pt-80 px-6 pb-24 space-y-8">
         {/* Section 1: top */}
-        <section className="w-fit mx-auto p-8 glass-card rounded-2xl sadow-[0_0_25px_rgba(0,243,255,0.12)] card-hover">
+        <section className="w-fit mx-auto p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
           <h1 className="text-7xl font-extrabold font-mono text-cyan-100 tracking-tighter text-center glow-cyan">
             David O.
           </h1>
@@ -30,7 +30,7 @@ export default function Home() {
 
         {/* Section 2 & 3: Projects and Contact side by side */}
         <div className="flex gap-8 justify-center flex-wrap">
-          <section className="w-fit p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(0,243,255,0.12)] card-hover">
+          <section className="w-fit p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Projects
             </h2>
@@ -63,7 +63,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="w-fit p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(0,243,255,0.12)] card-hover">
+          <section className="w-fit p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Contact
             </h2>
@@ -105,7 +105,7 @@ export default function Home() {
         </div>
 
         {/* Experience section */}
-        <section className="p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(0,243,255,0.12)] card-hover space-y-6">
+        <section className="p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <h2 className="text-4xl font-bold font-mono text-cyan-100 glow-cyan">
               Experience
