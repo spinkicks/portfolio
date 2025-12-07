@@ -30,7 +30,7 @@ export default function Home() {
 
         <section className="w-full max-w-4xl mx-auto p-6 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
           <p className="text-cyan-200 font-mono text-base leading-relaxed">
-            I&apos;m a CS student at the University of Texas at Austin, minoring in Statistics & Data Science. My technical background spans AI/ML engineering and full-stack development. I&apos;m passionate about scalable solutions.
+            I&apos;m a CS student at the University of Texas at Austin, minoring in Statistics & Data Science. My technical background spans AI/ML engineering and full-stack development. I&apos;m passionate about scalable solutions. I also type fast... (check the bottom of the page).
           </p>
         </section>
 
@@ -125,7 +125,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="block text-cyan-300 hover:text-cyan-100 hover:underline"
               >
-                MonkeyType
+                MonkeyType (#500 Global)
               </a>
               <a
                 href="https://open.spotify.com/user/cxxo2nymwpjcgw7kz5cttbrhj?si=8a890bb5b6584942"
