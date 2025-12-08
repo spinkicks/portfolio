@@ -24,8 +24,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/blank",
-        width: 600,
-        height: 315,
+        width: 0,
+        height: 0,
         alt: "David's Portfolio",
       },
     ],
