@@ -220,7 +220,7 @@ const ProjectCard = ({ project }: { project: (typeof DATA.projects)[0] }) => {
             className="text-[10px] flex items-center gap-1 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 px-2 py-1 rounded bg-indigo-500/10 transition-colors"
           >
             <Sparkles size={10} />
-            <span>✨ SYSTEM_AUDIT</span>
+            <span>AI SYSTEM_AUDIT</span>
           </button>
         )}
 
