@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description: "Motivated software engineer.",
     images: [
       {
-        url: "/hooded.svg",
+        url: "/blank",
         width: 600,
         height: 315,
         alt: "David's Portfolio",
