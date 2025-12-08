@@ -18,6 +18,18 @@ export const metadata: Metadata = {
   icons: {
     icon: "/hooded.svg",
   },
+  openGraph: {
+    title: "David's Portfolio",
+    description: "Motivated software engineer.",
+    images: [
+      {
+        url: "/david ascii.png",
+        width: 1200,
+        height: 630,
+        alt: "David's Portfolio",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
