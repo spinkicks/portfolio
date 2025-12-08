@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 
+// list of common english words used for the typing challenge
 const WORD_BANK = [
   "program",
   "follow",
@@ -60,6 +61,7 @@ const WORD_BANK = [
   "point",
 ];
 
+// fisher-yates shuffle algorithm to randomize array order
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -69,20 +71,29 @@ function shuffle<T>(array: T[]): T[] {
   return arr;
 }
 
+// grab a random selection of words from the bank and shuffle them
 function pickWords(count: number) {
   return shuffle(WORD_BANK).slice(0, count);
 }
 
+// main typing test component with wpm calculation and real-time feedback
 export default function TypingTest() {
+  // state for managing the words to type and user input
   const [promptWords, setPromptWords] = useState<string[]>(() => pickWords(10));
   const prompt = useMemo(() => promptWords.join(" "), [promptWords]);
   const targetWords = promptWords.length;
   const [input, setInput] = useState("");
+  // track when user starts typing and when they finish
   const [startTime, setStartTime] = useState<number | null>(null);
   const [finishTime, setFinishTime] = useState<number | null>(null);
   const [finishChars, setFinishChars] = useState<number | null>(null);
+  // store the user's best wpm score across all attempts
   const [bestWpm, setBestWpm] = useState<number | null>(null);
+  // anti-cheat detection flag for copy/paste attempts
+  const [hasCheated, setHasCheated] = useState(false);
 
+  // normalize target and user input by trimming whitespace and collapsing multiple spaces
+  // this makes comparison case-insensitive and forgiving of spacing differences
   const normalizedTarget = useMemo(
     () => prompt.trim().replace(/\s+/g, " "),
     [prompt]
@@ -93,18 +104,24 @@ export default function TypingTest() {
     [input]
   );
 
+  // count how many words and characters have been typed so far
   const wordsTyped =
     normalizedInput.length > 0 ? normalizedInput.split(" ").length : 0;
+  // calculate elapsed time since test started, accounting for finish time or current time
   const elapsedMs = useMemo(() => {
     if (!startTime) return 0;
     const endPoint = finishTime ?? Date.now();
     return Math.max(0, endPoint - startTime);
   }, [startTime, finishTime]);
 
+  // convert milliseconds to seconds for wpm calculations
   const elapsedSeconds = elapsedMs / 1000;
+  // total characters typed, or use the final character count if test is finished
   const charactersTyped = input.length;
   const charactersForFinal = finishChars ?? charactersTyped;
 
+  // calculate live wpm (words per minute) as user types
+  // formula: (characters / 5) * (60 / elapsed_seconds) rounded to 1 decimal
   const liveWpm =
     startTime && elapsedSeconds > 0
       ? Math.round(
@@ -112,6 +129,8 @@ export default function TypingTest() {
         ) / 10
       : 0;
 
+  // calculate final wpm based on the submitted result
+  // uses the character count from when test was completed
   const finalWpm =
     finishTime && startTime
       ? Math.round(
@@ -126,11 +145,13 @@ export default function TypingTest() {
         ) / 10
       : null;
 
+  // check if user has typed everything correctly and completed the challenge
   const isComplete =
     normalizedInput.length > 0 &&
     normalizedInput === normalizedTarget &&
     normalizedTarget.split(" ").length === targetWords;
 
+  // when test is complete, capture the final timestamp and character count
   useEffect(() => {
     if (isComplete && startTime && !finishTime) {
       setFinishTime(Date.now());
@@ -138,6 +159,7 @@ export default function TypingTest() {
     }
   }, [isComplete, startTime, finishTime, charactersTyped]);
 
+  // update the best wpm score whenever a new test is completed
   useEffect(() => {
     if (
       finishTime &&
@@ -151,6 +173,7 @@ export default function TypingTest() {
     }
   }, [finishTime, startTime, finalWpm, charactersForFinal]);
 
+  // handle textarea input changes and manage timer start/reset logic
   const handleChange = (value: string) => {
     if (!startTime && value.trim().length > 0) {
       setStartTime(Date.now());
@@ -162,12 +185,23 @@ export default function TypingTest() {
     setInput(value);
   };
 
+  // detect and block attempts to paste the exact prompt text to prevent cheating
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedText = e.clipboardData.getData("text");
+    if (pastedText.trim() === normalizedTarget) {
+      setHasCheated(true);
+      e.preventDefault();
+    }
+  };
+
+  // reset everything for a fresh attempt at the typing challenge
   const handleReset = () => {
     setInput("");
     setStartTime(null);
     setFinishTime(null);
     setFinishChars(null);
     setPromptWords(pickWords(10));
+    setHasCheated(false);
   };
 
   return (
@@ -199,9 +233,15 @@ export default function TypingTest() {
         <textarea
           value={input}
           onChange={(e) => handleChange(e.target.value)}
+          onPaste={handlePaste}
           placeholder="Type the words above..."
           className="w-full min-h-[120px] p-4 text-lg rounded-lg bg-black/80 border border-cyan-700/50 focus:border-cyan-400 outline-none text-cyan-50 font-mono placeholder:text-cyan-300/60 resize-none"
         />
+        {hasCheated && (
+          <div className="text-red-400 text-sm font-mono">
+            Nice try cheater... no copy pasting allowed.
+          </div>
+        )}
         <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-baseline gap-2">
           <span className="text-sm text-zinc-400">Live</span>
