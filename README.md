@@ -4,7 +4,7 @@ Showcase **Full Stack Development** and **AI/Systems Engineering**.
 
 Next.js frontend integrated with Python-based logic for mathematical visualizations (this part is coming soon).
 
-**Live Demo:** [https://terrify.vercel.app/](Live Site)
+**Live Demo:** [https://terrify.vercel.app/](https://terrify.vercel.app/)
 
 ---
 
