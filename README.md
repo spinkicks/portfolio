@@ -2,9 +2,9 @@
 
 Showcase **Full Stack Development** and **AI/Systems Engineering**.
 
-Next.js frontend integrated with Python-based logic for mathematical visualizations.
+Next.js frontend integrated with Python-based logic for mathematical visualizations (this part is coming soon).
 
-**Live Demo:** i'll put my vercel link here *(Coming Soon)*
+**Live Demo:** [https://terrify.vercel.app/](Live Site)
 
 ---
 
@@ -17,7 +17,10 @@ Next.js frontend integrated with Python-based logic for mathematical visualizati
 * **Animation:** Framer Motion
 * **Deployment:** Vercel
 
-### Backend & Data Logic
+### AI Integration
+* **Gemini API Wrapper:** Custom implementation to power the alternate terminal style portfolio interface. The API wrapper enables dynamic portfolio analysis, project audits, and interactive AI-powered Q&A through a command line interface.
+
+### Backend & Data Logic (I'll probably implement this eventually)
 * **Python:** NumPy / Pandas (Linear Algebra & Data Processing)
 * **Visualization:** Recharts (rendering Python-generated datasets)
 * **Math Engine:** Custom implementation of Least Squares & Matrix Transformations (Proxy for NDA-restricted work)
