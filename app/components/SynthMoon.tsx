@@ -24,7 +24,7 @@ export default function SynthMoon() {
       <img 
         src="/moon-overlay.png" 
         alt="Synth Moon" 
-        className="w-55 h-55 opacity-50 drop-shadow-[0_0_15px_rgba(100,200,255,0.4)]" 
+        className="w-55 h-55 opacity-60 drop-shadow-[0_0_15px_rgba(100,200,255,0.4)]" 
       />
     </motion.div>
   );
