@@ -308,7 +308,7 @@ const CommandInput = ({
         className={`bg-transparent border-none outline-none text-zinc-300 flex-1 font-mono ${
           isLoading ? "opacity-50 cursor-wait" : ""
         }`}
-        placeholder={isLoading ? "processing..." : "type 'help' or ask a question about my profile with 'ask <question>'..."}
+        placeholder={isLoading ? "processing..." : "type 'help' or ask a question about my profile with 'ask <question>'; 'ask is he good at web dev'..."}
         autoFocus
       />
     </form>
