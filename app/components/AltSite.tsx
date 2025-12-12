@@ -23,8 +23,8 @@ const callGemini = async (prompt: string, systemInstruction = "") => {
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Access the environment variable
 
   if (!apiKey) {
-    console.error("API Key is missing!");
-    return "Error: System configuration error (API Key missing).";
+    console.error("error, missing api key");
+    return "Error: missing my api key";
   }
 
   try {
@@ -49,7 +49,7 @@ const callGemini = async (prompt: string, systemInstruction = "") => {
     const data = await response.json();
     return (
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response data."
+      "No response data found"
     );
   } catch (error) {
     console.error("Gemini API Error:", error);
