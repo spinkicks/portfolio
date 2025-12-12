@@ -3,13 +3,16 @@
 import SynthMoon from "./SynthMoon";
 import TypingTest from "./TypingTest";
 
+// props for switching between site layouts
 type MainSiteProps = {
   onSwitch: () => void;
 };
 
+// main portfolio page with animated moon, intro, projects, skills, experience, and typing test
 export default function MainSite({ onSwitch }: MainSiteProps) {
   return (
     <main className="relative min-h-[300vh] bg-black overflow-x-hidden">
+      {/* background image with overlay for depth */}
       <div
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50"
         style={{ backgroundImage: "url('/moonless-bg.png')" }}
@@ -17,9 +20,12 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
         <div className="absolute inset-0 bg-black/40" />
       </div>
 
+      {/* animated moon that moves across screen as user scrolls */}
       <SynthMoon />
 
+      {/* main content container with all sections */}
       <div className="relative z-20 w-full max-w-6xl mx-auto pt-80 px-6 pb-24 space-y-8">
+        {/* intro card with name and location */}
         <section className="w-fit mx-auto p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
           <h1 className="text-7xl font-extrabold font-mono text-cyan-100 tracking-tighter text-center glow-cyan">
             David O.
@@ -29,6 +35,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
           </p>
         </section>
 
+        {/* button to toggle between main and terminal layout */}
         <div className="w-full max-w-6xl mx-auto flex justify-end">
           <button
             type="button"
@@ -39,17 +46,20 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
           </button>
         </div>
 
+        {/* short bio about background and interests */}
         <section className="w-full max-w-4xl mx-auto p-6 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
           <p className="text-cyan-200 font-mono text-base leading-relaxed">
             I&apos;m a CS student at the University of Texas at Austin, minoring in Statistics & Data Science. My technical background spans AI/ML engineering and full-stack development. I&apos;m passionate about scalable solutions. I also type fast... (check the bottom of the page).
           </p>
         </section>
 
+        {/* three-column layout for projects, skills, and contact info */}
         <div className="grid gap-8 md:grid-cols-3 items-start justify-items-center">
           <section className="w-full max-w-sm p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover">
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Projects
             </h2>
+            {/* list of notable projects with links */}
             <div className="space-y-4 text-cyan-200 font-mono">
               <p>
                 1.{" "}
@@ -95,6 +105,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Skills
             </h2>
+            {/* technical skills broken down by category */}
             <div className="space-y-3 font-mono text-cyan-200 text-sm leading-relaxed">
               <p>
                 <span className="text-cyan-300">Languages:</span> Python, Java, C, C++, SQL, JavaScript, [Tailwind] CSS, LaTeX, Spanish (Fluent)
@@ -112,6 +123,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Contact
             </h2>
+            {/* social media and profile links */}
             <div className="space-y-2 font-mono text-cyan-200">
               <a
                 href="https://github.com/spinkicks"
@@ -149,11 +161,13 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
           </section>
         </div>
 
+        {/* work experience with flip card animations to reveal details */}
         <section className="p-8 glass-card rounded-2xl shadow-[0_0_25px_rgba(122,166,199,0.12)] card-hover space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <h2 className="text-4xl font-bold font-mono text-cyan-100 glow-cyan">Experience</h2>
             <p className="text-sm text-cyan-200 font-mono">From AI/ML to operations - highlights of my recent work.</p>
           </div>
+          {/* flip cards show job titles on front and accomplishments on back */}
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="reveal-card">
               <div className="reveal-front glass-card border border-cyan-500/20 p-5 rounded-xl flex flex-col justify-between h-full w-full card-hover">
@@ -198,6 +212,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
           </div>
         </section>
 
+        {/* typing speed challenge with wpm calculation */}
         <TypingTest />
       </div>
     </main>
