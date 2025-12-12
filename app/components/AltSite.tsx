@@ -16,10 +16,17 @@ type AltSiteProps = {
 };
 
 // environment config for api access
-const apiKey = ""; // API key injected by environment
+const apiKey = "AIzaSyDXj1WhCiSl5EjmXYXpB7t4NcxvRSAH8GI"; // API key injected by environment
 
 // talks to gemini api and gets responses based on prompts
 const callGemini = async (prompt: string, systemInstruction = "") => {
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Access the environment variable
+
+  if (!apiKey) {
+    console.error("API Key is missing!");
+    return "Error: System configuration error (API Key missing).";
+  }
+
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
@@ -219,8 +226,7 @@ const ProjectCard = ({ project }: { project: (typeof DATA.projects)[0] }) => {
             onClick={handleAudit}
             className="text-[10px] flex items-center gap-1 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 px-2 py-1 rounded bg-indigo-500/10 transition-colors"
           >
-            <Sparkles size={10} />
-            <span>AI SYSTEM_AUDIT</span>
+            <span>AI System Audit</span>
           </button>
         )}
 
@@ -332,7 +338,7 @@ export default function AltSite({ onBack }: AltSiteProps) {
     const timer = setTimeout(() => {
       setConsoleLog((prev) => {
         const now = Date.now();
-        return prev.filter((log) => now - log.timestamp < 5000);
+        return prev.filter((log) => now - log.timestamp < 11000); // use this effect for 11 seconds
       });
     }, 100);
 
@@ -608,7 +614,7 @@ export default function AltSite({ onBack }: AltSiteProps) {
           {/* only show the 3 most recent commands and fade them out */}
           {consoleLog.slice(-3).map((log, i) => {
             const age = Date.now() - log.timestamp;
-            const shouldShow = age < 5000;
+            const shouldShow = age < 11000;
             if (!shouldShow) return null;
             
             return (
@@ -616,8 +622,8 @@ export default function AltSite({ onBack }: AltSiteProps) {
                 key={i}
                 className="bg-zinc-950/90 border border-zinc-800 p-2 text-xs font-mono rounded shadow-xl animate-fade-in-up"
                 style={{
-                  // trigger fadeOut animation when entry reaches 4 seconds old
-                  animation: age > 4000 ? `fadeOut 1s ease-out forwards` : "none",
+                  // trigger fadeOut animation when entry reaches 10 seconds old
+                  animation: age > 10000 ? `fadeOut 1s ease-out forwards` : "none",
                 }}
               >
                 <span className="text-green-700">➜</span>{" "}
