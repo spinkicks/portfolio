@@ -47,7 +47,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* render all page content */}
+        {/* render all content on page */}
         {children}
         {/* vercel analytics for tracking page views and web vitals */}
         <Analytics />
