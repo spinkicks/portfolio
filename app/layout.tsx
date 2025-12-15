@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// metadata for seo and social sharing (title, description, favicon, og image)
+// metadata for seo and social sharing (title, description, favicon, image)
 export const metadata: Metadata = {
   title: "David's Portfolio",
   description: "Motivated software engineer.",
