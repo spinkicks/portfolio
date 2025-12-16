@@ -15,9 +15,6 @@ type AltSiteProps = {
   onBack: () => void;
 };
 
-// environment config for api access
-const apiKey = "AIzaSyDXj1WhCiSl5EjmXYXpB7t4NcxvRSAH8GI"; // API key injected by environment
-
 // talks to gemini api and gets responses based on prompts
 const callGemini = async (prompt: string, systemInstruction = "") => {
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Access the environment variable
