@@ -98,6 +98,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
                 </a>{" "}
                 [HTML/CSS]
               </p>
+              <p>4. Heap Memory Allocator [C]</p>
             </div>
           </section>
 
