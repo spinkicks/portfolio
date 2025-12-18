@@ -205,7 +205,7 @@ export default function TypingTest() {
   };
 
   return (
-    <section className="p-8 glass-card rounded-xl space-y-4 card-hover">
+    <section className="p-8 glass-card rounded-none space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h3 className="text-3xl font-mono text-cyan-200 glow-cyan">
@@ -266,7 +266,7 @@ export default function TypingTest() {
             </span>
           ) : (
             <span className="text-cyan-700 text-sm font-mono">
-              Type accurately. Everything counts.
+              Type accurately... cus everything counts
             </span>
           )}
         </div>
