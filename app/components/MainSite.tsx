@@ -25,25 +25,26 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
 
       {/* main content container with all sections */}
       <div className="relative z-20 w-full max-w-6xl mx-auto pt-80 px-6 pb-24 space-y-8">
-        {/* intro card with name and location */}
-        <section className="w-fit mx-auto p-8 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]">
-          <h1 className="text-7xl font-extrabold font-mono text-cyan-100 tracking-tighter text-center glow-cyan">
-            David O.
-          </h1>
-          <p className="mt-4 text-cyan-200 font-mono text-2xl text-center">
-            Austin, TX
-          </p>
-        </section>
+        {/* intro centered with button positioned to the right (button absolutely positioned) */}
+        <div className="w-full">
+          <div className="relative w-fit mx-auto">
+            <section className="w-fit p-8 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]">
+              <h1 className="text-7xl font-extrabold font-mono text-cyan-100 tracking-tighter text-center glow-cyan">
+                David O.
+              </h1>
+              <p className="mt-4 text-cyan-200 font-mono text-2xl text-center">
+                Austin, TX
+              </p>
+            </section>
 
-        {/* button to toggle between main and terminal layout */}
-        <div className="w-full max-w-6xl mx-auto flex justify-end">
-          <button
-            type="button"
-            onClick={onSwitch}
-            className="glass-card px-4 py-2 rounded-none text-cyan-200 font-mono text-sm border border-cyan-500/20 hover:bg-blue-600 hover:text-white transform transition-transform duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_8px_30px_rgba(72,178,255,0.08)]"
-          >
-            Switch Site Layout
-          </button>
+            <button
+              type="button"
+              onClick={onSwitch}
+              className="absolute left-full ml-4 top-3/4 -translate-y-1/2 inline-flex items-center whitespace-nowrap glass-card px-4 py-2 font-mono text-sm border border-cyan-500/20 transform transition-transform duration-200 hover:scale-105 hover:bg-blue-600 hover:text-white hover:shadow-[0_8px_30px_rgba(72,178,255,0.08)]"
+            >
+              Switch Site Layout
+            </button>
+          </div>
         </div>
 
         {/* short bio about background and interests */}
