@@ -6,7 +6,6 @@ import {
   Linkedin,
   Mail,
   ExternalLink,
-  Sparkles,
   Loader,
 } from "lucide-react";
 
@@ -17,12 +16,16 @@ type AltSiteProps = {
 
 // gemini api wrapper with response to prompts
 const callGemini = async (prompt: string, systemInstruction = "") => {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Access the environment variable
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // Public key exposed to the client if intentionally set
 
   if (!apiKey) {
-    console.error("error, missing api key");
-    return "Error: missing my api key";
+    console.error("Gemini API Error: missing API key");
+    return "Error: missing API key";
   }
+
+  const controller = new AbortController();
+  const timeoutMs = 15000; // 15s timeout
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(
@@ -32,6 +35,7 @@ const callGemini = async (prompt: string, systemInstruction = "") => {
         headers: {
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           systemInstruction: { parts: [{ text: systemInstruction }] },
@@ -39,8 +43,12 @@ const callGemini = async (prompt: string, systemInstruction = "") => {
       }
     );
 
+    clearTimeout(timeout);
+
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      const text = await response.text().catch(() => "");
+      console.error("Gemini API non-OK response:", response.status, text);
+      return `Error: Gemini API ${response.status}`;
     }
 
     const data = await response.json();
@@ -48,9 +56,13 @@ const callGemini = async (prompt: string, systemInstruction = "") => {
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "No response data found"
     );
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === "AbortError") {
+      console.error("Gemini API Error: request timed out");
+      return "Error: Gemini API request timed out";
+    }
     console.error("Gemini API Error:", error);
-    return "Error: Sorry. Seems as if I ran out of my LLM's API credits.";
+    return "Error: Gemini API call failed";
   }
 };
 
@@ -142,27 +154,57 @@ const DATA = {
   ],
 };
 
-// --- Components ---
+// seeded helper to produce pseudo-random hex bytes for animated labels
+const seedFromString = (s: string) => {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+};
+
+// mulberry32 PRNG - fast, small, deterministic
+const mulberry32 = (a: number) => {
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+// produce a single pseudo-random byte (2 hex digits) per tick for the animated label
+const computeHexByte = (seed: string, tick = 0) => {
+  const seedVal = seedFromString(seed) ^ (tick & 0xffffffff);
+  const rng = mulberry32(seedVal);
+  const b = Math.floor(rng() * 256);
+  return b.toString(16).padStart(2, "0");
+};
+
 const Section = ({
   title,
   children,
   id,
+  tick,
 }: {
   title: string;
   children: React.ReactNode;
   id?: string;
-}) => (
-  // reusable section component with a random hex id and border styling
-  <section id={id} className="mb-16 animate-fade-in">
-    <h2 className="text-indigo-400 font-bold text-lg mb-6 flex items-center gap-2 select-none">
-      <span className="text-zinc-600">
-        0x{Math.floor(Math.random() * 99).toString(16).padStart(2, "0")}
-      </span>
-      {title.toLowerCase()}
-    </h2>
-    <div className="pl-4 ml-1">{children}</div>
-  </section>
-);
+  tick?: number;
+}) => {
+  const hex = computeHexByte(title, tick ?? 0);
+  return (
+    <section id={id} className="mb-16 animate-fade-in">
+      <h2 className="text-indigo-400 font-bold text-lg mb-6 flex items-center gap-2 select-none">
+        <span className="text-zinc-600">0x{hex}</span>
+        {title.toLowerCase()}
+      </h2>
+      <div className="pl-4 ml-1">{children}</div>
+    </section>
+  );
+};
 
 // displays a single project card with ai audit capability
 const ProjectCard = ({ project }: { project: (typeof DATA.projects)[0] }) => {
@@ -313,34 +355,38 @@ const CommandInput = ({
 };
 
 // each entry in the console log includes command response and when it happened
-type ConsoleEntry = { cmd: string; response: string | null; timestamp: number };
+type ConsoleEntry = { id: string; cmd: string; response: string | null; timestamp: number };
 
 export default function AltSite({ onBack }: AltSiteProps) {
   const [consoleLog, setConsoleLog] = useState<ConsoleEntry[]>([]);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
-  const [, setForceUpdate] = useState(0);
+  const [tick, setTick] = useState(0);
 
-  // force component to re-render every 100ms so the animations trigger properly
+  // tick drives the animated hex labels; a single interval updates it every 100ms
   useEffect(() => {
-    const interval = setInterval(() => {
-      setForceUpdate((prev) => prev + 1);
-    }, 100);
+    const interval = setInterval(() => setTick((t) => (t + 1) & 0xff), 100);
     return () => clearInterval(interval);
   }, []);
 
-  // remove console entries that are older than 5 seconds
-  useEffect(() => {
-    if (consoleLog.length === 0) return;
+  // Note: animations are handled by CSS; tick only updates the hex label state
 
-    const timer = setTimeout(() => {
-      setConsoleLog((prev) => {
-        const now = Date.now();
-        return prev.filter((log) => now - log.timestamp < 11000); // use this effect for 11 seconds
-      });
-    }, 100);
+  // helpers to manage console entries with stable ids and auto-removal
+  const addConsoleEntry = (cmd: string) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const entry = { id, cmd, response: null, timestamp: Date.now() };
+    setConsoleLog((prev) => [...prev, entry]);
+    // schedule removal after 11 seconds
+    setTimeout(() => {
+      setConsoleLog((prev) => prev.filter((e) => e.id !== id));
+    }, 11000);
+    return id;
+  };
 
-    return () => clearTimeout(timer);
-  }, [consoleLog]);
+  const finishConsoleEntry = (id: string, text: string) => {
+    setConsoleLog((prev) =>
+      prev.map((log) => (log.id === id ? { ...log, response: text } : log))
+    );
+  };
 
   // smoothly scroll to a section by its id
   const scrollToSection = (id: string) => {
@@ -354,17 +400,11 @@ export default function AltSite({ onBack }: AltSiteProps) {
     const cmd = parts[0].toLowerCase();
     const args = parts.slice(1).join(" ");
 
-    // add the command to the log immediately
-    setConsoleLog((prev) => [...prev, { cmd: rawCmd, response: null, timestamp: Date.now() }]);
+    // add the command to the log immediately and get its id
+    const entryId = addConsoleEntry(rawCmd);
 
-    // helper to set the response for the most recent log entry
-    const finish = (text: string) => {
-      setConsoleLog((prev) =>
-        prev.map((log, idx) =>
-          idx === prev.length - 1 ? { ...log, response: text } : log
-        )
-      );
-    };
+    // helper to set the response for that specific log entry
+    const finish = (text: string) => finishConsoleEntry(entryId, text);
 
     // handle different terminal commands
     switch (cmd) {
@@ -481,7 +521,7 @@ export default function AltSite({ onBack }: AltSiteProps) {
           </nav>
         </header>
 
-        <Section title="About_Me" id="about">
+        <Section title="About_Me" id="about" tick={tick}>
           <div className="space-y-4">
             {/* display about section items with labels */}
             {DATA.about.map((item, idx) => (
@@ -519,7 +559,7 @@ export default function AltSite({ onBack }: AltSiteProps) {
           </div>
         </Section>
 
-        <Section title="Experience_Log" id="experience">
+        <Section title="Experience_Log" id="experience" tick={tick}>
           <div className="relative border-l border-zinc-800 ml-3 space-y-12">
             {/* display each job with a timeline dot */}
             {DATA.experience.map((job, idx) => (
@@ -548,7 +588,7 @@ export default function AltSite({ onBack }: AltSiteProps) {
           </div>
         </Section>
 
-        <Section title="Project_Index" id="projects">
+        <Section title="Project_Index" id="projects" tick={tick}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* render each project as a card with ai audit feature */}
             {DATA.projects.map((project, idx) => (
@@ -557,7 +597,7 @@ export default function AltSite({ onBack }: AltSiteProps) {
           </div>
         </Section>
 
-        <Section title="Tech_Stack" id="skills">
+        <Section title="Tech_Stack" id="skills" tick={tick}>
           <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-sm">
             <div className="flex flex-wrap gap-x-6 gap-y-3 font-mono text-sm">
               {/* display each skill with a directory-style prefix */}
@@ -609,14 +649,13 @@ export default function AltSite({ onBack }: AltSiteProps) {
       <div className="fixed bottom-12 left-0 w-full pointer-events-none px-6 z-40">
         <div className="max-w-3xl mx-auto flex flex-col items-start gap-1">
           {/* only show the 3 most recent commands and fade them out */}
-          {consoleLog.slice(-3).map((log, i) => {
+          {consoleLog.slice(-3).map((log) => {
             const age = Date.now() - log.timestamp;
-            const shouldShow = age < 11000;
-            if (!shouldShow) return null;
+            if (age > 11000) return null;
             
             return (
               <div
-                key={i}
+                key={log.id}
                 className="bg-zinc-950/90 border border-zinc-800 p-2 text-xs font-mono rounded shadow-xl animate-fade-in-up"
                 style={{
                   // trigger fadeOut animation when entry reaches 10 seconds old
