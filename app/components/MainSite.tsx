@@ -3,6 +3,8 @@
 import SynthMoon from "./SynthMoon";
 import TypingTest from "./TypingTest";
 
+const GLASS_CARD_CLASSES = "glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]";
+
 // props for switching between site layouts
 type MainSiteProps = {
   onSwitch: () => void;
@@ -28,7 +30,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
         {/* intro centered with button positioned to the right (button absolutely positioned) */}
         <div className="w-full">
           <div className="relative w-fit mx-auto">
-            <section className="w-fit p-8 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]">
+            <section className={`w-fit p-8 ${GLASS_CARD_CLASSES}`}>
               <h1 className="text-7xl font-extrabold font-mono text-cyan-100 tracking-tighter text-center glow-cyan">
                 David O.
               </h1>
@@ -48,7 +50,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
         </div>
 
         {/* short bio about background and interests */}
-        <section className="w-full max-w-4xl mx-auto p-6 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]">
+        <section className={`w-full max-w-4xl mx-auto p-6 ${GLASS_CARD_CLASSES}`}>
           <p className="text-cyan-200 font-mono text-base leading-relaxed">
             I&apos;m a CS student at the University of Texas at Austin, minoring in Statistics & Data Science. My technical background spans AI/ML engineering and full-stack development. I&apos;m passionate about scalable solutions. I also type fast... (check the bottom of the page).
           </p>
@@ -56,7 +58,7 @@ export default function MainSite({ onSwitch }: MainSiteProps) {
 
         {/* three-column layout for projects, skills, and contact info */}
         <div className="grid gap-8 md:grid-cols-3 items-start justify-items-center">
-          <section className="w-full max-w-sm p-8 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]">
+          <section className={`w-full max-w-sm p-8 ${GLASS_CARD_CLASSES}`}>
             <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
               Projects
             </h2>
