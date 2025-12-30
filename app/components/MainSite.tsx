@@ -5,7 +5,7 @@ import TypingTest from "./TypingTest";
 
 const GLASS_CARD_CLASSES = "glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]";
 
-// props for switching between site layoutsd
+// props for switching between site layouts
 type MainSiteProps = {
   onSwitch: () => void;
 };
