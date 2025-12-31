@@ -42,9 +42,7 @@ const WORD_BANK = [
   "with",
   "little",
   "late",
-  "way",
-  "help",
-  "right",
+
   "most",
   "first",
   "stand",
@@ -53,10 +51,8 @@ const WORD_BANK = [
   "point",
   "down",
   "of",
-  "around",
-  "time",
-  "man",
-  "possible",
+
+
   "from",
   "point",
 ];
