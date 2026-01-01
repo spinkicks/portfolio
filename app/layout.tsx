@@ -26,12 +26,7 @@ export const metadata: Metadata = {
     title: "David's Portfolio",
     description: "Motivated software engineer.",
     images: [
-      {
-        url: "/blank",
-        width: 0,
-        height: 0,
-        alt: "David's Portfolio",
-      },
+
     ],
   },
 };
