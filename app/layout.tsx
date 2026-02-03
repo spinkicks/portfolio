@@ -9,7 +9,7 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-// configure monospace font with css variable for global use
+// configure monospace font with css variable, global use
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
