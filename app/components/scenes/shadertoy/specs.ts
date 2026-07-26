@@ -145,9 +145,32 @@ export const SUNSET_DRIVE: ShaderSpec = {
   bufferScale: 0.7,
 };
 
+/**
+ * Digital rain, flown through on a fixed circuit. Single pass, no channels and
+ * no feedback, which is why it needs none of the buffer wiring above.
+ *
+ * The march is the whole cost: every pixel walks up to ITERATIONS horizontal
+ * cells and checks two vertical cells in each. Behind a page of body text it
+ * does not need the full depth, so the count is a macro here and the host draws
+ * it at a fraction of the canvas as well.
+ */
+export const MATRIX_RAIN: ShaderSpec = {
+  name: "matrix-rain",
+  credit: {
+    author: "And390",
+    title: "Inside the Matrix",
+    url: "https://www.shadertoy.com/view/4t3BWl",
+    // Not the site default: the author waived it in the source header.
+    license: "Free use, per the author",
+  },
+  passes: [{ id: "image", url: "/shaders/matrix-rain/image.glsl" }],
+  defines: ["RAIN_ITERATIONS 20"],
+};
+
 export const SHADERS = {
   "synthwave-theme": SYNTHWAVE_THEME,
   "sunset-drive": SUNSET_DRIVE,
+  "matrix-rain": MATRIX_RAIN,
 } as const;
 
 export type ShaderKey = keyof typeof SHADERS;

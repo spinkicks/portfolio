@@ -429,8 +429,8 @@
    and buttons all agree with the backdrop rather than merely coexisting with
    it. Values are sampled from the 4K artwork the plates are cut from.
 
-   Scoped to a class rather than :root on purpose: the terminal layout keeps
-   the base palette.
+   Scoped to a class rather than :root on purpose: each layout retunes the same
+   token names, so every component follows without knowing which one it is in.
    ============================================================ */
 
 .theme-wireframe {
@@ -447,6 +447,122 @@
   --fg-faint: #9587bb;
   --line: rgba(245, 78, 159, 0.22);
   --line-soft: rgba(154, 102, 216, 0.16);
+}
+
+/* ------------------------------------------------------------
+   Terminal palette
+   Phosphor on a cool near-black. Deliberately two accents and no more: green
+   carries anything live or interactive, amber carries figures and metadata.
+   Everything else is a step on the grey ramp, which is what keeps a monospace
+   page legible at this density.
+   ------------------------------------------------------------ */
+.theme-terminal {
+  --ink-900: #05070a;
+  --ink-800: #090c11;
+  --ink-700: #10151b;
+  --surface: rgba(9, 12, 17, 0.82);
+  --surface-strong: rgba(16, 21, 27, 0.96);
+
+  --lime: #5df2a0;
+  --amber: #ffc061;
+  /* Links take the phosphor too. A third hue in monospace body copy reads as
+     an error state rather than as emphasis. */
+  --cyan: #5df2a0;
+  --violet: #5df2a0;
+  --magenta: #ff7089;
+  --red: #ff7089;
+
+  --fg: #dfe8e3;
+  --fg-dim: #93a49b;
+  /* Lighter than it looks like it wants to be. Faint carries real content here
+     (section indices, the dot-leader labels, chips, the status line), and the
+     darker grey-green this started at measured 3.9:1 on the flat background,
+     under the 4.5:1 floor before the rain was even behind it. This clears the
+     floor against the brightest pixel the backdrop produces. */
+  --fg-faint: #818f88;
+
+  --line: rgba(93, 242, 160, 0.17);
+  --line-soft: rgba(223, 232, 227, 0.1);
+}
+
+/* ============================================================
+   Terminal primitives
+   ============================================================ */
+
+/* Tabular figures so columns of years and periods line up, and ligatures off
+   because a monospace face that turns != into a glyph stops being a faithful
+   readout of what was typed. */
+.tty {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  font-variant-ligatures: none;
+}
+
+/* Dot leader between a label and its value, as a manual or an index sets it.
+   A gradient rather than a dotted border: border dots are rendered at whatever
+   spacing the engine picks and go blurry off whole pixels, while this lands on
+   an exact 5px period every time. */
+.leader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9ch;
+}
+
+.leader-fill {
+  flex: 1 1 auto;
+  min-width: 2ch;
+  height: 1px;
+  /* Lifts the rule off the baseline to sit with the x-height of the text. */
+  transform: translateY(-0.32em);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--fg-faint) 0 1px,
+    transparent 1px 5px
+  );
+  opacity: 0.55;
+}
+
+/* Hard-edged block cursor. steps(1) rather than a fade: a tube either drives
+   the phosphor or it doesn't, and an eased blink reads as a web page. */
+.caret {
+  display: inline-block;
+  width: 1ch;
+  height: 1.05em;
+  background: var(--lime);
+  vertical-align: text-bottom;
+  animation: caret 1.06s steps(1) infinite;
+}
+
+@keyframes caret {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Square, hairline, no fill. Reads as a token rather than a button, which
+   matters where nothing else on the page is clickable. */
+.tty-chip {
+  display: inline-block;
+  border: 1px solid var(--line-soft);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+  white-space: nowrap;
+}
+
+/* Section heading rule: the hairline runs from the title to the right edge, so
+   the eye gets a hard horizontal to hang the column on. */
+.tty-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--line-soft);
 }
 
 /* ============================================================

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ShaderToyRuntime, type ShaderSpec } from "./shadertoy/runtime";
 import { useSceneScroll } from "./useSceneScroll";
 
@@ -22,7 +22,22 @@ const MAX_WIDTH = 1920;
 /** Frames to settle before freezing, when the visitor asked for no motion. */
 const SETTLE_FRAMES = 45;
 
-export default function ShaderScene({ spec }: { spec: ShaderSpec }) {
+export default function ShaderScene({
+  spec,
+  base = BASE,
+  /** Backing-store multiplier. Below 1 the canvas is drawn small and scaled up,
+   *  which is the cheapest lever on a heavy march. */
+  scale = 1,
+  className = "pointer-events-none fixed inset-0 z-0 overflow-hidden",
+  /** Replaces the default scrim stack, which is tuned for the synthwave hero. */
+  overlay,
+}: {
+  spec: ShaderSpec;
+  base?: string;
+  scale?: number;
+  className?: string;
+  overlay?: ReactNode;
+}) {
   const { reduceMotion, scrollY } = useSceneScroll();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [running, setRunning] = useState(false);
@@ -54,11 +69,9 @@ export default function ShaderScene({ spec }: { spec: ShaderSpec }) {
       const cssHeight = canvas.clientHeight;
       if (!runtime || cssWidth === 0 || cssHeight === 0) return;
 
-      const dpr = Math.min(
-        window.devicePixelRatio || 1,
-        MAX_DPR,
-        MAX_WIDTH / cssWidth
-      );
+      const dpr =
+        Math.min(window.devicePixelRatio || 1, MAX_DPR, MAX_WIDTH / cssWidth) *
+        scale;
       const width = Math.max(1, Math.round(cssWidth * dpr));
       const height = Math.max(1, Math.round(cssHeight * dpr));
       if (canvas.width !== width || canvas.height !== height) {
@@ -122,14 +135,10 @@ export default function ShaderScene({ spec }: { spec: ShaderSpec }) {
       canvas.removeEventListener("webglcontextlost", onContextLost);
       runtime?.dispose();
     };
-  }, [spec, scrollY]);
+  }, [scale, spec, scrollY]);
 
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      style={{ background: BASE }}
-    >
+    <div aria-hidden="true" className={className} style={{ background: base }}>
       {/* Keyed off `running`, which is false on the server and on the client's
           first render alike, so the two agree. */}
       <div
@@ -142,13 +151,17 @@ export default function ShaderScene({ spec }: { spec: ShaderSpec }) {
         <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
       </div>
 
-      {/* Lighter than the artwork scene's stack. That one leans hard to the
-          left because it was built for a left-aligned column; the copy here is
-          centred and carries its own scrim, so all this has to do is keep the
-          scene from competing at the edges. */}
-      <div className="absolute inset-x-0 bottom-0 h-[20vh] bg-gradient-to-t from-ink via-ink/55 to-transparent" />
-      <div className="absolute inset-0 bg-ink/20" />
-      <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_45%,transparent_0%,rgba(4,2,12,0.18)_62%,rgba(4,2,12,0.6)_100%)]" />
+      {overlay ?? (
+        <>
+          {/* Lighter than the artwork scene's stack. That one leans hard to the
+              left because it was built for a left-aligned column; the copy here
+              is centred and carries its own scrim, so all this has to do is
+              keep the scene from competing at the edges. */}
+          <div className="absolute inset-x-0 bottom-0 h-[20vh] bg-gradient-to-t from-ink via-ink/55 to-transparent" />
+          <div className="absolute inset-0 bg-ink/20" />
+          <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_45%,transparent_0%,rgba(4,2,12,0.18)_62%,rgba(4,2,12,0.6)_100%)]" />
+        </>
+      )}
     </div>
   );
 }
