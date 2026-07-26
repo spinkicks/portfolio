@@ -136,7 +136,7 @@ export default function TypingTest() {
             Beat <span className="text-magenta glow-magenta">200 WPM</span>
           </h3>
           <p className="mt-2 max-w-md text-sm text-dim">
-            Type the passage below. Accuracy counts — only correct characters
+            Type the passage below. Accuracy counts, so only correct characters
             score.
           </p>
         </div>
@@ -146,7 +146,7 @@ export default function TypingTest() {
           <Stat label="Accuracy" value={`${accuracy.toFixed(0)}%`} tone="violet" />
           <Stat
             label="Best"
-            value={bestWpm === null ? "—" : bestWpm.toFixed(0)}
+            value={bestWpm === null ? "··" : bestWpm.toFixed(0)}
             tone="magenta"
           />
         </div>
@@ -222,7 +222,7 @@ export default function TypingTest() {
         {!focused && !isDone && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink-800/80 backdrop-blur-[2px]">
             <span className="label text-dim">
-              {input.length ? "Paused — click to resume" : "Click to start"}
+              {input.length ? "Paused, click to resume" : "Click to start"}
             </span>
           </div>
         )}
@@ -249,7 +249,7 @@ export default function TypingTest() {
         <p aria-live="polite" className="text-sm">
           {isDone ? (
             <span className="text-lime">
-              Done — {wpm.toFixed(1)} WPM at {accuracy.toFixed(0)}% accuracy
+              Done: {wpm.toFixed(1)} WPM at {accuracy.toFixed(0)}% accuracy
               {wpm >= 200 ? ". You beat me." : "."}
             </span>
           ) : (

@@ -15,7 +15,7 @@ so the same two commands work on any landscape without retuning.
 
 ## Setup
 
-Runs on ONNX Runtime rather than PyTorch — the model is ~1.3 GB instead of a
+Runs on ONNX Runtime rather than PyTorch: the model is ~1.3 GB instead of a
 2.5 GB torch install, and CPU inference on a 4K source takes about 25 seconds.
 
 ```bash
@@ -42,7 +42,7 @@ check it before trusting the output.
 ### Picking `--far` and `--near`
 
 `--far` splits sky from ground, `--near` splits background from foreground. Read
-them off the depth map — mid-grey is the ridgeline, near-white is whatever is
+them off the depth map: mid-grey is the ridgeline, near-white is whatever is
 closest to camera. The values in use:
 
 | scene       | source                    | `--far` | `--near` |

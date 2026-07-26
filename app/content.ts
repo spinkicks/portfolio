@@ -4,7 +4,7 @@ export const profile = {
   location: "Austin, TX",
   email: "fear@utexas.edu",
   tagline:
-    "I build AI/ML tooling and full-stack systems — from LLM evaluation pipelines to products serving real traffic.",
+    "I build AI/ML tooling and full-stack systems, from LLM evaluation pipelines to products serving real traffic.",
   bio: "CS student at UT Austin minoring in Statistics & Data Science. My work sits where machine learning meets shipping software: analyzing model failures at Mercor, simulating traffic systems at the University of Houston, and building products that hold up under real users. I care about systems that stay fast as they grow.",
 };
 
@@ -26,7 +26,7 @@ export const heroStats = [
   { value: "3", label: "Internships" },
   { value: "5", label: "Shipped projects" },
   { value: "200", label: "WPM · top 500" },
-  { value: "'26", label: "UT Austin BS CS" },
+  { value: "'28", label: "UT Austin BS CS" },
 ];
 
 export const navLinks = [
@@ -37,7 +37,7 @@ export const navLinks = [
 ];
 
 export const facts = [
-  { label: "Education", value: "UT Austin — BS Computer Science" },
+  { label: "Education", value: "UT Austin, BS Computer Science" },
   { label: "Minor", value: "Statistics & Data Science" },
   { label: "Based in", value: "Austin, TX" },
   { label: "Focus", value: "AI/ML Engineering · Full-Stack" },
@@ -57,7 +57,7 @@ export const experience: Experience[] = [
   {
     company: "Mercor Intelligence",
     role: "AI/ML Intern",
-    period: "Feb 2025 — Apr 2025",
+    period: "Feb 2025 to Apr 2025",
     summary:
       "Analyzed failure modes for a frontier LLM and turned that analysis into better training data.",
     highlights: [
@@ -70,7 +70,7 @@ export const experience: Experience[] = [
   {
     company: "University of Houston",
     role: "ML Researcher & SWE Intern",
-    period: "May 2023 — Aug 2023",
+    period: "May 2023 to Aug 2023",
     summary:
       "Built real-time traffic simulations to study flow phenomena and congestion paradoxes.",
     highlights: [
@@ -83,7 +83,7 @@ export const experience: Experience[] = [
   {
     company: "Project: Empower",
     role: "Chief Operations Officer",
-    period: "Aug 2022 — Jan 2024",
+    period: "Aug 2022 to Jan 2024",
     summary:
       "Scaled a 501(c)(3) from a single chapter to a multi-chapter organization while shipping its product.",
     highlights: [

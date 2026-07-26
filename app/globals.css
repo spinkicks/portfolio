@@ -6,7 +6,7 @@
 :root {
   color-scheme: dark;
 
-  /* Surfaces — violet-black, not neutral black */
+  /* Surfaces: violet-black, not neutral black */
   --ink-900: #07020f;
   --ink-800: #0c0519;
   --ink-700: #150a29;
@@ -21,7 +21,7 @@
   --lime: #7ef7b0;
   --red: #ff6b81;
 
-  /* Text — all pairs below hit 4.5:1 on --ink-900 */
+  /* Text: all pairs below hit 4.5:1 on --ink-900 */
   --fg: #f6f1ff;
   --fg-dim: #c3b3dd;
   --fg-faint: #8f7fae;
@@ -90,7 +90,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Thin styled scrollbar — visible, so scroll position stays legible */
+  /* Thin styled scrollbar: visible, so scroll position stays legible */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -213,13 +213,12 @@
   }
 }
 
-/* Sits above the copy, below the grain. 3px period rather than the shader's
-   2px: over text, a tighter pitch stops reading as a tube and starts reading
-   as a rendering fault. */
+/* Sits above the copy, below the grain. A 3px period: over text, a tighter
+   pitch stops reading as a tube and starts reading as a rendering fault. */
 .scanlines {
   position: fixed;
   inset: 0;
-  z-index: 44;
+  z-index: 43;
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
@@ -242,6 +241,65 @@
 }
 
 /* ============================================================
+   CRT roll bar
+   ------------------------------------------------------------
+   The bright band that crawls down a CRT when a camera's shutter
+   and the tube's refresh don't agree.
+
+   It is one element rather than a band plus a separate edge line,
+   because both halves have to travel locked together and a single
+   gradient can carry the long soft ramp and the hard leading edge
+   at once. Screen blending means it only ever adds light, so it
+   passes over the copy without eating it.
+   ============================================================ */
+.crt-roll {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.crt-roll::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  /* Fixed height, not a viewport fraction. The band is a property of the tube,
+     not of the window. Sized in vh it grows into a wash on a tall screen. */
+  height: 150px;
+  mix-blend-mode: screen;
+  will-change: transform;
+  animation: crt-roll 14s linear infinite;
+  /* Peak alpha is a little above the 0.02 to 0.04 the usual CSS CRT overlays use,
+     because those sit on a flat terminal background and this one has to carry
+     over artwork. Most of the band is a faint trailing haze with the light
+     gathered into the last few percent, which is what reads as an edge. */
+  background: linear-gradient(
+    to bottom,
+    rgba(150, 235, 255, 0) 0%,
+    rgba(150, 235, 255, 0.004) 55%,
+    rgba(190, 245, 255, 0.011) 80%,
+    rgba(235, 250, 255, 0.026) 93%,
+    rgba(255, 255, 255, 0.058) 98%,
+    rgba(255, 255, 255, 0.075) 99.4%,
+    rgba(120, 215, 255, 0.014) 100%
+  );
+}
+
+/* Travel starts fully above the fold and ends fully below it, so the band is
+   never clipped mid-sweep at either end. */
+@keyframes crt-roll {
+  from {
+    transform: translate3d(0, -150px, 0);
+  }
+  to {
+    transform: translate3d(0, 100vh, 0);
+  }
+}
+
+/* ============================================================
    Marquee display face and lighting
    ============================================================ */
 
@@ -253,7 +311,7 @@
 }
 
 /* Bent glass. Monoton already draws its own inline stroke, so the job here is
-   only to make it look energised — a tight white core inside progressively
+   only to make it look energised: a tight white core inside progressively
    wider halos.
 
    The gas colour is a bare RGB triplet rather than a colour so the same shadow
@@ -338,7 +396,7 @@
   border: 1px solid var(--line-soft);
 }
 
-/* Hairline that fades out — used to close section headers */
+/* Hairline that fades out, used to close section headers */
 .rule {
   height: 1px;
   background: linear-gradient(90deg, var(--line), transparent);
@@ -371,7 +429,7 @@
    and buttons all agree with the backdrop rather than merely coexisting with
    it. Values are sampled from the 4K artwork the plates are cut from.
 
-   Scoped to a class rather than :root on purpose — the terminal layout keeps
+   Scoped to a class rather than :root on purpose: the terminal layout keeps
    the base palette.
    ============================================================ */
 
@@ -404,5 +462,11 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  /* The blanket rule above collapses the animation but leaves the band parked
+     at its starting offset, which would strand a bright bar across the top of
+     the page. It has nothing to say when it isn't moving, so drop it. */
+  .crt-roll::before {
+    display: none;
   }
 }

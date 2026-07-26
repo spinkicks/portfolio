@@ -53,7 +53,7 @@ def layer_mask(depth, thresh, min_blob, feather):
 
     Components are also required to reach the bottom of the frame. Ground
     always does in these compositions, so anything floating in the sky is a
-    depth artefact — typically a patch of empty sky in a corner that the model
+    depth artefact, typically a patch of empty sky in a corner that the model
     reads as nearer than a distant ridge.
     """
     m = depth >= thresh
@@ -80,8 +80,8 @@ def layer_mask(depth, thresh, min_blob, feather):
 def extend_sky(rgb, terrain_alpha):
     """Continue the sky downward behind the terrain.
 
-    Only ever seen through the feathered silhouette edge — the far plate covers
-    the rest at every scroll position — so a per-column continuation of the last
+    Only ever seen through the feathered silhouette edge, since the far plate covers
+    the rest at every scroll position, so a per-column continuation of the last
     clear sky row is enough, and it keeps the sun's colour correct at the seam.
     """
     h, w, _ = rgb.shape

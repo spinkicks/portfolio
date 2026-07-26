@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
     // Cap the ladder at 2560. The plates are 4K masters, but a full 3840
     // variant of the wireframe piece costs 1.1 MB against 400 KB at 2560, and
     // it sits behind scrims at 25-100% opacity. Capping here rather than via
-    // `sizes` is deliberate — `sizes` is multiplied by device pixel ratio, so a
+    // `sizes` is deliberate: `sizes` is multiplied by device pixel ratio, so a
     // retina laptop would still ask for 3840.
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 2560],
   },

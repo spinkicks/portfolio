@@ -17,12 +17,17 @@ export function Grain() {
  * Line structure over the whole page, not just the artwork.
  *
  * The backdrop gets its tube treatment in the shader, but that stops at the
- * canvas — without this the copy on top would read as sitting in front of a
+ * canvas. Without this the copy on top would read as sitting in front of a
  * screen rather than on one. Kept far lighter than the shader's own lines,
  * since text is much less forgiving of them than a photograph is.
  */
 export function Scanlines() {
   return <div aria-hidden="true" className="scanlines" />;
+}
+
+/** The bright band crawling down the tube. Pairs with Scanlines. */
+export function CrtRoll() {
+  return <div aria-hidden="true" className="crt-roll" />;
 }
 
 export function FrameEdge() {

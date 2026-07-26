@@ -1,15 +1,29 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Mail, Terminal } from "lucide-react";
-import ArtScene from "./scenes/ArtScene";
-import { FrameEdge, Grain, Scanlines, SectionNav, SocialRail } from "./hero/Chrome";
+import {
+  Backdrop,
+  BackdropSwitch,
+  creditFor,
+  DEFAULT_BACKDROP,
+  type BackdropId,
+} from "./scenes/backdrops";
+import {
+  CrtRoll,
+  FrameEdge,
+  Grain,
+  Scanlines,
+  SectionNav,
+  SocialRail,
+} from "./hero/Chrome";
 import HeroMarquee from "./hero/HeroMarquee";
 import TypingTest from "./TypingTest";
 import { experience, facts, links, profile, projects, skills } from "../content";
 
 export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
+  const [scene, setScene] = useState<BackdropId>(DEFAULT_BACKDROP);
   return (
     <div className="relative min-h-screen bg-ink text-fg">
       <a
@@ -19,7 +33,7 @@ export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
         Skip to content
       </a>
 
-      <ArtScene />
+      <Backdrop id={scene} />
 
       <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-end gap-2 p-4 sm:p-7">
         <SectionNav />
@@ -36,24 +50,45 @@ export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
       <SocialRail className="hidden lg:flex" />
 
       <main id="main" className="relative z-20">
-        <HeroMarquee />
+        <HeroMarquee
+          switcher={<BackdropSwitch value={scene} onChange={setScene} />}
+        />
 
-        <div className="mx-auto w-full max-w-5xl space-y-24 px-6 pb-24 pt-24 sm:space-y-32 sm:pb-32">
-          <About />
-          <Work />
-          <Projects />
-          <Skills />
+        {/* The backdrop used to dim itself as you scrolled, which is what made
+            the lighting swing. The darkening lives here instead: it belongs to
+            the content and scrolls with it, so any given paragraph always sits
+            on the same tone no matter where the page is.
 
-          <Reveal>
-            <TypingTest />
-          </Reveal>
+            The ramp is measured in vh rather than in percent. A percentage
+            would be a fraction of this block, which is the height of the whole
+            page. The fade would still be arriving somewhere around the
+            projects list, leaving the first section stranded over the sun. A
+            linear-gradient holds its final stop, so past 55vh this is a flat
+            wash all the way down. */}
+        <div className="relative">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 -top-[16vh] bottom-0 bg-[linear-gradient(to_bottom,transparent_0,color-mix(in_srgb,var(--color-ink)_94%,transparent)_55vh)]"
+          />
 
-          <Contact />
+          <div className="relative mx-auto w-full max-w-5xl space-y-24 px-6 pb-24 pt-24 sm:space-y-32 sm:pb-32">
+            <About />
+            <Work />
+            <Projects />
+            <Skills />
+
+            <Reveal>
+              <TypingTest />
+            </Reveal>
+
+            <Contact backdrop={scene} />
+          </div>
         </div>
       </main>
 
       <FrameEdge />
       <Scanlines />
+      <CrtRoll />
       <Grain />
     </div>
   );
@@ -259,7 +294,13 @@ function Skills() {
 
 /* ------------------------------------------------------------- Contact */
 
-function Contact() {
+/**
+ * Carries the backdrop attribution. It belongs to whichever scene is running,
+ * but the hero is the wrong place to say so. This is the colophon.
+ */
+function Contact({ backdrop }: { backdrop: BackdropId }) {
+  const credit = creditFor(backdrop);
+
   return (
     <Reveal>
       <footer id="contact" className="border-t border-line-soft pt-12">
@@ -300,9 +341,23 @@ function Contact() {
           ))}
         </ul>
 
-        <p className="mt-12 font-mono text-xs text-faint">
-          © {new Date().getFullYear()} David O. — Austin, TX
-        </p>
+        <div className="mt-12 space-y-2 font-mono text-xs text-faint">
+                <p>© {new Date().getFullYear()} David O. · Austin, TX</p>
+          {credit && (
+            <p>
+              Backdrop:{" "}
+              <a
+                href={credit.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-4 transition-colors duration-200 hover:text-dim"
+              >
+                {credit.title}
+              </a>{" "}
+              by {credit.author} · {credit.license}
+            </p>
+          )}
+        </div>
       </footer>
     </Reveal>
   );
@@ -338,14 +393,20 @@ function Section({
 function Reveal({ children }: { children: ReactNode }) {
   const reduceMotion = useReducedMotion();
 
-  if (reduceMotion) return <>{children}</>;
-
+  // Nothing the server renders may depend on the motion preference, which only
+  // the client can read, not the element, and not its starting style either.
+  // So the preference lands on the transition instead: same markup both ways,
+  // and a zero duration means the reveal resolves instantly rather than moving.
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+      }
     >
       {children}
     </motion.div>
