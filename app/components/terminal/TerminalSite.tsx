@@ -95,11 +95,14 @@ export default function TerminalSite({ onSwitch }: { onSwitch: () => void }) {
       {/* An absolutely positioned backdrop paints above static siblings, so
           everything over it has to be positioned too. */}
       <div className="relative z-10 flex min-h-0 flex-1">
-        <Rail current={current} goto={goto} onSwitch={onSwitch} />
+        <Rail current={current} goto={goto} />
 
         <div ref={paneRef} className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-            <Masthead onSwitch={onSwitch} />
+          {/* Top padding clears the switch pinned above. At wide viewports that
+              control sits out in the right-hand gutter and would clear anyway,
+              but the gutter closes up around 1024px and the two would collide. */}
+          <div className="mx-auto max-w-3xl px-5 pb-8 pt-16 sm:px-8 sm:pb-12 sm:pt-20">
+            <Masthead />
             <About />
             <Work />
             <Projects />
@@ -107,6 +110,21 @@ export default function TerminalSite({ onSwitch }: { onSwitch: () => void }) {
             <Contact />
           </div>
         </div>
+      </div>
+
+      {/* Pinned to the shell rather than placed in the pane, so it holds its
+          corner instead of scrolling away, matching where the synthwave layout
+          keeps the same control. Square and hairline rather than a pill: the
+          position is what carries the consistency, the styling still belongs to
+          whichever layout it is in. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-end p-4 sm:p-7">
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="pointer-events-auto inline-flex min-h-9 items-center border border-line-soft bg-ink-900/70 px-3.5 text-xs text-dim backdrop-blur transition-colors duration-150 hover:border-lime/50 hover:text-lime"
+        >
+          Synthwave layout
+        </button>
       </div>
 
       <div className="relative z-10">
@@ -158,11 +176,9 @@ function RainBackdrop() {
 function Rail({
   current,
   goto,
-  onSwitch,
 }: {
   current: string;
   goto: (id: string) => void;
-  onSwitch: () => void;
 }) {
   return (
     <nav
@@ -229,14 +245,6 @@ function Rail({
             </li>
           ))}
         </ul>
-
-        <button
-          type="button"
-          onClick={onSwitch}
-          className="mt-6 w-full border border-line-soft px-3 py-2 text-xs text-dim transition-colors duration-150 hover:border-lime/50 hover:text-lime"
-        >
-          Synthwave layout
-        </button>
       </div>
     </nav>
   );
@@ -244,7 +252,7 @@ function Rail({
 
 /* -------------------------------------------------------------- Masthead */
 
-function Masthead({ onSwitch }: { onSwitch: () => void }) {
+function Masthead() {
   return (
     <header className="mb-14">
       {/* Doubles as the first worked example of the prompt below. */}
@@ -260,20 +268,14 @@ function Masthead({ onSwitch }: { onSwitch: () => void }) {
         {profile.tagline}
       </p>
 
-      <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 lg:hidden">
+      {/* Only below lg, where the rail that normally carries this is hidden. */}
+      <div className="mt-7 lg:hidden">
         <a
           href={`mailto:${profile.email}`}
-          className="border border-line-soft px-3 py-1.5 text-xs text-lime"
+          className="inline-block border border-line-soft px-3 py-1.5 text-xs text-lime"
         >
           {profile.email}
         </a>
-        <button
-          type="button"
-          onClick={onSwitch}
-          className="border border-line-soft px-3 py-1.5 text-xs text-dim"
-        >
-          Synthwave layout
-        </button>
       </div>
     </header>
   );
