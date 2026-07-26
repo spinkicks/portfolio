@@ -79,8 +79,6 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: var(--violet) var(--ink-800);
   }
 
   body {
@@ -90,18 +88,16 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Thin styled scrollbar: visible, so scroll position stays legible */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+  /* No scrollbars on either layout.
+     Both properties are needed and neither is inherited, so they go on the
+     universal selector rather than on html: the terminal scrolls inside its own
+     pane and its console keeps a third scroll area, and each would otherwise
+     draw its own bar. Nothing here stops anything scrolling. */
+  * {
+    scrollbar-width: none;
   }
-  ::-webkit-scrollbar-track {
-    background: var(--ink-800);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(var(--violet), var(--magenta));
-    border: 2px solid var(--ink-800);
-    border-radius: 999px;
+  *::-webkit-scrollbar {
+    display: none;
   }
 
   /* Custom cursors */
