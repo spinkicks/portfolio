@@ -1,224 +1,353 @@
 "use client";
 
-import SynthMoon from "./SynthMoon";
+import { ReactNode } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowUpRight, Mail, Terminal } from "lucide-react";
+import ArtScene from "./scenes/ArtScene";
+import { FrameEdge, Grain, Scanlines, SectionNav, SocialRail } from "./hero/Chrome";
+import HeroMarquee from "./hero/HeroMarquee";
 import TypingTest from "./TypingTest";
+import { experience, facts, links, profile, projects, skills } from "../content";
 
-const GLASS_CARD_CLASSES = "glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]";
-
-// props for switching between site layouts
-type MainSiteProps = {
-  onSwitch: () => void;
-};
-
-// main portfolio page with animated moon, intro, projects, skills, experience, and typing test
-export default function MainSite({ onSwitch }: MainSiteProps) {
+export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
   return (
-    <main className="relative min-h-[300vh] bg-black overflow-x-hidden">
-      {/* background image with overlay for depth */}
-      <div
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50"
-        style={{ backgroundImage: "url('/moonless-bg.png')" }}
+    <div className="relative min-h-screen bg-ink text-fg">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:border focus:border-cyan focus:bg-ink-800 focus:px-4 focus:py-2 focus:text-sm"
       >
-        <div className="absolute inset-0 bg-black/40" />
+        Skip to content
+      </a>
+
+      <ArtScene />
+
+      <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-end gap-2 p-4 sm:p-7">
+        <SectionNav />
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-soft bg-ink-800/70 px-4 font-mono text-xs tracking-wide text-dim backdrop-blur transition-colors duration-200 hover:border-magenta hover:text-fg"
+        >
+          <Terminal size={14} aria-hidden="true" />
+          Terminal view
+        </button>
+      </header>
+
+      <SocialRail className="hidden lg:flex" />
+
+      <main id="main" className="relative z-20">
+        <HeroMarquee />
+
+        <div className="mx-auto w-full max-w-5xl space-y-24 px-6 pb-24 pt-24 sm:space-y-32 sm:pb-32">
+          <About />
+          <Work />
+          <Projects />
+          <Skills />
+
+          <Reveal>
+            <TypingTest />
+          </Reveal>
+
+          <Contact />
+        </div>
+      </main>
+
+      <FrameEdge />
+      <Scanlines />
+      <Grain />
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- About */
+
+function About() {
+  return (
+    <Section id="about" index="01" title="About">
+      <div className="grid gap-12 md:grid-cols-[1.35fr_1fr]">
+        <p className="max-w-[60ch] text-base leading-relaxed text-dim sm:text-lg">
+          {profile.bio}
+        </p>
+
+        <dl className="divide-y divide-line-soft border-t border-line-soft">
+          {facts.map((fact) => (
+            <div key={fact.label} className="grid grid-cols-[7rem_1fr] gap-4 py-3">
+              <dt className="label pt-0.5">{fact.label}</dt>
+              <dd className="text-sm text-fg">{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
+    </Section>
+  );
+}
 
-      {/* animated moon that moves across screen as user scrolls */}
-      <SynthMoon />
+/* ---------------------------------------------------------------- Work */
 
-      {/* main content container with all sections */}
-      <div className="relative z-20 w-full max-w-6xl mx-auto pt-80 px-6 pb-24 space-y-8">
-        {/* intro centered with button positioned to the right (button absolutely positioned) */}
-        <div className="w-full">
-          <div className="relative w-fit mx-auto">
-            <section className={`w-fit p-8 ${GLASS_CARD_CLASSES}`}>
-              <h1 className="text-7xl font-extrabold font-mono text-cyan-100 tracking-tighter text-center glow-cyan">
-                David O.
-              </h1>
-              <p className="mt-4 text-cyan-200 font-mono text-2xl text-center">
-                Austin, TX
-              </p>
-            </section>
+function Work() {
+  return (
+    <Section id="work" index="02" title="Experience">
+      <ol className="space-y-px">
+        {experience.map((job, i) => (
+          <li
+            key={job.company}
+            className="group relative border-l border-line-soft py-8 pl-6 transition-colors duration-300 hover:border-magenta sm:pl-10"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute -left-px top-8 h-2 w-2 -translate-x-1/2 rounded-full bg-violet transition-colors duration-300 group-hover:bg-magenta"
+            />
 
-            <button
-              type="button"
-              onClick={onSwitch}
-              className="absolute left-full ml-4 top-3/4 -translate-y-1/2 inline-flex items-center whitespace-nowrap glass-card px-4 py-2 font-mono text-sm border border-cyan-500/20 transform transition-transform duration-200 hover:scale-105 hover:bg-blue-600 hover:text-white hover:shadow-[0_8px_30px_rgba(72,178,255,0.08)]"
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+              <h3 className="display text-2xl text-fg sm:text-3xl">
+                {job.company}
+              </h3>
+              <span className="label">{job.period}</span>
+            </div>
+
+            <p className="mt-2 font-mono text-sm text-cyan">{job.role}</p>
+            <p className="mt-4 max-w-[62ch] text-base text-dim">{job.summary}</p>
+
+            <ul className="mt-4 max-w-[68ch] space-y-2">
+              {job.highlights.map((point) => (
+                <li
+                  key={point}
+                  className="relative pl-5 text-sm leading-relaxed text-dim before:absolute before:left-0 before:top-[0.6em] before:h-1 before:w-1 before:bg-violet"
+                >
+                  {point}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {job.stack.map((tech) => (
+                <span key={tech} className="chip">
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            <span className="label absolute -left-16 top-8 hidden lg:block">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </Section>
+  );
+}
+
+/* ------------------------------------------------------------ Projects */
+
+function Projects() {
+  const [feature, ...rest] = projects;
+
+  return (
+    <Section id="projects" index="03" title="Selected Work">
+      <div className="grid gap-px bg-line-soft md:grid-cols-2">
+        <ProjectCard project={feature} featured />
+        {rest.map((project) => (
+          <ProjectCard key={project.name} project={project} />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function ProjectCard({
+  project,
+  featured = false,
+}: {
+  project: (typeof projects)[number];
+  featured?: boolean;
+}) {
+  return (
+    <article
+      className={`group relative flex flex-col bg-ink-800/60 p-6 backdrop-blur transition-colors duration-300 hover:bg-ink-700/70 sm:p-8 ${
+        featured ? "md:col-span-2" : ""
+      }`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <h3
+          className={`display text-fg transition-colors duration-200 group-hover:text-magenta ${
+            featured ? "text-3xl sm:text-4xl" : "text-2xl"
+          }`}
+        >
+          {project.href ? (
+            <a
+              href={project.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              // Stretched link: the whole card is the hit target, but only
+              // this anchor lands in the tab order.
+              className="after:absolute after:inset-0 after:content-['']"
             >
-              Switch Site Layout
-            </button>
-          </div>
-        </div>
+              {project.name}
+            </a>
+          ) : (
+            project.name
+          )}
+        </h3>
 
-        {/* short bio about background and interests */}
-        <section className={`w-full max-w-4xl mx-auto p-6 ${GLASS_CARD_CLASSES}`}>
-          <p className="text-cyan-200 font-mono text-base leading-relaxed">
-            I&apos;m a CS student at the University of Texas at Austin, minoring in Statistics & Data Science. My technical background spans AI/ML engineering and full-stack development. I&apos;m passionate about scalable solutions. I also type fast... (check the bottom of the page).
-          </p>
-        </section>
-
-        {/* three-column layout for projects, skills, and contact info */}
-        <div className="grid gap-8 md:grid-cols-3 items-start justify-items-center">
-          <section className={`w-full max-w-sm p-8 ${GLASS_CARD_CLASSES}`}>
-            <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
-              Projects
-            </h2>
-            {/* list of notable projects with links */}
-            <div className="space-y-4 text-cyan-200 font-mono">
-              <p>
-                1.{" "}
-                <a
-                  href="https://illuminate.projectempower.io/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-cyan-300 hover:text-cyan-100 hover:underline"
-                >
-                  Illuminate
-                </a>{" "}
-                [Next.js]
-              </p>
-              <p>
-                2.{" "}
-                <a
-                  href="https://devpost.com/software/tender-d70yp5"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-cyan-300 hover:text-cyan-100 hover:underline"
-                >
-                  Tendir
-                </a>{" "}
-                (Typescript)
-              </p>
-              <p>3. PintOS Kernel [C]</p>
-              <p>
-                4.{" "}
-                <a
-                  href="https://sciencehowitworks.wixsite.com/my-site-1"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-cyan-300 hover:text-cyan-100 hover:underline"
-                >
-                  STEM Today
-                </a>{" "}
-                [HTML/CSS]
-              </p>
-              <p>4. Heap Memory Allocator [C]</p>
-            </div>
-          </section>
-
-          <section className="w-full max-w-sm p-8 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]">
-            <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
-              Skills
-            </h2>
-            {/* technical skills broken down by category */}
-            <div className="space-y-3 font-mono text-cyan-200 text-sm leading-relaxed">
-              <p>
-                <span className="text-cyan-300">Languages:</span> Python, Java, C, C++, SQL, JavaScript, [Tailwind] CSS, LaTeX, Spanish (Fluent)
-              </p>
-              <p>
-                <span className="text-cyan-300">Frameworks & Libraries:</span> MongoDB, Next.js, React, Node.js, NumPy, Matplotlib, Bootstrap
-              </p>
-              <p>
-                <span className="text-cyan-300">Tools & Technologies:</span> Supabase, Google Cloud VM, Cloudflare R2, Git, Google Analytics (GA4), Google Tag Manager, Excel
-              </p>
-            </div>
-          </section>
-
-          <section className="w-full max-w-sm p-8 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)]">
-            <h2 className="text-3xl font-bold text-cyan-100 mb-4 font-mono glow-cyan text-center">
-              Contact
-            </h2>
-            {/* social media and profile links */}
-            <div className="space-y-2 font-mono text-cyan-200">
-              <a
-                href="https://github.com/spinkicks"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-cyan-300 hover:text-cyan-100 hover:underline"
-              >
-                GitHub
-              </a>
-              <a
-                href="https://www.linkedin.com/in/calmguy/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-cyan-300 hover:text-cyan-100 hover:underline"
-              >
-                LinkedIn
-              </a>
-              <a
-                href="https://monkeytype.com/profile/Dipslox"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-cyan-300 hover:text-cyan-100 hover:underline"
-              >
-                MonkeyType (#500 Global)
-              </a>
-              <a
-                href="https://open.spotify.com/user/cxxo2nymwpjcgw7kz5cttbrhj?si=8a890bb5b6584942"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-cyan-300 hover:text-cyan-100 hover:underline"
-              >
-                Spotify
-              </a>
-            </div>
-          </section>
-        </div>
-
-        {/* work experience with flip card animations to reveal details */}
-        <section className="p-8 glass-card rounded-none shadow-[0_0_25px_rgba(122,166,199,0.12)] space-y-6">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h2 className="text-4xl font-bold font-mono text-cyan-100 glow-cyan">Experience</h2>
-            <p className="text-sm text-cyan-200 font-mono">Highlights of my recent work.</p>
-          </div>
-          {/* flip cards show job titles on front and accomplishments on back */}
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className="reveal-card">
-              <div className="reveal-front glass-card border border-cyan-500/20 p-5 rounded-none flex flex-col justify-between h-full w-full">
-                <h3 className="text-2xl font-mono text-cyan-100">Mercor Intelligence</h3>
-                <p className="text-sm font-mono text-cyan-300 mt-1">AI/ML Intern - Feb 2025 to Apr 2025</p>
-              </div>
-              <div className="reveal-back glass-card border border-cyan-500/20 p-6 rounded-none h-full w-full">
-                <ul className="space-y-2 text-cyan-200 font-mono text-sm leading-relaxed">
-                  <li>Engineered Python scripts to analyze model failures and optimize training data for a leading LLM; formatted datasets in LaTeX.</li>
-                  <li>Applied discrete math/stats/calculus to improve evaluation workflows.</li>
-                  <li>Drove ~0.5% accuracy gain via targeted analysis of frequent errors.</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="reveal-card">
-              <div className="reveal-front glass-card border border-cyan-500/20 p-5 rounded-none flex flex-col justify-between h-full w-full">
-                <h3 className="text-2xl font-mono text-cyan-100">University of Houston</h3>
-                <p className="text-sm font-mono text-cyan-300 mt-1">ML Researcher & SWE Intern - May 2023 to Aug 2023</p>
-              </div>
-              <div className="reveal-back glass-card border border-cyan-500/20 p-6 rounded-none h-full w-full">
-                <ul className="space-y-2 text-cyan-200 font-mono text-sm leading-relaxed">
-                  <li>Built/analyzed traffic simulations (Python, SUMO, Flow) to study flow phenomena and paradoxes.</li>
-                  <li>Used TraCI API to control simulations and collect data validating real-world models.</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="reveal-card sm:col-span-2">
-              <div className="reveal-front glass-card border border-cyan-500/20 p-5 rounded-none flex flex-col justify-between h-full w-full">
-                <h3 className="text-2xl font-mono text-cyan-100">Project: Empower</h3>
-                <p className="text-sm font-mono text-cyan-300 mt-1">Chief Operations Officer - Aug 2022 to Jan 2024</p>
-              </div>
-              <div className="reveal-back glass-card border border-cyan-500/20 p-6 rounded-none h-full w-full">
-                <ul className="space-y-2 text-cyan-200 font-mono text-sm leading-relaxed">
-                  <li>Scaled a 501c3 to 100+ members across 10+ chapters; led chapter teams.</li>
-                  <li>Orchestrated a $100k DevPost hackathon.</li>
-                  <li>Collaborated on Next.js frontend and Node/Supabase/SQL backend.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* typing speed challenge with wpm calculation */}
-        <TypingTest />
+        {project.href ? (
+          <ArrowUpRight
+            size={20}
+            aria-hidden="true"
+            className="shrink-0 text-faint transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-magenta"
+          />
+        ) : (
+          <span className="label shrink-0">{project.year}</span>
+        )}
       </div>
-    </main>
+
+      <p
+        className={`mt-3 text-dim ${
+          featured ? "max-w-[58ch] text-base sm:text-lg" : "text-sm"
+        }`}
+      >
+        {project.blurb}
+      </p>
+
+      <div className="mt-6 flex flex-wrap items-center gap-2 pt-2">
+        {project.stack.map((tech) => (
+          <span key={tech} className="chip">
+            {tech}
+          </span>
+        ))}
+      </div>
+
+      {project.secondary && (
+        <a
+          href={project.secondary.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative z-10 mt-4 inline-flex w-fit items-center gap-1 font-mono text-xs text-cyan underline-offset-4 hover:underline"
+        >
+          {project.secondary.label}
+          <ArrowUpRight size={12} aria-hidden="true" />
+        </a>
+      )}
+    </article>
+  );
+}
+
+/* -------------------------------------------------------------- Skills */
+
+function Skills() {
+  return (
+    <Section id="skills" index="04" title="Toolkit">
+      <div className="grid gap-10 sm:grid-cols-3">
+        {skills.map((category) => (
+          <div key={category.group}>
+            <h3 className="label text-cyan">{category.group}</h3>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {category.items.map((item) => (
+                <li
+                  key={item}
+                  className="border border-line-soft px-2.5 py-1 font-mono text-xs text-dim"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ------------------------------------------------------------- Contact */
+
+function Contact() {
+  return (
+    <Reveal>
+      <footer id="contact" className="border-t border-line-soft pt-12">
+        <p className="label text-magenta">Contact</p>
+
+        <h2 className="display mt-4 max-w-[16ch] text-4xl text-fg sm:text-6xl">
+          Let&apos;s build something.
+        </h2>
+
+        <a
+          href={`mailto:${profile.email}`}
+          className="mt-6 inline-flex min-h-12 items-center gap-3 font-mono text-lg text-cyan underline-offset-8 transition-colors duration-200 hover:text-fg hover:underline"
+        >
+          <Mail size={18} aria-hidden="true" />
+          {profile.email}
+        </a>
+
+        <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
+          {links.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex min-h-11 items-center gap-2 font-mono text-sm text-dim transition-colors duration-200 hover:text-fg"
+              >
+                {link.label}
+                {link.note && (
+                  <span className="text-xs text-faint">({link.note})</span>
+                )}
+                <ArrowUpRight
+                  size={13}
+                  aria-hidden="true"
+                  className="text-faint transition-colors duration-200 group-hover:text-magenta"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-12 font-mono text-xs text-faint">
+          © {new Date().getFullYear()} David O. — Austin, TX
+        </p>
+      </footer>
+    </Reveal>
+  );
+}
+
+/* ------------------------------------------------------------ Primitives */
+
+function Section({
+  id,
+  index,
+  title,
+  children,
+}: {
+  id: string;
+  index: string;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <Reveal>
+      <section id={id} className="scroll-mt-24">
+        <div className="flex items-baseline gap-5">
+          <span className="label text-magenta">{index}</span>
+          <h2 className="display text-3xl text-fg sm:text-5xl">{title}</h2>
+        </div>
+        <div className="rule mt-5 mb-10" />
+        {children}
+      </section>
+    </Reveal>
+  );
+}
+
+function Reveal({ children }: { children: ReactNode }) {
+  const reduceMotion = useReducedMotion();
+
+  if (reduceMotion) return <>{children}</>;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
   );
 }

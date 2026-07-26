@@ -40,5 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# python (tools/)
+__pycache__/
+*.pyc
+
 # ignore gemini notes and docs
 GEMINI.md

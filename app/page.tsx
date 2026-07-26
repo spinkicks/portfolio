@@ -19,5 +19,9 @@ export default function Home() {
     return <AltSite onBack={() => setUseAlt(false)} />;
   }
 
-  return <MainSite onSwitch={() => setUseAlt(true)} />;
+  return (
+    <div className="theme-wireframe">
+      <MainSite onSwitch={() => setUseAlt(true)} />
+    </div>
+  );
 }

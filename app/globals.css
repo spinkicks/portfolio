@@ -1,181 +1,408 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Design tokens
+   ============================================================ */
 :root {
-  /* Backgrounds */
-  --bg-main: #050511;
-  --bg-card: rgba(12, 12, 20, 0.72);
+  color-scheme: dark;
 
-  /* Accents */
-  --color-cyan: #9ab8d6;
-  --color-magenta: #9b88c6;
-  --color-pink: #c8a2b8;
+  /* Surfaces — violet-black, not neutral black */
+  --ink-900: #07020f;
+  --ink-800: #0c0519;
+  --ink-700: #150a29;
+  --surface: rgba(21, 10, 41, 0.62);
+  --surface-strong: rgba(30, 15, 57, 0.88);
 
-  /* Text */
-  --text-main: #d5dae4;
-  --text-muted: #929aad;
+  /* Neon spectrum */
+  --magenta: #ff3ea5;
+  --cyan: #2ee6ff;
+  --violet: #a855f7;
+  --amber: #ffb347;
+  --lime: #7ef7b0;
+  --red: #ff6b81;
 
-  /* Legacy fallback hooks */
-  --background: var(--bg-main);
-  --foreground: var(--text-main);
+  /* Text — all pairs below hit 4.5:1 on --ink-900 */
+  --fg: #f6f1ff;
+  --fg-dim: #c3b3dd;
+  --fg-faint: #8f7fae;
+
+  /* Hairlines */
+  --line: rgba(255, 62, 165, 0.18);
+  --line-soft: rgba(198, 160, 255, 0.11);
+
+  /* Spacing scale */
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6rem;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur: 220ms;
+  --dur-slow: 380ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--ink-900);
+  --color-foreground: var(--fg);
+
+  --color-ink: var(--ink-900);
+  --color-ink-800: var(--ink-800);
+  --color-ink-700: var(--ink-700);
+  --color-surface: var(--surface);
+
+  --color-magenta: var(--magenta);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --color-amber: var(--amber);
+  --color-lime: var(--lime);
+  --color-red: var(--red);
+
+  --color-fg: var(--fg);
+  --color-dim: var(--fg-dim);
+  --color-faint: var(--fg-faint);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
 }
 
-body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Base
+   ============================================================ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--violet) var(--ink-800);
+  }
+
+  body {
+    background-color: var(--ink-900);
+    color: var(--fg);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Thin styled scrollbar — visible, so scroll position stays legible */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--ink-800);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--violet), var(--magenta));
+    border: 2px solid var(--ink-800);
+    border-radius: 999px;
+  }
+
+  /* Custom cursors */
+  * {
+    cursor: url("/cursor-main.cur"), auto;
+  }
+  a,
+  button,
+  summary,
+  [role="button"] {
+    cursor: url("/cursor-hover.cur"), pointer;
+  }
+  :disabled {
+    cursor: not-allowed;
+  }
+
+  /* Keyboard focus is always visible */
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: rgba(255, 62, 165, 0.35);
+    color: var(--fg);
+  }
 }
 
-/* hide scrollbar */
-::-webkit-scrollbar {
-  display: none;
-}
-html {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* custom cursor */
-* {
-  cursor: url('/cursor-main.cur'), auto;
+/* ============================================================
+   Components
+   Layered so Tailwind colour/size utilities can still override them.
+   ============================================================ */
+@layer components {
+.display {
+  font-family: var(--font-space-grotesk), var(--font-geist-sans), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
 }
 
-a, button {
-  cursor: url('/cursor-hover.cur'), pointer;
+/* Small uppercase mono label used for section indices and metadata */
+.label {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
 }
 
-.glass-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(154, 184, 214, 0.14);
-  box-shadow: 0 0 18px rgba(154, 184, 214, 0.14);
+/* Chromatic-fringe glow. Offsets stay under 2px so text remains crisp. */
+.text-chroma {
+  text-shadow:
+    -0.02em 0 0 rgba(255, 62, 165, 0.55),
+    0.02em 0 0 rgba(46, 230, 255, 0.45),
+    0 0 0.5em rgba(255, 62, 165, 0.25);
 }
 
+.glow-magenta {
+  text-shadow: 0 0 0.6em rgba(255, 62, 165, 0.45);
+}
 .glow-cyan {
-  text-shadow: 0 0 8px rgba(154, 184, 214, 0.32);
+  text-shadow: 0 0 0.6em rgba(46, 230, 255, 0.4);
 }
 
-.btn-glow:hover {
-  box-shadow: 0 0 12px rgba(155, 136, 198, 0.28);
+/* ============================================================
+   Film grain
+   One static turbulence tile over the whole viewport. It sands off the
+   banding in the artwork's big gradients and stops the flat UI panels from
+   reading as plastic. Kept in soft-light so it darkens and lightens rather
+   than just greying everything down.
+   ============================================================ */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  opacity: 0.75;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.bg-radial-accent {
-  background: radial-gradient(circle, rgba(155, 136, 198, 0.18) 0%, rgba(5, 5, 17, 0) 70%);
-}
-
-.card-hover {
-  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 0 25px rgba(0, 243, 255, 0.18);
-  border-color: rgba(0, 243, 255, 0.25);
-}
-
-.shooting-star {
-  position: absolute;
-  top: var(--top);
-  left: var(--left);
-  width: 2px;
-  height: 90px;
-  background: linear-gradient(180deg, rgba(154, 184, 214, 0.55), transparent);
-  filter: drop-shadow(0 0 6px rgba(154, 184, 214, 0.38));
-  transform: rotate(45deg);
-  animation: shoot var(--duration) ease-in-out infinite;
-  animation-delay: var(--delay);
-}
-
-@keyframes shoot {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) rotate(45deg);
-  }
-  10% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(300px, 150px, 0) rotate(45deg);
-  }
-}
-
-.flip-card {
-  perspective: 1200px;
-  position: relative;
-  min-height: 240px;
-}
-
-.flip-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.7s ease;
-  transform-style: preserve-3d;
-}
-
-.flip-card.tall {
-  min-height: 280px;
-}
-
-.reveal-card {
-  position: relative;
-  overflow: visible;
-  min-height: 240px;
-}
-
-.reveal-front {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  width: 100%;
-}
-
-.reveal-back {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transform: translateY(10px) scale(0.98);
-  transition: transform 0.35s ease, opacity 0.35s ease;
-  z-index: 5;
-}
-
-.reveal-card:hover .reveal-back {
-  opacity: 1;
-  transform: translateY(-6px) scale(1.02);
-}
-
-.flip-card:hover .flip-card-inner {
-  transform: rotateY(180deg);
-}
-
-.flip-face {
+/* Second, coarser pass in overlay. Soft-light alone flattens out as you push
+   it; layering a chunkier tile on top keeps the texture reading as film stock
+   rather than a uniform dither. */
+.grain::after {
+  content: "";
   position: absolute;
   inset: 0;
-  backface-visibility: hidden;
-  border-radius: 16px;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
 }
 
-.flip-back {
-  transform: rotateY(180deg);
+@media (prefers-reduced-motion: no-preference) {
+  /* Nudge the tile so the grain reads as film rather than a fixed screen
+     texture. Slow enough that it never draws attention to itself. */
+  .grain {
+    animation: grain-drift 8s steps(6) infinite;
+  }
 }
-.text-cyan-100 { color: #d0d9e4 !important; }
-.text-cyan-200 { color: #bdc8d6 !important; }
-.text-cyan-300 { color: #a7b5c5 !important; }
-.text-cyan-400 { color: #8fa0b2 !important; }
-.text-cyan-700 { color: #71829a !important; }
-.text-purple-400 { color: #b3a1d1 !important; }
-.text-pink-500 { color: #c9a5b9 !important; }
-.text-emerald-300 { color: #84b18a !important; }
+
+@keyframes grain-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 220px 220px;
+  }
+}
+
+/* Sits above the copy, below the grain. 3px period rather than the shader's
+   2px: over text, a tighter pitch stops reading as a tube and starts reading
+   as a rendering fault. */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0 2px,
+    rgba(0, 0, 0, 0.16) 2px 3px
+  );
+}
+
+/* Corner falloff, so the page reads as a lit surface rather than a flat fill.
+   Separate element from the lines because it must not repeat with them. */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 50%,
+    transparent 55%,
+    rgba(4, 2, 12, 0.35) 100%
+  );
+}
+
+/* ============================================================
+   Marquee display face and lighting
+   ============================================================ */
+
+.font-marquee {
+  font-family: var(--font-monoton), var(--font-space-grotesk), sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+}
+
+/* Bent glass. Monoton already draws its own inline stroke, so the job here is
+   only to make it look energised — a tight white core inside progressively
+   wider halos.
+
+   The gas colour is a bare RGB triplet rather than a colour so the same shadow
+   stack can be run at several alphas; a second tube only overrides --tube. */
+.type-tube {
+  --tube: 245, 78, 159;
+  color: #fff0fb;
+  text-shadow:
+    0 0 0.04em #ffffff,
+    0 0 0.16em rgb(var(--tube)),
+    0 0 0.42em rgb(var(--tube)),
+    0 0 0.9em rgba(var(--tube), 0.75),
+    0 0 1.9em rgba(var(--tube), 0.45);
+}
+
+.type-tube-cyan {
+  --tube: 46, 230, 255;
+  color: #f0fdff;
+}
+
+/* Glass with no gas in it, for runs that read as part of the sign but aren't
+   lit. Monoton draws its own inline stroke, so dimming the fill is enough. */
+.type-tube-off {
+  color: rgba(246, 240, 255, 0.24);
+  text-shadow: none;
+}
+
+/* Local darkening for heroes that put copy over the bright side of the
+   artwork. The scene's own scrim is directional and only covers the left. */
+.copy-scrim {
+  background: radial-gradient(
+    72% 66% at 50% 50%,
+    rgba(4, 2, 12, 0.86) 0%,
+    rgba(4, 2, 12, 0.72) 48%,
+    rgba(4, 2, 12, 0.3) 76%,
+    transparent 100%
+  );
+}
+
+/* ============================================================
+   Framed edge
+   Inset hairline that turns the page into a poster. Gradient border via the
+   two-layer mask trick, since border-image can't do rounded corners.
+   ============================================================ */
+.frame-edge {
+  position: fixed;
+  inset: 0.5rem;
+  z-index: 40;
+  pointer-events: none;
+  border-radius: 1.1rem;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 78, 159, 0.85),
+    rgba(63, 127, 224, 0.3) 35%,
+    rgba(154, 102, 216, 0.55) 65%,
+    rgba(245, 78, 159, 0.8)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+@media (min-width: 640px) {
+  .frame-edge {
+    inset: 0.875rem;
+    border-radius: 1.4rem;
+  }
+}
+
+/* ============================================================
+   Surfaces
+   ============================================================ */
+.panel {
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line-soft);
+}
+
+/* Hairline that fades out — used to close section headers */
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), transparent);
+}
+
+/* Neon chip for tech tags */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.5rem;
+  color: var(--fg-dim);
+  border: 1px solid var(--line-soft);
+  background: rgba(168, 85, 247, 0.07);
+  transition: color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+.group:hover .chip {
+  color: var(--fg);
+  border-color: var(--line);
+}
+
+}
+
+/* ============================================================
+   Scene palette
+   Retunes the token set the whole UI reads from, so chips, borders, headings
+   and buttons all agree with the backdrop rather than merely coexisting with
+   it. Values are sampled from the 4K artwork the plates are cut from.
+
+   Scoped to a class rather than :root on purpose — the terminal layout keeps
+   the base palette.
+   ============================================================ */
+
+.theme-wireframe {
+  --ink-900: #0b0418;
+  --ink-800: #170733;
+  --ink-700: #250c4a;
+  --surface: rgba(23, 7, 51, 0.72);
+  --magenta: #f54e9f;
+  --cyan: #3f7fe0;
+  --violet: #9a66d8;
+  --amber: #f0a04b;
+  --fg: #f6f0ff;
+  --fg-dim: #cbbce8;
+  --fg-faint: #9587bb;
+  --line: rgba(245, 78, 159, 0.22);
+  --line-soft: rgba(154, 102, 216, 0.16);
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
