@@ -9,6 +9,7 @@ import { MATRIX_RAIN } from "../scenes/shadertoy/specs";
 import {
   experience,
   facts,
+  heroStats,
   links,
   profile,
   projects,
@@ -268,8 +269,28 @@ function Masthead() {
         {profile.tagline}
       </p>
 
+      {status.open && (
+        <p className="mt-6 flex items-baseline gap-2 text-xs lg:hidden">
+          <span className="border border-lime/50 px-1.5 py-0.5 uppercase tracking-[0.18em] text-lime">
+            {status.tag}
+          </span>
+          <span className="text-faint">{status.detail}</span>
+        </p>
+      )}
+
+      <dl className="mt-7 grid grid-cols-2 gap-px border border-line-soft bg-line-soft sm:grid-cols-4">
+        {heroStats.map((stat) => (
+          <div key={stat.label} className="bg-ink-900/90 px-3 py-3">
+            <dt className="text-[0.65rem] leading-snug text-faint">
+              {stat.label.toLowerCase()}
+            </dt>
+            <dd className="mt-1 text-base text-amber">{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+
       {/* Only below lg, where the rail that normally carries this is hidden. */}
-      <div className="mt-7 lg:hidden">
+      <div className="mt-6 lg:hidden">
         <a
           href={`mailto:${profile.email}`}
           className="inline-block border border-line-soft px-3 py-1.5 text-xs text-lime"

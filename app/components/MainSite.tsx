@@ -224,15 +224,16 @@ function ProjectCard({
           )}
         </h3>
 
-        {project.href ? (
-          <ArrowUpRight
-            size={20}
-            aria-hidden="true"
-            className="shrink-0 text-faint transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-magenta"
-          />
-        ) : (
-          <span className="label shrink-0">{project.year}</span>
-        )}
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="label">{project.year}</span>
+          {project.href && (
+            <ArrowUpRight
+              size={20}
+              aria-hidden="true"
+              className="text-faint transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-magenta"
+            />
+          )}
+        </div>
       </div>
 
       <p

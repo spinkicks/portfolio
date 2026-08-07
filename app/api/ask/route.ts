@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { experience, facts, links, profile, projects, skills, status } from "../../content";
+import { portfolioKnowledge } from "./knowledge";
 
 /**
  * Answers questions about the portfolio for the terminal's `ask` command.
@@ -45,7 +45,7 @@ function throttled(ip: string) {
 
 /** Built here rather than shipped to the client, so the prompt stays private. */
 function knowledge() {
-  return JSON.stringify({ profile, status, facts, experience, projects, skills, links });
+  return JSON.stringify(portfolioKnowledge());
 }
 
 const SYSTEM = `You answer questions about David O. for the terminal on his portfolio site.

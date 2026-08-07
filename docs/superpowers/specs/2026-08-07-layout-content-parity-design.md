@@ -8,12 +8,13 @@ Give the synthwave and terminal layouts the same portfolio information while pre
 
 ## Scope
 
-The audit found four gaps:
+The audit found five gaps:
 
 1. The terminal layout does not render `heroStats`.
 2. The terminal layout hides availability on screens where its left rail is absent.
 3. The synthwave header navigation omits the Skills section.
 4. The terminal's Gemini knowledge payload omits `heroStats`.
+5. Synthwave project cards omit the year when a project has a primary link.
 
 The implementation will:
 
@@ -21,6 +22,7 @@ The implementation will:
 - Render the four `heroStats` values in the terminal masthead.
 - Render availability in the terminal masthead on small screens while retaining its desktop rail treatment.
 - Add `heroStats` to the server-side Gemini knowledge payload.
+- Render the year on every synthwave project card.
 
 ## Intentional Differences
 
@@ -35,14 +37,15 @@ These features change how visitors interact with each layout. They do not change
 
 ## Components and Data Flow
 
-`app/content.ts` exports all portfolio records. `MainSite`, `HeroMarquee`, `Chrome`, `TerminalSite`, terminal commands, and the ask route read those exports directly.
+`app/content.ts` exports all portfolio records. `MainSite`, `HeroMarquee`, `Chrome`, `TerminalSite`, terminal commands, and the pure `portfolioKnowledge()` builder read those exports. The ask route serializes the builder's result for Gemini.
 
 The implementation adds no duplicated strings:
 
 - `navLinks` supplies the new synthwave Skills link.
 - `TerminalSite` maps `heroStats` into a compact terminal readout.
 - `TerminalSite` reads the existing `status` object for mobile availability.
-- The ask route serializes `heroStats` with the rest of the portfolio data.
+- `portfolioKnowledge()` includes `heroStats`, and the ask route serializes the complete result.
+- `MainSite` renders `project.year` independently of the project's link state.
 
 ## Error Handling
 
@@ -57,5 +60,6 @@ Verification will cover:
 - Availability appears in both layouts at desktop and mobile widths.
 - Synthwave navigation includes About, Experience, Projects, Skills, and Contact.
 - The Gemini knowledge payload includes `heroStats`.
+- Every project year appears in both layouts.
 - TypeScript, ESLint, and the production build pass.
 - Git reports a clean tree after the commit and push to `main`.
