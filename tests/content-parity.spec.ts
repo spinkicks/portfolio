@@ -14,14 +14,14 @@ import {
 const baseUrl = process.env.PORTFOLIO_URL ?? "http://127.0.0.1:8422";
 
 const expectedProjectContract = [
-  ["Small Learning Model", "featured", "development-only"],
-  ["Speedrun", "featured", "early release"],
-  ["GT100K", "featured", "pre-production"],
   ["Subwoofer Central", "featured", "live"],
+  ["Small Learning Model", "featured", "development-only"],
+  ["GT100K", "featured", "pre-production"],
   ["Agentic Software Factory v1", "featured", "development-only"],
   ["Blazing Audio", "featured", "live"],
   ["Univyrse", "featured", "live"],
   ["NeuroBaseline", "featured", "prototype"],
+  ["Speedrun", "featured", "early release"],
   ["Virgilio Acoustics", "more", "live"],
   ["UTMAX", "more", "live"],
   ["UTMap", "more", "live"],
@@ -290,6 +290,27 @@ test("factory project uses generic identity without public URL", () => {
 
   expect(factory, "missing Agentic Software Factory v1 project").toBeDefined();
   expect(factory?.href, "factory must not expose a public URL").toBeUndefined();
+});
+
+test("Agentic Software Factory v1 summary and details describe loop harnesses and self-QA agents", () => {
+  const factory = richProjects.find(
+    (project) => project.name === "Agentic Software Factory v1"
+  );
+
+  expect(factory, "missing Agentic Software Factory v1 project").toBeDefined();
+  expect(factory?.summary).toMatch(/loop harnesses/i);
+  expect(factory?.summary).toMatch(/self-QA agents/i);
+  expect(factory?.summary).toBe(
+    "Cross-project agentic software factory built around bounded Claude and Codex loop harnesses, self-QA agents, deterministic gates, recovery, browser QA, and pull-request delivery."
+  );
+  expect(factory?.details).toEqual([
+    "Runs repeated builder-review loops in isolated worktrees with file-backed cross-turn state, time and no-progress caps, and stranded-run recovery.",
+    "Self-QA agents combine semantic browser walks, screenshot and pixel checks, model and deterministic graders, and specialized review panels.",
+    "Used across GT100K and Subwoofer Central with host-side Git controls and pull-request delivery; the repository remains private.",
+  ]);
+  expect(factory?.status).toBe("development-only");
+  expect(factory?.year).toBe("2026");
+  expect(factory?.stack).toEqual(["Python", "Bash", "Claude", "Codex"]);
 });
 
 test("Small Learning Model exposes dataset secondary link and download metrics", () => {

@@ -124,6 +124,21 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    name: "Subwoofer Central",
+    tier: "featured",
+    status: "live",
+    summary:
+      "Browser enclosure-engineering workstation connecting acoustic simulation, physical geometry, Three.js visualization, warnings, charts, cut sheets, nesting, persistence, and sharing.",
+    details: [
+      "One normalized design model drives sealed, ported, passive-radiator, and release-gated bandpass calculations plus fabrication geometry.",
+      "WebGL and geometry work use independent computation fingerprints, demand rendering, a persistent canvas, and adaptive worker offload.",
+      "Its current Vitest unit/parity gate passes 5,068 cases across 422 files.",
+    ],
+    stack: ["Next.js", "TypeScript", "Three.js", "Vitest"],
+    href: "https://www.subwoofer.live/",
+    year: "2026",
+  },
+  {
     name: "Small Learning Model",
     tier: "featured",
     status: "development-only",
@@ -144,21 +159,6 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
-    name: "Speedrun",
-    tier: "featured",
-    status: "early release",
-    summary:
-      "Extended Anki's Rust engine with six GRE Math RPCs, exam-aware queue behavior, shared Svelte experiences, and early Windows and Android builds.",
-    details: [
-      "Custom layers add uncertainty-aware Memory, Performance, Readiness, calibration, and scheduling hooks while preserving inherited FSRS due dates and Anki sync.",
-      "The optional FastAPI/LangGraph generator grounds proposals with hybrid retrieval and requires SymPy verification before emission.",
-      "Offline checks reverified 50/50 gold answers, rejected 6/6 invalid specifications, and measured a 0.900 Recall@10 tie across BM25, dense, and hybrid retrieval.",
-    ],
-    stack: ["Rust", "Svelte", "Kotlin", "FastAPI", "SymPy"],
-    href: "https://github.com/spinkicks/speedrun/releases/tag/v0.1.0-early",
-    year: "2026",
-  },
-  {
     name: "GT100K",
     tier: "featured",
     status: "pre-production",
@@ -174,31 +174,15 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
-    name: "Subwoofer Central",
-    tier: "featured",
-    status: "live",
-    summary:
-      "Browser enclosure-engineering workstation connecting acoustic simulation, physical geometry, Three.js visualization, warnings, charts, cut sheets, nesting, persistence, and sharing.",
-    details: [
-      "One normalized design model drives sealed, ported, passive-radiator, and release-gated bandpass calculations plus fabrication geometry.",
-      "WebGL and geometry work use independent computation fingerprints, demand rendering, a persistent canvas, and adaptive worker offload.",
-      "Its current Vitest unit/parity gate passes 5,068 cases across 422 files.",
-    ],
-    stack: ["Next.js", "TypeScript", "Three.js", "Vitest"],
-    href: "https://www.subwoofer.live/",
-    year: "2026",
-  },
-  {
     name: "Agentic Software Factory v1",
     tier: "featured",
     status: "development-only",
     summary:
-      "Cross-project bounded Claude and Codex agentic engineering harness for repeated implementation, review, recovery, browser QA, and pull-request delivery.",
+      "Cross-project agentic software factory built around bounded Claude and Codex loop harnesses, self-QA agents, deterministic gates, recovery, browser QA, and pull-request delivery.",
     details: [
-      "Used across GT100K and Subwoofer Central for implementation, review, recovery, browser QA, and pull-request delivery.",
-      "Isolates lanes in worktrees and carries cross-turn state through files rather than hidden process memory.",
-      "Applies deterministic target gates, time and no-progress caps, stranded-run recovery, and host-side Git controls.",
-      "Uses semantic browser QA and specialized review passes before pull-request delivery; the repository remains private.",
+      "Runs repeated builder-review loops in isolated worktrees with file-backed cross-turn state, time and no-progress caps, and stranded-run recovery.",
+      "Self-QA agents combine semantic browser walks, screenshot and pixel checks, model and deterministic graders, and specialized review panels.",
+      "Used across GT100K and Subwoofer Central with host-side Git controls and pull-request delivery; the repository remains private.",
     ],
     stack: ["Python", "Bash", "Claude", "Codex"],
     year: "2026",
@@ -244,6 +228,21 @@ export const projects: Project[] = [
     stack: ["Python", "scikit-learn", "FastAPI", "Next.js"],
     href: "https://github.com/spinkicks/neurobaseline",
     year: "2025",
+  },
+  {
+    name: "Speedrun",
+    tier: "featured",
+    status: "early release",
+    summary:
+      "Extended Anki's Rust engine with six GRE Math RPCs, exam-aware queue behavior, shared Svelte experiences, and early Windows and Android builds.",
+    details: [
+      "Custom layers add uncertainty-aware Memory, Performance, Readiness, calibration, and scheduling hooks while preserving inherited FSRS due dates and Anki sync.",
+      "The optional FastAPI/LangGraph generator grounds proposals with hybrid retrieval and requires SymPy verification before emission.",
+      "Offline checks reverified 50/50 gold answers, rejected 6/6 invalid specifications, and measured a 0.900 Recall@10 tie across BM25, dense, and hybrid retrieval.",
+    ],
+    stack: ["Rust", "Svelte", "Kotlin", "FastAPI", "SymPy"],
+    href: "https://github.com/spinkicks/speedrun/releases/tag/v0.1.0-early",
+    year: "2026",
   },
   {
     name: "Virgilio Acoustics",
