@@ -20,7 +20,15 @@ import {
 } from "./hero/Chrome";
 import HeroMarquee from "./hero/HeroMarquee";
 import TypingTest from "./TypingTest";
-import { experience, facts, links, profile, projects, skills } from "../content";
+import {
+  experience,
+  facts,
+  featuredProjects,
+  links,
+  moreProjects,
+  profile,
+  skills,
+} from "../content";
 
 export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
   const [scene, setScene] = useState<BackdropId>(DEFAULT_BACKDROP);
@@ -98,7 +106,7 @@ export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
 
 function About() {
   return (
-    <Section id="about" index="01" title="About">
+    <Section id="about" title="About">
       <div className="grid gap-12 md:grid-cols-[1.35fr_1fr]">
         <p className="max-w-[60ch] text-base leading-relaxed text-dim sm:text-lg">
           {profile.bio}
@@ -121,16 +129,16 @@ function About() {
 
 function Work() {
   return (
-    <Section id="work" index="02" title="Experience">
-      <ol className="space-y-px">
-        {experience.map((job, i) => (
+    <Section id="work" title="Experience">
+      <ol className="space-y-0">
+        {experience.map((job) => (
           <li
             key={job.company}
-            className="group relative border-l border-line-soft py-8 pl-6 transition-colors duration-300 hover:border-magenta sm:pl-10"
+            className="group relative border-l border-line-soft py-7 pl-6 transition-colors duration-300 hover:border-magenta sm:pl-10"
           >
             <span
               aria-hidden="true"
-              className="absolute -left-px top-8 h-2 w-2 -translate-x-1/2 rounded-full bg-violet transition-colors duration-300 group-hover:bg-magenta"
+              className="absolute -left-px top-7 h-2 w-2 -translate-x-1/2 rounded-full bg-violet transition-colors duration-300 group-hover:bg-magenta"
             />
 
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
@@ -161,10 +169,6 @@ function Work() {
                 </span>
               ))}
             </div>
-
-            <span className="label absolute -left-16 top-8 hidden lg:block">
-              {String(i + 1).padStart(2, "0")}
-            </span>
           </li>
         ))}
       </ol>
@@ -175,95 +179,180 @@ function Work() {
 /* ------------------------------------------------------------ Projects */
 
 function Projects() {
-  const [feature, ...rest] = projects;
-
   return (
-    <Section id="projects" index="03" title="Selected Work">
-      <div className="grid gap-px bg-line-soft md:grid-cols-2">
-        <ProjectCard project={feature} featured />
-        {rest.map((project) => (
-          <ProjectCard key={project.name} project={project} />
+    <Section id="projects" title="Featured Work">
+      <ol className="grid border-y border-line-soft md:grid-cols-2">
+        {featuredProjects.map((project) => (
+          <FeaturedProjectEntry key={project.name} project={project} />
         ))}
+      </ol>
+
+      <div className="mt-16 sm:mt-20">
+        <div className="mb-6 flex items-baseline justify-between gap-6">
+          <h3 className="display text-2xl text-fg sm:text-3xl">More Projects</h3>
+          <span className="font-mono text-xs text-faint">
+            {String(moreProjects.length).padStart(2, "0")} entries
+          </span>
+        </div>
+        <ol className="grid border-y border-line-soft md:grid-cols-2">
+          {moreProjects.map((project) => (
+            <MoreProjectEntry key={project.name} project={project} />
+          ))}
+        </ol>
       </div>
     </Section>
   );
 }
 
-function ProjectCard({
+function ProjectLinks({
   project,
-  featured = false,
 }: {
-  project: (typeof projects)[number];
-  featured?: boolean;
+  project: { secondary?: { label: string; href: string } };
+}) {
+  if (!project.secondary) return null;
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <a
+        href={project.secondary.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-cyan transition-colors duration-200 hover:text-fg"
+      >
+        {project.secondary.label}
+        <ArrowUpRight size={12} aria-hidden="true" />
+      </a>
+    </div>
+  );
+}
+
+function FeaturedProjectEntry({
+  project,
+}: {
+  project: (typeof featuredProjects)[number];
 }) {
   return (
-    <article
-      className={`group relative flex flex-col bg-ink-800/60 p-6 backdrop-blur transition-colors duration-300 hover:bg-ink-700/70 sm:p-8 ${
-        featured ? "md:col-span-2" : ""
-      }`}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <h3
-          className={`display text-fg transition-colors duration-200 group-hover:text-magenta ${
-            featured ? "text-3xl sm:text-4xl" : "text-2xl"
-          }`}
-        >
-          {project.href ? (
-            <a
-              href={project.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              // Stretched link: the whole card is the hit target, but only
-              // this anchor lands in the tab order.
-              className="after:absolute after:inset-0 after:content-['']"
-            >
-              {project.name}
-            </a>
-          ) : (
-            project.name
-          )}
-        </h3>
-
-        <div className="flex shrink-0 items-center gap-3">
-          <span className="label">{project.year}</span>
-          {project.href && (
-            <ArrowUpRight
-              size={20}
-              aria-hidden="true"
-              className="text-faint transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-magenta"
-            />
-          )}
+    <li className="border-line-soft py-6 md:odd:border-r md:odd:pr-8 md:even:pl-8">
+      <article>
+        <div className="flex items-start justify-between gap-5">
+          <div>
+            <h3 className="display text-xl text-fg">
+              {project.href ? (
+                <a
+                  href={project.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 transition-colors duration-200 hover:text-magenta"
+                >
+                  {project.name}
+                  <ArrowUpRight size={14} aria-hidden="true" />
+                </a>
+              ) : (
+                project.name
+              )}
+            </h3>
+            <p className="mt-1.5 font-mono text-xs text-cyan">{project.status}</p>
+          </div>
+          <span className="font-mono text-xs text-faint">{project.year}</span>
         </div>
-      </div>
+        <p className="mt-3 text-pretty text-sm leading-relaxed text-dim">
+          {project.summary}
+        </p>
+        <ProjectLinks project={project} />
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {project.stack.map((tech) => (
+            <li key={tech} className="chip">
+              {tech}
+            </li>
+          ))}
+        </ul>
+        <ProjectDetails details={project.details} compact />
+      </article>
+    </li>
+  );
+}
 
-      <p
-        className={`mt-3 text-dim ${
-          featured ? "max-w-[58ch] text-base sm:text-lg" : "text-sm"
-        }`}
-      >
-        {project.blurb}
-      </p>
+function MoreProjectEntry({
+  project,
+}: {
+  project: (typeof moreProjects)[number];
+}) {
+  return (
+    <li className="border-line-soft py-6 md:odd:border-r md:odd:pr-8 md:even:pl-8">
+      <article>
+        <div className="flex items-start justify-between gap-5">
+          <div>
+            <h4 className="display text-xl text-fg">
+              {project.href ? (
+                <a
+                  href={project.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 transition-colors duration-200 hover:text-magenta"
+                >
+                  {project.name}
+                  <ArrowUpRight size={14} aria-hidden="true" />
+                </a>
+              ) : (
+                project.name
+              )}
+            </h4>
+            <p className="mt-1.5 font-mono text-xs text-cyan">{project.status}</p>
+          </div>
+          <span className="font-mono text-xs text-faint">{project.year}</span>
+        </div>
+        <p className="mt-3 text-pretty text-sm leading-relaxed text-dim">
+          {project.summary}
+        </p>
+        <ProjectLinks project={project} />
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {project.stack.map((tech) => (
+            <li key={tech} className="chip">
+              {tech}
+            </li>
+          ))}
+        </ul>
+        <ProjectDetails details={project.details} compact />
+      </article>
+    </li>
+  );
+}
 
-      <div className="mt-6 flex flex-wrap items-center gap-2 pt-2">
-        {project.stack.map((tech) => (
-          <span key={tech} className="chip">
-            {tech}
-          </span>
-        ))}
-      </div>
-
-      {project.secondary && (
-        <a
-          href={project.secondary.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative z-10 mt-4 inline-flex w-fit items-center gap-1 font-mono text-xs text-cyan underline-offset-4 hover:underline"
+function ProjectDetails({
+  details,
+  compact = false,
+}: {
+  details: string[];
+  compact?: boolean;
+}) {
+  return (
+    <details className={`${compact ? "mt-4" : "mt-6"} group/details`}>
+      <summary className="flex min-h-11 w-fit list-none items-center gap-2 font-mono text-xs text-faint transition-colors duration-200 hover:text-cyan [&::-webkit-details-marker]:hidden">
+        <span
+          aria-hidden="true"
+          className="text-cyan group-open/details:hidden"
         >
-          {project.secondary.label}
-          <ArrowUpRight size={12} aria-hidden="true" />
-        </a>
-      )}
-    </article>
+          +
+        </span>
+        <span
+          aria-hidden="true"
+          className="hidden text-cyan group-open/details:inline"
+        >
+          -
+        </span>
+        <span>Technical details</span>
+      </summary>
+      <ul className="max-w-[70ch] space-y-2 pb-2 pt-2">
+        {details.map((detail) => (
+          <li
+            key={detail}
+            className="relative pl-4 text-sm leading-relaxed text-dim before:absolute before:left-0 before:top-[0.65em] before:size-1 before:bg-violet"
+          >
+            {detail}
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 
@@ -271,17 +360,14 @@ function ProjectCard({
 
 function Skills() {
   return (
-    <Section id="skills" index="04" title="Toolkit">
-      <div className="grid gap-10 sm:grid-cols-3">
+    <Section id="skills" title="Toolkit">
+      <div className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
         {skills.map((category) => (
-          <div key={category.group}>
-            <h3 className="label text-cyan">{category.group}</h3>
+          <div key={category.group} className="border-t border-line-soft pt-4">
+            <h3 className="font-mono text-xs text-cyan">{category.group}</h3>
             <ul className="mt-4 flex flex-wrap gap-2">
               {category.items.map((item) => (
-                <li
-                  key={item}
-                  className="border border-line-soft px-2.5 py-1 font-mono text-xs text-dim"
-                >
+                <li key={item} className="chip">
                   {item}
                 </li>
               ))}
@@ -329,9 +415,6 @@ function Contact({ backdrop }: { backdrop: BackdropId }) {
                 className="group inline-flex min-h-11 items-center gap-2 font-mono text-sm text-dim transition-colors duration-200 hover:text-fg"
               >
                 {link.label}
-                {link.note && (
-                  <span className="text-xs text-faint">({link.note})</span>
-                )}
                 <ArrowUpRight
                   size={13}
                   aria-hidden="true"
@@ -343,7 +426,7 @@ function Contact({ backdrop }: { backdrop: BackdropId }) {
         </ul>
 
         <div className="mt-12 space-y-2 font-mono text-xs text-faint">
-                <p>© {new Date().getFullYear()} David O. · Austin, TX</p>
+          <p>© {new Date().getFullYear()} David O. · Austin, TX</p>
           {credit && (
             <p>
               Backdrop:{" "}
@@ -368,23 +451,20 @@ function Contact({ backdrop }: { backdrop: BackdropId }) {
 
 function Section({
   id,
-  index,
   title,
   children,
 }: {
   id: string;
-  index: string;
   title: string;
   children: ReactNode;
 }) {
   return (
     <Reveal>
       <section id={id} className="scroll-mt-24">
-        <div className="flex items-baseline gap-5">
-          <span className="label text-magenta">{index}</span>
-          <h2 className="display text-3xl text-fg sm:text-5xl">{title}</h2>
-        </div>
-        <div className="rule mt-5 mb-10" />
+        <h2 className="display text-balance text-3xl text-fg sm:text-5xl">
+          {title}
+        </h2>
+        <div className="rule mb-10 mt-5" />
         {children}
       </section>
     </Reveal>

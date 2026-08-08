@@ -8,11 +8,12 @@ import ShaderScene from "../scenes/ShaderScene";
 import { MATRIX_RAIN } from "../scenes/shadertoy/specs";
 import {
   experience,
+  featuredProjects,
   facts,
   heroStats,
   links,
+  moreProjects,
   profile,
-  projects,
   skills,
   status,
 } from "../../content";
@@ -278,13 +279,11 @@ function Masthead() {
         </p>
       )}
 
-      <dl className="mt-7 grid grid-cols-2 gap-px border border-line-soft bg-line-soft sm:grid-cols-4">
+      <dl className="mt-7 border border-line-soft">
         {heroStats.map((stat) => (
-          <div key={stat.label} className="bg-ink-900/90 px-3 py-3">
-            <dt className="text-[0.65rem] leading-snug text-faint">
-              {stat.label.toLowerCase()}
-            </dt>
-            <dd className="mt-1 text-base text-amber">{stat.value}</dd>
+          <div key={stat.label} className="bg-ink-900/90 px-4 py-4 text-center">
+            <dt className="text-xs leading-snug text-faint">{stat.label.toLowerCase()}</dt>
+            <dd className="mt-1.5 text-xl text-amber">{stat.value}</dd>
           </div>
         ))}
       </dl>
@@ -398,19 +397,38 @@ function Work() {
 function Projects() {
   return (
     <Section id="projects" index={3} title="projects">
-      <ol className="space-y-7">
-        {projects.map((project) => (
-          <li key={project.name} className="flex gap-4 sm:gap-6">
-            {/* Fixed gutter of tabular years: the column edge is what makes a
-                list of unrelated things scan as one set. */}
+      <div>
+        <h3 className="mb-5 text-xs text-amber">Featured Work</h3>
+        <TerminalProjectList projects={featuredProjects} />
+      </div>
+
+      <div className="mt-10">
+        <h3 className="mb-5 text-xs text-amber">More Projects</h3>
+        <TerminalProjectList projects={moreProjects} />
+      </div>
+    </Section>
+  );
+}
+
+function TerminalProjectList({
+  projects,
+}: {
+  projects: typeof featuredProjects | typeof moreProjects;
+}) {
+  return (
+    <ol className="space-y-7">
+      {projects.map((project) => (
+        <li key={project.name}>
+          <article className="flex gap-4 sm:gap-6">
             <span className="w-[4ch] shrink-0 pt-0.5 text-xs text-faint">
               {project.year}
             </span>
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h3 className="text-sm text-fg">{project.name}</h3>
-                {project.href && (
+                <h4 className="text-sm text-fg">{project.name}</h4>
+                <span className="text-xs text-amber">{project.status}</span>
+                {project.href ? (
                   <a
                     href={project.href}
                     target="_blank"
@@ -418,23 +436,32 @@ function Projects() {
                     className="inline-flex items-baseline gap-1 text-xs text-lime underline-offset-4 hover:underline"
                   >
                     open
-                    <ArrowUpRight size={11} aria-hidden="true" className="translate-y-0.5" />
+                    <ArrowUpRight
+                      size={11}
+                      aria-hidden="true"
+                      className="translate-y-0.5"
+                    />
                   </a>
-                )}
-                {project.secondary && (
+                ) : null}
+                {project.secondary ? (
                   <a
                     href={project.secondary.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-dim underline-offset-4 hover:text-fg hover:underline"
+                    className="inline-flex items-baseline gap-1 text-xs text-lime underline-offset-4 hover:underline"
                   >
                     {project.secondary.label.toLowerCase()}
+                    <ArrowUpRight
+                      size={11}
+                      aria-hidden="true"
+                      className="translate-y-0.5"
+                    />
                   </a>
-                )}
+                ) : null}
               </div>
 
-              <p className="mt-2 max-w-[64ch] text-sm leading-relaxed text-dim">
-                {project.blurb}
+              <p className="mt-2 max-w-[66ch] text-sm leading-relaxed text-dim">
+                {project.summary}
               </p>
 
               <ul className="mt-3 flex flex-wrap gap-1.5">
@@ -444,11 +471,39 @@ function Projects() {
                   </li>
                 ))}
               </ul>
+
+              <details className="group/details mt-3">
+                <summary className="flex min-h-9 w-fit list-none items-center gap-2 text-xs text-faint hover:text-lime [&::-webkit-details-marker]:hidden">
+                  <span aria-hidden="true" className="group-open/details:hidden">
+                    +
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="hidden group-open/details:inline"
+                  >
+                    -
+                  </span>
+                  <span>Technical details</span>
+                </summary>
+                <ul className="mt-1 space-y-1.5">
+                  {project.details.map((detail) => (
+                    <li
+                      key={detail}
+                      className="flex max-w-[66ch] gap-2.5 text-sm leading-relaxed text-dim"
+                    >
+                      <span aria-hidden="true" className="shrink-0 text-faint">
+                        -
+                      </span>
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+              </details>
             </div>
-          </li>
-        ))}
-      </ol>
-    </Section>
+          </article>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -500,7 +555,7 @@ function Contact() {
               rel="noopener noreferrer"
               className="shrink-0 text-dim underline-offset-4 transition-colors duration-150 hover:text-fg hover:underline"
             >
-              {link.note ? `${link.note}` : "open"}
+              open
             </a>
           </li>
         ))}

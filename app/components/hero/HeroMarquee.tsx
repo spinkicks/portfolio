@@ -47,16 +47,14 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
           {profile.tagline}
         </p>
 
-        <dl className="mx-auto mt-11 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
+        <dl className="mx-auto mt-11 max-w-sm">
           {heroStats.map((stat) => (
-            <div key={stat.label}>
+            <div key={stat.label} className="text-center">
               <dt className="sr-only">{stat.label}</dt>
-              <dd className="font-marquee text-2xl text-magenta">
+              <dd className="font-marquee text-3xl text-magenta sm:text-4xl">
                 {stat.value}
               </dd>
-              {/* Brighter than the usual .label tone: these sit further out
-                  than the scrim's strong core. */}
-              <p className="label mt-2.5 leading-snug text-dim">{stat.label}</p>
+              <p className="label mt-3 leading-snug text-dim">{stat.label}</p>
             </div>
           ))}
         </dl>

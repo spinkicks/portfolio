@@ -1,11 +1,11 @@
 export const profile = {
   name: "David O.",
-  role: "Software Engineer",
+  role: "Software Engineer · Applied AI",
   location: "Austin, TX",
   email: "fear@utexas.edu",
   tagline:
-    "I build AI/ML tooling and full-stack systems, from LLM evaluation pipelines to products serving real traffic.",
-  bio: "CS student at UT Austin minoring in Statistics & Data Science. My work sits where machine learning meets shipping software: analyzing model failures at Mercor, simulating traffic systems at the University of Houston, and building products that hold up under real users. I care about systems that stay fast as they grow.",
+    "I build evaluated AI systems, agentic developer tools, and interactive engineering software.",
+  bio: "UT Austin computer science student minoring in Statistics & Data Science. Recent work spans QLoRA model routing, deterministic verification, Rust engine extensions, and deployed TypeScript products. I care about explicit limits, measurable gates, and useful interfaces.",
 };
 
 /**
@@ -21,13 +21,8 @@ export const status = {
   label: "Open to Summer 2027 internships",
 };
 
-/** Four numbers worth leading with, before anyone scrolls. */
-export const heroStats = [
-  { value: "3", label: "Internships" },
-  { value: "5", label: "Shipped projects" },
-  { value: "200", label: "WPM · top 500" },
-  { value: "'28", label: "UT Austin BS CS" },
-];
+/** Single credential shown in the hero before anyone scrolls. */
+export const heroStats = [{ value: "'28", label: "UT Austin BS CS" }];
 
 export const navLinks = [
   { label: "About", href: "#about" },
@@ -41,7 +36,7 @@ export const facts = [
   { label: "Education", value: "UT Austin, BS Computer Science" },
   { label: "Minor", value: "Statistics & Data Science" },
   { label: "Based in", value: "Austin, TX" },
-  { label: "Focus", value: "AI/ML Engineering · Full-Stack" },
+  { label: "Focus", value: "SWE · Applied AI · ML/LLM Systems" },
   { label: "Languages", value: "English · Spanish (fluent)" },
 ];
 
@@ -56,28 +51,39 @@ export type Experience = {
 
 export const experience: Experience[] = [
   {
+    company: "Alpha School",
+    role: "AI Engineering Intern",
+    period: "Jun 2026 to Aug 2026",
+    summary:
+      "Built evaluated applied-AI and learning systems across model routing, native study tooling, deterministic learner modeling, and a public audio course.",
+    highlights: [
+      "GT100K: served as primary engineer on a two-person, synthetic, pre-production platform spanning 28 packages, 16 adapters, and 9 apps, with deterministic Beta-Bernoulli interest inference and human-controlled transitions.",
+      "Small Learning Model: fine-tuned Qwen3-1.7B with QLoRA around a calculate/defer/abstain/explain contract and an 80-function Formula Core.",
+      "Speedrun: extended Anki's Rust engine with six GRE Math RPCs and shared Svelte experiences for early Windows and Android builds.",
+      "Blazing Audio: shipped 13 lessons, 50 graded problems, 24 interaction types, Leitner review, and five authenticated OpenAI Cloud Functions.",
+      "Short-video MVP: built a React/Firebase prototype with transactional handles, a real-time scroll-snap feed, social actions, and telemetry.",
+    ],
+    stack: ["TypeScript", "Python", "Rust", "Svelte", "Firebase", "QLoRA"],
+  },
+  {
     company: "Mercor Intelligence",
-    role: "AI/ML Intern",
+    role: "AI/ML Data Contractor",
     period: "Feb 2025 to Apr 2025",
     summary:
-      "Analyzed failure modes for a frontier LLM and turned that analysis into better training data.",
+      "Created and independently verified NDA-bound mathematical-reasoning data for frontier-model training and evaluation.",
     highlights: [
-      "Engineered Python tooling to cluster model failures and surface the highest-frequency error classes.",
-      "Formatted and validated mathematical reasoning datasets in LaTeX for downstream training.",
-      "Drove a ~0.5% accuracy gain by targeting the most common failure categories.",
+      "Authored structured LaTeX solutions across discrete mathematics, geometry, and algorithms, then independently checked reasoning and final answers.",
     ],
-    stack: ["Python", "LaTeX", "Data Analysis", "LLM Evaluation"],
+    stack: ["LaTeX", "Mathematical Reasoning", "Data Verification"],
   },
   {
     company: "University of Houston",
     role: "ML Researcher & SWE Intern",
     period: "May 2023 to Aug 2023",
     summary:
-      "Built real-time traffic simulations to study flow phenomena and congestion paradoxes.",
+      "Built traffic-network simulations and experiment automation for repeatable congestion research.",
     highlights: [
-      "Modeled traffic networks in SUMO and Flow to reproduce and measure known flow paradoxes.",
-      "Wrote TraCI API scripts for programmatic simulation control and automated data collection.",
-      "Validated simulated results against real-world traffic models.",
+      "Used Python, SUMO, Flow, and TraCI to control simulations and collect evaluation data.",
     ],
     stack: ["Python", "SUMO", "Flow", "TraCI"],
   },
@@ -86,19 +92,30 @@ export const experience: Experience[] = [
     role: "Chief Operations Officer",
     period: "Aug 2022 to Jan 2024",
     summary:
-      "Scaled a 501(c)(3) from a single chapter to a multi-chapter organization while shipping its product.",
+      "Served as COO while the 501(c)(3) expanded internationally, and contributed to its software products.",
     highlights: [
-      "Grew the org to 100+ members across 10+ chapters and led the chapter leadership teams.",
-      "Orchestrated a $100k DevPost hackathon end to end.",
-      "Contributed to the Next.js frontend and the Node/Supabase/SQL backend.",
+      "During the tenure, Project: Empower grew to 60+ chapters across 10 countries.",
+      "Led a 621-participant Devpost hackathon offering $112,750 in prizes and co-developed Illuminate.",
     ],
-    stack: ["Next.js", "Node.js", "Supabase", "SQL"],
+    stack: ["Operations", "Next.js", "React", "Supabase"],
   },
 ];
 
+export type ProjectTier = "featured" | "more";
+
+export type ProjectStatus =
+  | "live"
+  | "early release"
+  | "development-only"
+  | "pre-production"
+  | "prototype";
+
 export type Project = {
   name: string;
-  blurb: string;
+  tier: ProjectTier;
+  status: ProjectStatus;
+  summary: string;
+  details: string[];
   stack: string[];
   href?: string;
   secondary?: { label: string; href: string };
@@ -107,84 +124,242 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    name: "Small Learning Model",
+    tier: "featured",
+    status: "development-only",
+    summary:
+      "Fine-tuned Qwen3-1.7B with QLoRA to route audio questions across calculate, defer, abstain, and explain, with accepted calls executed by an 80-function Formula Core.",
+    details: [
+      "A historical V7.2 tuned-model-plus-executor evaluation scored 94.4% versus 30.7% for base on 319 frozen value-and-unit items.",
+      "V7.4 reached 91.9% numeric accuracy but remained development-only after failing strict family and behavioral release gates.",
+      "As of August 2026, the public V7.4 development checkpoint had 377 model downloads and its companion dataset had 50 dataset downloads.",
+      "The pipeline includes deterministic data generation, fail-closed tool compilation, hash-pinned training, Gradio inference, and a 387-row evaluation manifest.",
+    ],
+    stack: ["Qwen3", "QLoRA", "PyTorch", "Python"],
+    href: "https://huggingface.co/audiuphile/blazing-audio-slm-v7-4-dev",
+    secondary: {
+      label: "Dataset",
+      href: "https://huggingface.co/datasets/audiuphile/blazing-audio-slm-v7-4-dataset-dev",
+    },
+    year: "2026",
+  },
+  {
+    name: "Speedrun",
+    tier: "featured",
+    status: "early release",
+    summary:
+      "Extended Anki's Rust engine with six GRE Math RPCs, exam-aware queue behavior, shared Svelte experiences, and early Windows and Android builds.",
+    details: [
+      "Custom layers add uncertainty-aware Memory, Performance, Readiness, calibration, and scheduling hooks while preserving inherited FSRS due dates and Anki sync.",
+      "The optional FastAPI/LangGraph generator grounds proposals with hybrid retrieval and requires SymPy verification before emission.",
+      "Offline checks reverified 50/50 gold answers, rejected 6/6 invalid specifications, and measured a 0.900 Recall@10 tie across BM25, dense, and hybrid retrieval.",
+    ],
+    stack: ["Rust", "Svelte", "Kotlin", "FastAPI", "SymPy"],
+    href: "https://github.com/spinkicks/speedrun/releases/tag/v0.1.0-early",
+    year: "2026",
+  },
+  {
+    name: "GT100K",
+    tier: "featured",
+    status: "pre-production",
+    summary:
+      "Primary engineer on a two-person, synthetic education platform organized as 28 packages, 16 adapters, and 9 apps behind deterministic ports.",
+    details: [
+      "Implemented Beta-Bernoulli learner-interest inference with evidence decay, normalized negative evidence, uncertainty gates, and distinct-day requirements.",
+      "Kept consequential hypothesis transitions under human authority and excluded duration and performance from interest-belief updates through a type-enforced signal firewall.",
+      "Encoded deny-by-default consent, child-safety constraints, evidence-class governance, and opt-in LLM adapters while preserving deterministic offline behavior.",
+    ],
+    stack: ["TypeScript", "React", "PostgreSQL", "PGlite"],
+    href: "https://github.com/spinkicks/gt100k",
+    year: "2026",
+  },
+  {
+    name: "Subwoofer Central",
+    tier: "featured",
+    status: "live",
+    summary:
+      "Browser enclosure-engineering workstation connecting acoustic simulation, physical geometry, Three.js visualization, warnings, charts, cut sheets, nesting, persistence, and sharing.",
+    details: [
+      "One normalized design model drives sealed, ported, passive-radiator, and release-gated bandpass calculations plus fabrication geometry.",
+      "WebGL and geometry work use independent computation fingerprints, demand rendering, a persistent canvas, and adaptive worker offload.",
+      "Its current Vitest unit/parity gate passes 5,068 cases across 422 files.",
+    ],
+    stack: ["Next.js", "TypeScript", "Three.js", "Vitest"],
+    href: "https://www.subwoofer.live/",
+    year: "2026",
+  },
+  {
+    name: "Agentic Software Factory v1",
+    tier: "featured",
+    status: "development-only",
+    summary:
+      "Cross-project bounded Claude and Codex agentic engineering harness for repeated implementation, review, recovery, browser QA, and pull-request delivery.",
+    details: [
+      "Used across GT100K and Subwoofer Central for implementation, review, recovery, browser QA, and pull-request delivery.",
+      "Isolates lanes in worktrees and carries cross-turn state through files rather than hidden process memory.",
+      "Applies deterministic target gates, time and no-progress caps, stranded-run recovery, and host-side Git controls.",
+      "Uses semantic browser QA and specialized review passes before pull-request delivery; the repository remains private.",
+    ],
+    stack: ["Python", "Bash", "Claude", "Codex"],
+    year: "2026",
+  },
+  {
+    name: "Blazing Audio",
+    tier: "featured",
+    status: "live",
+    summary:
+      "Public interactive audio course with 13 lessons, 50 graded problems, 24 interaction types, concept-level Leitner review, and real-time learning tools.",
+    details: [
+      "A typed content registry drives deterministic local grading, progress, prerequisite warm-ups, and interleaved review.",
+      "Five authenticated OpenAI Cloud Functions handle generated review, semantic judgment, tutoring, and capstone evaluation through strict schemas and private rubrics.",
+      "AI grading falls back to deterministic multiple choice when unavailable; the live product does not call the custom audio SLM.",
+    ],
+    stack: ["React", "TypeScript", "Firebase", "OpenAI"],
+    href: "https://blazing-audio-alpha.web.app/",
+    year: "2026",
+  },
+  {
+    name: "Univyrse",
+    tier: "featured",
+    status: "live",
+    summary:
+      "Co-developed Firebase and Stripe marketplace for browsing and purchasing verified college-application content.",
+    details: [
+      "Hardened purchase-gated content delivery, administration workflows, API rate limits, and deployment reliability across the Firebase and Stripe marketplace.",
+    ],
+    stack: ["Next.js", "Firebase", "Stripe"],
+    href: "https://univyrse.ai/",
+    year: "2026",
+  },
+  {
+    name: "NeuroBaseline",
+    tier: "featured",
+    status: "prototype",
+    summary:
+      "Co-developed a non-diagnostic prototype using Isolation Forest and PELT to model baseline changes in simulated typing-behavior data.",
+    details: [
+      "Combined anomaly detection and change-point analysis into a personalized Neuro Variability Index.",
+      "Won the Synovate Hackathon first-place Grand Prize among 61 participants.",
+    ],
+    stack: ["Python", "scikit-learn", "FastAPI", "Next.js"],
+    href: "https://github.com/spinkicks/neurobaseline",
+    year: "2025",
+  },
+  {
+    name: "Virgilio Acoustics",
+    tier: "more",
+    status: "live",
+    summary:
+      "Founded Virgilio Acoustics, an Austin audio installation business that has generated $3,000+ in revenue, and built its public site and administration workflow.",
+    details: [
+      "Design and install custom stereo, home-theater, and high-output audio systems for Austin clients.",
+      "Combined a Next.js and TypeScript marketing site with Vercel Analytics and a password-protected Neon and Vercel Blob administration workflow.",
+    ],
+    stack: ["Next.js", "TypeScript", "Neon", "Vercel Blob"],
+    href: "https://www.virgilio.systems/",
+    year: "2026",
+  },
+  {
+    name: "UTMAX",
+    tier: "more",
+    status: "live",
+    summary:
+      "Ongoing contributor to the team-built UT Austin schedule-planning platform, including an 18-file UI revamp.",
+    details: [
+      "The 18-file contribution tightened frontend presentation and interaction quality across the shared product.",
+    ],
+    stack: ["Frontend", "Responsive UI"],
+    href: "https://www.utmax.tech/",
+    year: "2026",
+  },
+  {
+    name: "UTMap",
+    tier: "more",
+    status: "live",
+    summary:
+      "Ongoing co-development on the team-built UT Austin campus map with a focus on mobile interaction and map readability.",
+    details: [
+      "Worked on mobile UX, label clustering, overlay handling, and shuttle styling.",
+    ],
+    stack: ["Frontend", "Geospatial UI"],
+    href: "https://www.utmap.app/",
+    year: "2026",
+  },
+  {
     name: "Illuminate",
-    blurb:
-      "Searchable database of ~400 high school extracurriculars. Built the responsive UI, wired up GA4, and tuned it to hold up under heavy traffic.",
-    stack: ["Next.js", "React", "Supabase", "Tailwind"],
+    tier: "more",
+    status: "live",
+    summary:
+      "Co-developed a searchable Next.js, React, and Supabase product spanning roughly 400 curated extracurricular opportunities.",
+    details: [
+      "Contributed responsive search and discovery flows around the shared opportunity catalog.",
+    ],
+    stack: ["Next.js", "React", "Supabase"],
     href: "https://illuminate.projectempower.io/",
     year: "2024",
   },
   {
-    name: "Tendir",
-    blurb:
-      "Fintech web app for organizing official contracts and public tenders. Won 1st Place Best Fintech Hack at Fintectual.",
-    stack: ["Vue", "TypeScript", "Node.js", "Opentender"],
-    href: "https://devpost.com/software/tender-d70yp5",
-    year: "2023",
-  },
-  {
-    name: "PintOS Kernel",
-    blurb:
-      "Kernel-level systems work in C: thread scheduling, synchronization primitives, and user-program system calls.",
-    stack: ["C", "Operating Systems"],
-    year: "2024",
-  },
-  {
-    name: "Heap Memory Allocator",
-    blurb:
-      "Custom malloc/free implementation with block splitting, coalescing, and free-list management.",
-    stack: ["C", "Memory Management"],
-    year: "2024",
-  },
-  {
-    name: "STEM Today",
-    blurb:
-      "Science communication platform that reached ~9k followers. Directed a 140+ member team making complex research readable.",
-    stack: ["HTML/CSS", "JavaScript"],
-    href: "https://sciencehowitworks.wixsite.com/my-site-1",
-    secondary: { label: "Instagram", href: "https://www.instagram.com/stemtoday/" },
-    year: "2022",
+    name: "Short-video MVP",
+    tier: "more",
+    status: "prototype",
+    summary:
+      "React and Firebase prototype with transactional unique-handle signup, a real-time scroll-snap feed, social actions, and watch telemetry.",
+    details: [
+      "Implemented the central consumption loop, optimistic likes and favorites, live comments, and append-only engagement events.",
+      "The prototype did not include uploads, personalized recommendations, Cloud Functions, or a moderation interface.",
+    ],
+    stack: ["React", "TypeScript", "Firebase"],
+    href: "https://github.com/spinkicks/short-form-video-app",
+    year: "2026",
   },
 ];
+
+export const featuredProjects = projects.filter(
+  (project) => project.tier === "featured"
+);
+
+export const moreProjects = projects.filter(
+  (project) => project.tier === "more"
+);
 
 export const skills = [
   {
     group: "Languages",
-    items: ["Python", "Java", "C", "C++", "SQL", "JavaScript", "LaTeX"],
+    items: ["Python", "TypeScript/JavaScript", "Rust", "SQL", "C/C++", "Go", "Java"],
   },
   {
-    group: "Frameworks & Libraries",
+    group: "AI and ML",
+    items: [
+      "PyTorch",
+      "Transformers",
+      "QLoRA/PEFT",
+      "Hugging Face",
+      "scikit-learn",
+      "LangGraph",
+      "OpenAI API",
+      "SymPy",
+      "NumPy/SciPy",
+    ],
+  },
+  {
+    group: "Web and Systems",
     items: [
       "React",
       "Next.js",
-      "Node.js",
-      "Tailwind CSS",
-      "MongoDB",
-      "NumPy",
-      "Matplotlib",
-      "Bootstrap",
+      "Svelte",
+      "FastAPI",
+      "Three.js",
+      "Firebase",
+      "PostgreSQL/Supabase",
     ],
   },
   {
-    group: "Tools & Platforms",
-    items: [
-      "Git",
-      "Supabase",
-      "Google Cloud VM",
-      "Cloudflare R2",
-      "Google Analytics (GA4)",
-      "Google Tag Manager",
-      "Excel",
-    ],
+    group: "Testing and Tools",
+    items: ["Vitest", "Pytest", "Playwright", "Git", "Linux/WSL", "Vercel"],
   },
 ];
 
 export const links = [
   { label: "GitHub", href: "https://github.com/spinkicks" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/calmguy/" },
-  { label: "MonkeyType", href: "https://monkeytype.com/profile/Dipslox", note: "#500 global" },
-  {
-    label: "Spotify",
-    href: "https://open.spotify.com/user/cxxo2nymwpjcgw7kz5cttbrhj?si=8a890bb5b6584942",
-  },
 ];

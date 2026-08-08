@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Monoton, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
 
 // configure sans-serif font with css variable for global use
 const geistSans = Geist({
@@ -32,17 +32,17 @@ const monoton = Monoton({
 
 // metadata for seo and social sharing (title, description, favicon, image)
 export const metadata: Metadata = {
-  title: "David's Portfolio",
-  description: "Motivated software engineer.",
+  title: "David Ordonez | Software Engineer & Applied AI",
+  description:
+    "UT Austin computer science student building evaluated AI systems, agentic developer tools, and interactive engineering software.",
   icons: {
     icon: "/hooded.svg",
   },
   openGraph: {
-    title: "David's Portfolio",
-    description: "Motivated software engineer.",
-    images: [
-
-    ],
+    title: "David Ordonez | Software Engineer & Applied AI",
+    description:
+      "Evaluated AI systems, agentic developer tools, and interactive engineering software.",
+    images: [],
   },
 };
 

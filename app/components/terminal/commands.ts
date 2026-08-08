@@ -1,4 +1,13 @@
-import { experience, links, profile, projects, skills, status } from "../../content";
+import {
+  experience,
+  featuredProjects,
+  links,
+  moreProjects,
+  profile,
+  projects,
+  skills,
+  status,
+} from "../../content";
 
 /**
  * The command set behind the prompt.
@@ -52,6 +61,12 @@ function openTargets(): { name: string; url: string }[] {
     ...projects
       .filter((p) => p.href)
       .map((p) => ({ name: p.name.toLowerCase(), url: p.href as string })),
+    ...projects
+      .filter((p) => p.secondary)
+      .map((p) => ({
+        name: `${p.name.toLowerCase()} ${p.secondary!.label.toLowerCase()}`,
+        url: p.secondary!.href,
+      })),
     { name: "email", url: `mailto:${profile.email}` },
   ];
 }
@@ -109,10 +124,26 @@ export const COMMANDS: Command[] = [
   },
   {
     name: "projects",
-    summary: "shipped work",
+    summary: "featured systems and more work",
     run: (_arg, ctx) => {
       ctx.goto("projects");
-      return projects.map((p) => kv(pad(`${p.year}  ${p.name}`, 26), p.stack.join(", ")));
+      return [
+        dim("Featured work"),
+        ...featuredProjects.map((project) =>
+          kv(
+            pad(`${project.year}  ${project.name}`, 31),
+            `${project.status} · ${project.stack.join(", ")}`
+          )
+        ),
+        dim(""),
+        dim("More projects"),
+        ...moreProjects.map((project) =>
+          kv(
+            pad(`${project.year}  ${project.name}`, 31),
+            `${project.status} · ${project.stack.join(", ")}`
+          )
+        ),
+      ];
     },
   },
   {
