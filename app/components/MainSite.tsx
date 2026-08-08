@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useRef, useState, useSyncExternalStore } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Mail, Terminal } from "lucide-react";
 import {
@@ -28,7 +28,20 @@ import {
   moreProjects,
   profile,
   skills,
+  type Experience,
 } from "../content";
+
+const DESKTOP_TABLIST_QUERY = "(min-width: 1024px)";
+
+function subscribeTablistOrientation(onStoreChange: () => void) {
+  const media = window.matchMedia(DESKTOP_TABLIST_QUERY);
+  media.addEventListener("change", onStoreChange);
+  return () => media.removeEventListener("change", onStoreChange);
+}
+
+function getTablistOrientation() {
+  return window.matchMedia(DESKTOP_TABLIST_QUERY).matches ? "vertical" : "horizontal";
+}
 
 export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
   const [scene, setScene] = useState<BackdropId>(DEFAULT_BACKDROP);
@@ -128,51 +141,131 @@ function About() {
 /* ---------------------------------------------------------------- Work */
 
 function Work() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const orientation = useSyncExternalStore(
+    subscribeTablistOrientation,
+    getTablistOrientation,
+    () => "horizontal" as const
+  );
+  const panelId = "experience-focus-panel";
+  const activeJob = experience[activeIndex];
+
+  const focusTab = (index: number) => {
+    tabRefs.current[index]?.focus();
+  };
+
+  const selectTab = (index: number, moveFocus = false) => {
+    setActiveIndex(index);
+    if (moveFocus) focusTab(index);
+  };
+
+  const handleTablistKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement | HTMLDivElement>
+  ) => {
+    const { key } = event;
+    if (key === "Enter" || key === " ") return;
+
+    let next = activeIndex;
+    const last = experience.length - 1;
+
+    if (orientation === "vertical") {
+      if (key === "ArrowDown") next = activeIndex === last ? 0 : activeIndex + 1;
+      else if (key === "ArrowUp") next = activeIndex === 0 ? last : activeIndex - 1;
+      else if (key === "Home") next = 0;
+      else if (key === "End") next = last;
+      else return;
+    } else {
+      if (key === "ArrowRight") next = activeIndex === last ? 0 : activeIndex + 1;
+      else if (key === "ArrowLeft") next = activeIndex === 0 ? last : activeIndex - 1;
+      else if (key === "Home") next = 0;
+      else if (key === "End") next = last;
+      else return;
+    }
+
+    event.preventDefault();
+    selectTab(next, true);
+  };
+
   return (
-    <Section id="work" title="Experience">
-      <ol className="space-y-0">
-        {experience.map((job) => (
-          <li
-            key={job.company}
-            className="group relative border-l border-line-soft py-7 pl-6 transition-colors duration-300 hover:border-magenta sm:pl-10"
-          >
-            <span
-              aria-hidden="true"
-              className="absolute -left-px top-7 h-2 w-2 -translate-x-1/2 rounded-full bg-violet transition-colors duration-300 group-hover:bg-magenta"
-            />
-
-            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-              <h3 className="display text-2xl text-fg sm:text-3xl">
-                {job.company}
-              </h3>
-              <span className="label">{job.period}</span>
-            </div>
-
-            <p className="mt-2 font-mono text-sm text-cyan">{job.role}</p>
-            <p className="mt-4 max-w-[62ch] text-base text-dim">{job.summary}</p>
-
-            <ul className="mt-4 max-w-[68ch] space-y-2">
-              {job.highlights.map((point) => (
-                <li
-                  key={point}
-                  className="relative pl-5 text-sm leading-relaxed text-dim before:absolute before:left-0 before:top-[0.6em] before:h-1 before:w-1 before:bg-violet"
-                >
-                  {point}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {job.stack.map((tech) => (
-                <span key={tech} className="chip">
-                  {tech}
+    <Section id="work" title="Experience" className="scroll-mt-32">
+      <div className="grid gap-6 lg:grid-cols-[12rem_1fr] lg:gap-10">
+        <div
+          role="tablist"
+          aria-label="Experience roles"
+          aria-orientation={orientation}
+          className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0"
+          onKeyDownCapture={handleTablistKeyDown}
+        >
+          {experience.map((job, index) => {
+            const selected = index === activeIndex;
+            return (
+              <button
+                key={job.company}
+                ref={(node) => {
+                  tabRefs.current[index] = node;
+                }}
+                type="button"
+                role="tab"
+                id={`experience-tab-${index}`}
+                aria-selected={selected}
+                aria-controls={panelId}
+                tabIndex={selected ? 0 : -1}
+                className="min-h-10 shrink-0 border border-line-soft px-3 py-2 text-left font-mono text-xs text-dim transition-colors duration-200 hover:border-magenta hover:text-fg aria-selected:border-magenta aria-selected:bg-magenta/10 aria-selected:text-fg lg:w-full"
+                onClick={() => selectTab(index)}
+              >
+                <span className="block text-fg">{job.company}</span>
+                <span className="mt-0.5 block text-[0.65rem] text-cyan">{job.role}</span>
+                <span className="mt-0.5 block text-[0.65rem] text-faint">
+                  {job.period}
                 </span>
-              ))}
-            </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          id={panelId}
+          role="tabpanel"
+          aria-labelledby={`experience-tab-${activeIndex}`}
+          className="border-t border-line-soft pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0"
+        >
+          <ExperiencePanel key={activeJob.company} job={activeJob} />
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function ExperiencePanel({ job }: { job: Experience }) {
+  return (
+    <article>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="display text-2xl text-fg sm:text-3xl">{job.company}</h3>
+        <span className="label">{job.period}</span>
+      </div>
+      <p className="mt-2 font-mono text-sm text-cyan">{job.role}</p>
+      <p className="mt-3 max-w-[62ch] text-base leading-relaxed text-dim">
+        {job.summary}
+      </p>
+      <ul className="mt-4 max-w-[68ch] space-y-2">
+        {job.highlights.map((point) => (
+          <li
+            key={point}
+            className="relative pl-5 text-sm leading-relaxed text-dim before:absolute before:left-0 before:top-[0.6em] before:h-1 before:w-1 before:bg-violet"
+          >
+            {point}
           </li>
         ))}
-      </ol>
-    </Section>
+      </ul>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {job.stack.map((tech) => (
+          <span key={tech} className="chip">
+            {tech}
+          </span>
+        ))}
+      </div>
+    </article>
   );
 }
 
@@ -453,14 +546,16 @@ function Section({
   id,
   title,
   children,
+  className = "scroll-mt-24",
 }: {
   id: string;
   title: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
     <Reveal>
-      <section id={id} className="scroll-mt-24">
+      <section id={id} className={className}>
         <h2 className="display text-balance text-3xl text-fg sm:text-5xl">
           {title}
         </h2>

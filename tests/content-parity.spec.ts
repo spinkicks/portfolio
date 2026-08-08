@@ -69,50 +69,170 @@ function matchingText(value: string) {
 }
 
 async function openLayout(page: Page, terminal: boolean) {
-  await page.addInitScript((showTerminal) => {
-    Math.random = () => (showTerminal ? 0.1 : 0.9);
-  }, terminal);
+  const inLayoutSwitch = terminal ? "Synthwave layout" : "Terminal view";
+  const toLayoutSwitch = terminal ? "Terminal view" : "Synthwave layout";
+
   // Turbopack can replace the first document while compiling a cold route.
   // Waiting only for the response commit avoids treating that replacement as
   // a failed navigation; the visible switch below is the real readiness gate.
   await page.goto(baseUrl, { waitUntil: "commit" });
-  await expect(
-    page.getByRole("button", {
-      name: terminal ? "Synthwave layout" : "Terminal view",
-    })
-  ).toBeVisible();
+
+  const inLayoutButton = page.getByRole("button", {
+    name: inLayoutSwitch,
+    exact: true,
+  });
+  const toLayoutButton = page.getByRole("button", {
+    name: toLayoutSwitch,
+    exact: true,
+  });
+
+  await expect(inLayoutButton.or(toLayoutButton)).toBeVisible();
+
+  if (await toLayoutButton.isVisible()) {
+    await toLayoutButton.click();
+  }
+
+  await expect(inLayoutButton).toBeVisible();
 }
 
 async function fillTerminalCommand(page: Page, command: string) {
   const input = page.getByRole("textbox", { name: "Terminal command" });
   await input.click();
-  await input.evaluate((el, text) => {
-    const propKey = Object.keys(el).find((key) => key.startsWith("__reactProps"));
-    if (!propKey) throw new Error("Terminal input is missing React props");
-    const props = (el as HTMLElement & Record<string, {
-      onChange?: (event: { target: { value: string } }) => void;
-    }>)[propKey];
-    props.onChange?.({ target: { value: text } });
-  }, command);
+  await input.fill(command);
   await expect(input).toHaveValue(command);
   return input;
 }
 
 async function submitTerminalCommand(page: Page, command: string) {
   const input = await fillTerminalCommand(page, command);
-  await input.evaluate((el) => {
-    const propKey = Object.keys(el).find((key) => key.startsWith("__reactProps"));
-    if (!propKey) throw new Error("Terminal input is missing React props");
-    const props = (el as HTMLElement & Record<string, {
-      onKeyUp?: (event: { key: string }) => void;
-    }>)[propKey];
-    props.onKeyUp?.({ key: "Enter" });
-  });
+  await input.press("Enter");
   await expect(input).toHaveValue("");
   return page.locator('[aria-live="polite"]');
 }
 
-async function expectCanonicalContent(page: Page) {
+async function expectTerminalExperienceContent(page: Page) {
+  const work = page.locator("#work");
+  for (const job of experience) {
+    const record = work
+      .getByRole("heading", { name: job.company, exact: true })
+      .locator("xpath=ancestor::li[1]");
+    for (const value of [job.role, job.period]) {
+      await expect(
+        record.getByText(exactText(value)).first(),
+        `${job.company} is missing: ${value}`
+      ).toBeVisible();
+    }
+    for (const value of [job.summary, ...job.highlights]) {
+      await expect(record, `${job.company} is missing: ${value}`).toContainText(
+        matchingText(value)
+      );
+    }
+    for (const tech of job.stack) {
+      await expect(
+        record.getByText(exactText(tech)).first(),
+        `${job.company} is missing stack item: ${tech}`
+      ).toBeVisible();
+    }
+  }
+}
+
+async function scrollSynthwaveWorkSection(page: Page) {
+  const tab0 = page.locator("#experience-tab-0");
+  await tab0.scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollBy(0, -100));
+}
+
+async function activateExperienceTab(page: Page, index: number) {
+  const tab = page.locator(`#experience-tab-${index}`);
+  await tab.scrollIntoViewIfNeeded();
+  await tab.click();
+}
+
+async function pressExperienceTabKey(page: Page, index: number, key: string) {
+  const tab = page.locator(`#experience-tab-${index}`);
+  await tab.scrollIntoViewIfNeeded();
+  await tab.focus();
+  await tab.press(key);
+}
+
+async function expectSynthwaveExperienceTabs(page: Page) {
+  const work = page.locator("#work");
+  await scrollSynthwaveWorkSection(page);
+
+  const tablist = work.getByRole("tablist", { name: /experience roles/i });
+  const tabs = tablist.getByRole("tab");
+  const panel = work.locator("#experience-focus-panel");
+
+  await expect(tabs).toHaveCount(experience.length);
+
+  await tabs.first().focus();
+
+  for (let index = 0; index < experience.length; index += 1) {
+    const tab = tabs.nth(index);
+    const job = experience[index];
+
+    await expect(tab).toContainText(job.company);
+    await expect(tab).toContainText(job.role);
+    await expect(tab).toContainText(job.period);
+    await expect(tab).toHaveAttribute("aria-controls", "experience-focus-panel");
+    await expect(tab).toHaveAttribute("id", `experience-tab-${index}`);
+
+    if (index > 0) {
+      await activateExperienceTab(page, index);
+    }
+
+    await expect(tab).toHaveAttribute("aria-selected", "true");
+    await expect(panel).toHaveAttribute(
+      "aria-labelledby",
+      `experience-tab-${index}`
+    );
+
+    await expect(
+      panel.getByRole("heading", { name: job.company, exact: true })
+    ).toBeVisible();
+    for (const value of [job.role, job.period, job.summary]) {
+      await expect(panel, `${job.company} is missing: ${value}`).toContainText(
+        matchingText(value)
+      );
+    }
+    for (const highlight of job.highlights) {
+      await expect(
+        panel,
+        `${job.company} is missing highlight: ${highlight}`
+      ).toContainText(matchingText(highlight));
+    }
+    for (const tech of job.stack) {
+      await expect(
+        panel.getByText(exactText(tech)).first(),
+        `${job.company} is missing stack item: ${tech}`
+      ).toBeVisible();
+    }
+  }
+
+  await activateExperienceTab(page, 0);
+  const orientation = await tablist.getAttribute("aria-orientation");
+  await pressExperienceTabKey(
+    page,
+    0,
+    orientation === "vertical" ? "ArrowDown" : "ArrowRight"
+  );
+  await expect(tabs.nth(1)).toBeFocused();
+  await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+  await expect(tabs.nth(1)).toHaveAttribute("tabindex", "0");
+  await expect(tabs.first()).toHaveAttribute("aria-selected", "false");
+  await expect(tabs.first()).toHaveAttribute("tabindex", "-1");
+
+  await activateExperienceTab(page, 1);
+  for (const highlight of experience[1].highlights) {
+    await expect(panel).toContainText(highlight);
+  }
+
+  await activateExperienceTab(page, 2);
+  await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
+  await expect(panel).toContainText(experience[2].company);
+}
+
+async function expectCanonicalContent(page: Page, terminal: boolean) {
   const body = (await page.locator("body").innerText()).toLowerCase();
   for (const value of Object.values(profile)) {
     expect(body, `missing profile value: ${value}`).toContain(value.toLowerCase());
@@ -139,28 +259,10 @@ async function expectCanonicalContent(page: Page) {
     ).toBeVisible();
   }
 
-  const work = page.locator("#work");
-  for (const job of experience) {
-    const record = work
-      .getByRole("heading", { name: job.company, exact: true })
-      .locator("xpath=ancestor::li[1]");
-    for (const value of [job.role, job.period]) {
-      await expect(
-        record.getByText(exactText(value)).first(),
-        `${job.company} is missing: ${value}`
-      ).toBeVisible();
-    }
-    for (const value of [job.summary, ...job.highlights]) {
-      await expect(record, `${job.company} is missing: ${value}`).toContainText(
-        matchingText(value)
-      );
-    }
-    for (const tech of job.stack) {
-      await expect(
-        record.getByText(exactText(tech)).first(),
-        `${job.company} is missing stack item: ${tech}`
-      ).toBeVisible();
-    }
+  if (terminal) {
+    await expectTerminalExperienceContent(page);
+  } else {
+    await expectSynthwaveExperienceTabs(page);
   }
 
   const projectSection = page.locator("#projects");
@@ -524,13 +626,86 @@ test("synthwave renders complete navigation and project years", async ({ page })
   }
 });
 
+test("Mercor highlights frame 0.5% as problem-set coverage, not accuracy gain", () => {
+  const mercor = experience.find((job) => job.company === "Mercor Intelligence");
+
+  expect(mercor, "missing Mercor Intelligence experience").toBeDefined();
+  const text = mercor!.highlights.join(" ");
+  expect(text).toMatch(/3,000/);
+  expect(text).toMatch(/15/);
+  expect(text).toMatch(/0\.5%/);
+  expect(text.toLowerCase()).toMatch(/share of problems corrected/);
+  expect(text.toLowerCase()).not.toMatch(/accuracy/);
+  expect(mercor!.stack).toContain("Python");
+});
+
+test("Empower highlights retain scale metrics and Illuminate delivery context", () => {
+  const empower = experience.find((job) => job.company === "Project: Empower");
+
+  expect(empower, "missing Project: Empower experience").toBeDefined();
+  const text = [...empower!.highlights, empower!.summary].join(" ");
+  expect(text).toMatch(/60\+ chapters/);
+  expect(text).toMatch(/10 countries/);
+  expect(text).toMatch(/621/);
+  expect(text).toMatch(/\$112,750/);
+  expect(text).toMatch(/1M/);
+  expect(text).toMatch(/GA4/);
+  expect(text).toMatch(/Tailwind/);
+  expect(text).toMatch(/team of five/i);
+  expect(empower!.stack).toContain("Node.js");
+  expect(empower!.stack).toContain("Tailwind CSS");
+});
+
+test("University of Houston highlights cover simulation and TraCI automation context", () => {
+  const uh = experience.find((job) => job.company === "University of Houston");
+
+  expect(uh, "missing University of Houston experience").toBeDefined();
+  const text = [...uh!.highlights, uh!.summary].join(" ");
+  expect(text).toMatch(/SUMO/i);
+  expect(text).toMatch(/TraCI/i);
+  expect(text).toMatch(/traffic-flow phenomena/i);
+  expect(text.toLowerCase()).not.toMatch(/publication/);
+  expect(text.toLowerCase()).not.toMatch(/trained model/);
+});
+
+test("terminal layout renders list-based experience content", async ({ page }) => {
+  await openLayout(page, true);
+  await expectTerminalExperienceContent(page);
+});
+
+test("synthwave Experience uses tab interface with keyboard navigation", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openLayout(page, false);
+  await expectSynthwaveExperienceTabs(page);
+});
+
+test("synthwave Experience tablist is vertical on desktop", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await openLayout(page, false);
+
+  await scrollSynthwaveWorkSection(page);
+
+  const work = page.locator("#work");
+
+  const tablist = work.getByRole("tablist", { name: /experience roles/i });
+  await expect(tablist).toHaveAttribute("aria-orientation", "vertical");
+
+  const tabs = tablist.getByRole("tab");
+  await activateExperienceTab(page, 0);
+  await pressExperienceTabKey(page, 0, "ArrowDown");
+  await expect(tabs.nth(1)).toBeFocused();
+  await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+});
+
 test("both layouts render every canonical portfolio field", async ({ page }) => {
   await openLayout(page, true);
-  await expectCanonicalContent(page);
+  await expectCanonicalContent(page, true);
 
   const synthwave = await page.context().newPage();
   await openLayout(synthwave, false);
-  await expectCanonicalContent(synthwave);
+  await expectCanonicalContent(synthwave, false);
   await synthwave.close();
 });
 

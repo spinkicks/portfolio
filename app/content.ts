@@ -72,18 +72,21 @@ export const experience: Experience[] = [
     summary:
       "Created and independently verified NDA-bound mathematical-reasoning data for frontier-model training and evaluation.",
     highlights: [
-      "Authored structured LaTeX solutions across discrete mathematics, geometry, and algorithms, then independently checked reasoning and final answers.",
+      "Used Python scripts to inspect mathematical solution failure patterns and target corrections across the set.",
+      "Authored structured LaTeX solutions across discrete mathematics, geometry, algorithms, and statistics/calculus as appropriate, with independent reasoning and final-answer verification.",
+      "Contributed verified corrections for roughly 0.5% of a 3,000-problem frontier-model mathematics set, about 15 problems, measured as share of problems corrected in the set.",
     ],
-    stack: ["LaTeX", "Mathematical Reasoning", "Data Verification"],
+    stack: ["Python", "LaTeX", "Mathematical Reasoning", "Data Verification"],
   },
   {
     company: "University of Houston",
     role: "ML Researcher & SWE Intern",
     period: "May 2023 to Aug 2023",
     summary:
-      "Built traffic-network simulations and experiment automation for repeatable congestion research.",
+      "Built traffic-network simulations and experiment automation for repeatable congestion research in a real-time embedded-systems research context.",
     highlights: [
-      "Used Python, SUMO, Flow, and TraCI to control simulations and collect evaluation data.",
+      "Ran Python, SUMO, and Flow traffic simulations to investigate traffic-flow phenomena and paradoxes in controlled network models.",
+      "Automated TraCI interactions for programmatic simulation control and data collection to compare simulation outcomes with real-world traffic scenarios and models.",
     ],
     stack: ["Python", "SUMO", "Flow", "TraCI"],
   },
@@ -95,9 +98,21 @@ export const experience: Experience[] = [
       "Served as COO while the 501(c)(3) expanded internationally, and contributed to its software products.",
     highlights: [
       "During the tenure, Project: Empower grew to 60+ chapters across 10 countries.",
-      "Led a 621-participant Devpost hackathon offering $112,750 in prizes and co-developed Illuminate.",
+      "Led a 621-participant Devpost hackathon offering $112,750 in prizes.",
+      "Collaborated with the development team across React frontend and Node/Supabase/SQL backend work.",
+      "Co-developed Illuminate with a team of five using Next.js, React, Node, and Supabase for roughly 400 curated opportunities.",
+      "User-confirmed Illuminate surpassed 1M page visits; integrated GA4 and built/styled responsive Tailwind UI.",
     ],
-    stack: ["Operations", "Next.js", "React", "Supabase"],
+    stack: [
+      "Next.js",
+      "React",
+      "Node.js",
+      "Supabase",
+      "SQL",
+      "Tailwind CSS",
+      "GA4",
+      "Operations",
+    ],
   },
 ];
 
