@@ -176,52 +176,55 @@
   pointer-events: none;
   opacity: 0.68;
   mix-blend-mode: soft-light;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.grain::before,
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: -50px;
+}
+
+.grain::before {
+  will-change: transform;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .grain::after {
-  content: "";
-  position: absolute;
-  inset: 0;
   opacity: 0.42;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.42' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .grain {
+  .grain::before {
     animation: grain-signal 0.52s steps(6) infinite;
   }
 }
 
 @keyframes grain-signal {
   0% {
-    background-position: 0 0;
-    opacity: 0.68;
+    transform: translate3d(0, 0, 0);
   }
   16.67% {
-    background-position: 41px 7px;
-    opacity: 0.66;
+    transform: translate3d(41px, 7px, 0);
   }
   33.33% {
-    background-position: -23px 38px;
-    opacity: 0.7;
+    transform: translate3d(-23px, 38px, 0);
   }
   50% {
-    background-position: 17px -31px;
-    opacity: 0.67;
+    transform: translate3d(17px, -31px, 0);
   }
   66.67% {
-    background-position: -44px 19px;
-    opacity: 0.69;
+    transform: translate3d(-44px, 19px, 0);
   }
   83.33% {
-    background-position: 29px -12px;
-    opacity: 0.65;
+    transform: translate3d(29px, -12px, 0);
   }
   100% {
-    background-position: -8px 45px;
-    opacity: 0.68;
+    transform: translate3d(-8px, 45px, 0);
   }
 }
 
@@ -592,5 +595,10 @@
      the page. It has nothing to say when it isn't moving, so drop it. */
   .crt-roll::before {
     display: none;
+  }
+  .grain::before,
+  .grain::after {
+    animation: none !important;
+    transform: translate3d(0, 0, 0);
   }
 }

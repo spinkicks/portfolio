@@ -8,9 +8,11 @@ const CRT = {
     animationName: "grain-signal",
     forbiddenAnimation: "grain-drift",
     durationSec: 0.52,
+    containerOpacity: 0.68,
     coarseOpacity: 0.42,
     baseFrequencyFine: "0.78",
     baseFrequencyCoarse: "0.42",
+    forbiddenKeyframeProps: ["background-position", "opacity"] as const,
   },
   scanlines: {
     bandAlpha: 0.055,
@@ -143,6 +145,39 @@ async function readKeyframeTransforms(page: Page, animationName: string) {
   }, animationName);
 }
 
+async function readKeyframePropertyNames(page: Page, animationName: string) {
+  return page.evaluate((name) => {
+    const props = new Set<string>();
+
+    const walkRules = (rules: CSSRuleList | CSSRule[]) => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSKeyframesRule && rule.name === name) {
+          for (const keyframe of Array.from(rule.cssRules)) {
+            if (keyframe instanceof CSSKeyframeRule) {
+              for (let i = 0; i < keyframe.style.length; i += 1) {
+                props.add(keyframe.style[i]);
+              }
+            }
+          }
+        }
+        if ("cssRules" in rule && rule.cssRules) {
+          walkRules(rule.cssRules);
+        }
+      }
+    };
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        walkRules(sheet.cssRules);
+      } catch {
+        // Cross-origin stylesheets are not readable.
+      }
+    }
+
+    return Array.from(props);
+  }, animationName);
+}
+
 function keyframeTransform(
   frames: Record<string, string>,
   key: "from" | "to" | "0%" | "100%"
@@ -194,33 +229,71 @@ test.describe("CRT final material contract", () => {
     expect(frame.pointerEvents).toBe("none");
   });
 
-  test("grain uses stepped signal noise, not legacy drift", async ({ page }) => {
+  test("grain container is fixed opacity with compositor-only pseudo turbulence", async ({
+    page,
+  }) => {
     const grain = await page.locator(".grain").evaluate((el) => {
       const style = getComputedStyle(el);
+      const before = getComputedStyle(el, "::before");
       const after = getComputedStyle(el, "::after");
       return {
         opacity: style.opacity,
         animationName: style.animationName,
-        animationTimingFunction: style.animationTimingFunction,
         animationDuration: style.animationDuration,
         backgroundImage: style.backgroundImage,
+        overflow: style.overflow,
+        fineBackgroundImage: before.backgroundImage,
+        fineAnimationName: before.animationName,
+        fineAnimationTimingFunction: before.animationTimingFunction,
+        fineAnimationDuration: before.animationDuration,
+        fineWillChange: before.willChange,
         coarseOpacity: after.opacity,
         coarseBackgroundImage: after.backgroundImage,
+        coarseAnimationName: after.animationName,
+        coarseAnimationTimingFunction: after.animationTimingFunction,
+        coarseAnimationDuration: after.animationDuration,
+        coarseMixBlendMode: after.mixBlendMode,
+        coarseWillChange: after.willChange,
       };
     });
 
-    expect(Number.parseFloat(grain.opacity)).toBeGreaterThan(0.64);
-    expect(Number.parseFloat(grain.opacity)).toBeLessThanOrEqual(0.7);
-    expect(Number.parseFloat(grain.coarseOpacity)).toBeCloseTo(CRT.grain.coarseOpacity, 2);
-    expect(grain.animationName).toContain(CRT.grain.animationName);
-    expect(grain.animationName).not.toContain(CRT.grain.forbiddenAnimation);
-    expect(grain.animationTimingFunction).toMatch(/steps/i);
-    expect(parseDurationSeconds(grain.animationDuration)).toBeCloseTo(
+    expect(Number.parseFloat(grain.opacity)).toBeCloseTo(CRT.grain.containerOpacity, 2);
+    expect(grain.animationName === "none" || grain.animationDuration === "0s").toBe(true);
+    expect(grain.backgroundImage === "none" || grain.backgroundImage === "").toBe(true);
+    expect(grain.overflow).toBe("hidden");
+
+    expect(grain.fineBackgroundImage).toContain(CRT.grain.baseFrequencyFine);
+    expect(grain.fineAnimationName).toContain(CRT.grain.animationName);
+    expect(grain.fineAnimationName).not.toContain(CRT.grain.forbiddenAnimation);
+    expect(grain.fineAnimationTimingFunction).toMatch(/steps/i);
+    expect(parseDurationSeconds(grain.fineAnimationDuration)).toBeCloseTo(
       CRT.grain.durationSec,
       2
     );
-    expect(grain.backgroundImage).toContain(CRT.grain.baseFrequencyFine);
+    expect(grain.fineWillChange).toContain("transform");
+
+    expect(Number.parseFloat(grain.coarseOpacity)).toBeCloseTo(CRT.grain.coarseOpacity, 2);
     expect(grain.coarseBackgroundImage).toContain(CRT.grain.baseFrequencyCoarse);
+    expect(grain.coarseAnimationName === "none" || grain.coarseAnimationDuration === "0s").toBe(
+      true
+    );
+    expect(grain.coarseMixBlendMode).toBe("overlay");
+    expect(grain.coarseWillChange === "auto" || grain.coarseWillChange === "").toBe(true);
+  });
+
+  test("grain keyframes animate transform only", async ({ page }) => {
+    const props = await readKeyframePropertyNames(page, CRT.grain.animationName);
+    expect(props.length).toBeGreaterThan(0);
+    for (const prop of props) {
+      expect(prop).toBe("transform");
+    }
+    for (const forbidden of CRT.grain.forbiddenKeyframeProps) {
+      expect(props).not.toContain(forbidden);
+    }
+
+    const keyframes = await readKeyframeTransforms(page, CRT.grain.animationName);
+    expect(keyframeTransform(keyframes, "0%")).toMatch(/translate3d/i);
+    expect(keyframeTransform(keyframes, "100%")).toMatch(/translate3d/i);
   });
 
   test("scanlines use fine pitch with uniform ink grade and no coarse bands", async ({
@@ -350,17 +423,30 @@ test.describe("CRT reduced motion", () => {
     expect(roll.display).toBe("none");
   });
 
-  test("stops grain animation", async ({ page }) => {
+  test("stops grain pseudo-layer animation without a parked offset", async ({ page }) => {
     const grain = await page.locator(".grain").evaluate((el) => {
-      const style = getComputedStyle(el);
+      const before = getComputedStyle(el, "::before");
+      const after = getComputedStyle(el, "::after");
       return {
-        animationDuration: style.animationDuration,
-        animationIterationCount: style.animationIterationCount,
+        beforeAnimationDuration: before.animationDuration,
+        beforeAnimationIterationCount: before.animationIterationCount,
+        beforeTransform: before.transform,
+        afterAnimationDuration: after.animationDuration,
+        afterAnimationIterationCount: after.animationIterationCount,
+        afterTransform: after.transform,
       };
     });
 
-    expect(parseDurationSeconds(grain.animationDuration)).toBeLessThanOrEqual(0.02);
-    expect(grain.animationIterationCount).toBe("1");
+    expect(parseDurationSeconds(grain.beforeAnimationDuration)).toBeLessThanOrEqual(0.02);
+    expect(grain.beforeAnimationIterationCount).toBe("1");
+    expect(parseDurationSeconds(grain.afterAnimationDuration)).toBeLessThanOrEqual(0.02);
+    expect(grain.afterAnimationIterationCount).toBe("1");
+    expect(grain.beforeTransform === "none" || grain.beforeTransform.includes("matrix(1, 0, 0, 1, 0, 0)")).toBe(
+      true
+    );
+    expect(grain.afterTransform === "none" || grain.afterTransform.includes("matrix(1, 0, 0, 1, 0, 0)")).toBe(
+      true
+    );
   });
 });
 

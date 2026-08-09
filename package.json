@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:parity": "playwright test tests/content-parity.spec.ts --workers=1"
+    "test:parity": "playwright test tests/content-parity.spec.ts --workers=1",
+    "benchmark:animation-lag": "playwright test tests/animation-lag-benchmark.spec.ts --workers=1"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",

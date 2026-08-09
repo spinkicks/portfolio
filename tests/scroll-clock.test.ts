@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
 import {
+  DRIVE_RENDER_INTERVAL_END_VH,
+  DRIVE_RENDER_INTERVAL_START_VH,
+  DRIVE_RENDER_MAX_INTERVAL_MS,
   DRIVE_SLOWDOWN_VH,
   DRIVE_TIME_MIN_SCALE,
+  driveRenderIntervalMs,
   driveTimeScale,
   shouldPauseShaderAtDeepScroll,
 } from "../app/components/scenes/shadertoy/scrollClock";
@@ -68,4 +72,36 @@ test("deep pause only applies after the cutoff viewport span", () => {
     false
   );
   expect(shouldPauseShaderAtDeepScroll("synthwave-theme", deep, VH)).toBe(true);
+});
+
+test("driveRenderIntervalMs is zero at and below 1.6 viewport heights", () => {
+  expect(driveRenderIntervalMs(0, VH)).toBe(0);
+  expect(driveRenderIntervalMs(VH * DRIVE_RENDER_INTERVAL_START_VH, VH)).toBe(0);
+  expect(driveRenderIntervalMs(VH * 1.2, VH)).toBe(0);
+});
+
+test("driveRenderIntervalMs eases monotonically to the 72fps cap by 4 viewport heights", () => {
+  const mid = VH * 2.8;
+  const end = VH * DRIVE_RENDER_INTERVAL_END_VH;
+  const beyond = VH * 8;
+
+  expect(driveRenderIntervalMs(mid, VH)).toBeGreaterThan(0);
+  expect(driveRenderIntervalMs(mid, VH)).toBeLessThan(DRIVE_RENDER_MAX_INTERVAL_MS);
+  expect(driveRenderIntervalMs(end, VH)).toBeCloseTo(DRIVE_RENDER_MAX_INTERVAL_MS, 5);
+  expect(driveRenderIntervalMs(beyond, VH)).toBeCloseTo(DRIVE_RENDER_MAX_INTERVAL_MS, 5);
+
+  const samples = [VH * 1.6, VH * 2, VH * 3, VH * 4, VH * 10].map((scrollY) =>
+    driveRenderIntervalMs(scrollY, VH)
+  );
+  for (let i = 1; i < samples.length; i += 1) {
+    expect(samples[i]).toBeGreaterThanOrEqual(samples[i - 1] - 1e-9);
+  }
+});
+
+test("driveRenderIntervalMs stays finite with invalid viewport heights", () => {
+  expect(() => driveRenderIntervalMs(1200, 0)).not.toThrow();
+  expect(() => driveRenderIntervalMs(1200, -50)).not.toThrow();
+  expect(Number.isFinite(driveRenderIntervalMs(1200, 0))).toBe(true);
+  expect(Number.isFinite(driveRenderIntervalMs(1200, -50))).toBe(true);
+  expect(driveRenderIntervalMs(1200, 0)).toBeGreaterThanOrEqual(0);
 });

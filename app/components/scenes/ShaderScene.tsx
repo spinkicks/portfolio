@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ShaderToyRuntime, type ShaderSpec } from "./shadertoy/runtime";
 import {
+  driveRenderIntervalMs,
   driveTimeScale,
   shouldPauseShaderAtDeepScroll,
 } from "./shadertoy/scrollClock";
@@ -68,6 +69,7 @@ export default function ShaderScene({
     let realTime = 0;
     let driveTime = 0;
     let lastFrame = 0;
+    let lastRender = 0;
     const isDrive = spec.name === "sunset-drive";
 
     const remeasure = () => {
@@ -125,7 +127,16 @@ export default function ShaderScene({
         driveTime = realTime;
       }
 
+      const renderIntervalMs = isDrive
+        ? driveRenderIntervalMs(currentScrollY, vh)
+        : 0;
+      const elapsedSinceRender = lastRender === 0 ? renderIntervalMs : now - lastRender;
+      if (renderIntervalMs > 0 && elapsedSinceRender < renderIntervalMs) {
+        return;
+      }
+
       runtime.frame(realTime, driveTime);
+      lastRender = now;
       settled++;
       if (settled === 1) setRunning(true);
       if (TRACK_SHADER_FRAMES && settled % 30 === 0) {
