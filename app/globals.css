@@ -164,67 +164,99 @@
 }
 
 /* ============================================================
-   Film grain
-   One static turbulence tile over the whole viewport. It sands off the
-   banding in the artwork's big gradients and stops the flat UI panels from
-   reading as plastic. Kept in soft-light so it darkens and lightens rather
-   than just greying everything down.
+   CRT overlays
+   Composite tube treatment: B-style stepped grain and fine
+   scanlines, A-like ink grade and vignette contrast, and a
+   slower bottom-to-top refresh glow. Terminal layout omits these.
    ============================================================ */
 .grain {
   position: fixed;
   inset: 0;
   z-index: 45;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.68;
   mix-blend-mode: soft-light;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Second, coarser pass in overlay. Soft-light alone flattens out as you push
-   it; layering a chunkier tile on top keeps the texture reading as film stock
-   rather than a uniform dither. */
 .grain::after {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.5;
+  opacity: 0.42;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.42' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* Nudge the tile so the grain reads as film rather than a fixed screen
-     texture. Slow enough that it never draws attention to itself. */
   .grain {
-    animation: grain-drift 8s steps(6) infinite;
+    animation: grain-signal 0.52s steps(6) infinite;
   }
 }
 
-@keyframes grain-drift {
+@keyframes grain-signal {
   0% {
     background-position: 0 0;
+    opacity: 0.68;
+  }
+  16.67% {
+    background-position: 41px 7px;
+    opacity: 0.66;
+  }
+  33.33% {
+    background-position: -23px 38px;
+    opacity: 0.7;
+  }
+  50% {
+    background-position: 17px -31px;
+    opacity: 0.67;
+  }
+  66.67% {
+    background-position: -44px 19px;
+    opacity: 0.69;
+  }
+  83.33% {
+    background-position: 29px -12px;
+    opacity: 0.65;
   }
   100% {
-    background-position: 220px 220px;
+    background-position: -8px 45px;
+    opacity: 0.68;
   }
 }
 
-/* Sits above the copy, below the grain. A 3px period: over text, a tighter
-   pitch stops reading as a tube and starts reading as a rendering fault. */
 .scanlines {
   position: fixed;
   inset: 0;
   z-index: 43;
   pointer-events: none;
-  background: repeating-linear-gradient(
+  background-color: rgba(4, 2, 12, 0.035);
+  background-image: repeating-linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0) 0 2px,
-    rgba(0, 0, 0, 0.16) 2px 3px
+    rgba(0, 0, 0, 0) 0 1px,
+    rgba(0, 0, 0, 0.055) 1px 2px
   );
 }
 
-/* Corner falloff, so the page reads as a lit surface rather than a flat fill.
-   Separate element from the lines because it must not repeat with them. */
+.scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.1;
+  mix-blend-mode: soft-light;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 96, 96, 0.42) 0,
+    rgba(255, 96, 96, 0.42) 33.34%,
+    rgba(96, 255, 96, 0.42) 33.34%,
+    rgba(96, 255, 96, 0.42) 66.67%,
+    rgba(96, 96, 255, 0.42) 66.67%,
+    rgba(96, 96, 255, 0.42) 100%
+  );
+  background-size: 3px 100%;
+}
+
 .scanlines::after {
   content: "";
   position: absolute;
@@ -236,18 +268,6 @@
   );
 }
 
-/* ============================================================
-   CRT roll bar
-   ------------------------------------------------------------
-   The bright band that crawls down a CRT when a camera's shutter
-   and the tube's refresh don't agree.
-
-   It is one element rather than a band plus a separate edge line,
-   because both halves have to travel locked together and a single
-   gradient can carry the long soft ramp and the hard leading edge
-   at once. Screen blending means it only ever adds light, so it
-   passes over the copy without eating it.
-   ============================================================ */
 .crt-roll {
   position: fixed;
   inset: 0;
@@ -262,36 +282,28 @@
   left: 0;
   right: 0;
   top: 0;
-  /* Fixed height, not a viewport fraction. The band is a property of the tube,
-     not of the window. Sized in vh it grows into a wash on a tall screen. */
-  height: 150px;
+  height: 10vh;
   mix-blend-mode: screen;
   will-change: transform;
-  animation: crt-roll 14s linear infinite;
-  /* Peak alpha is a little above the 0.02 to 0.04 the usual CSS CRT overlays use,
-     because those sit on a flat terminal background and this one has to carry
-     over artwork. Most of the band is a faint trailing haze with the light
-     gathered into the last few percent, which is what reads as an edge. */
+  animation: crt-roll 8s linear infinite;
   background: linear-gradient(
     to bottom,
     rgba(150, 235, 255, 0) 0%,
-    rgba(150, 235, 255, 0.004) 55%,
-    rgba(190, 245, 255, 0.011) 80%,
-    rgba(235, 250, 255, 0.026) 93%,
-    rgba(255, 255, 255, 0.058) 98%,
-    rgba(255, 255, 255, 0.075) 99.4%,
-    rgba(120, 215, 255, 0.014) 100%
+    rgba(190, 245, 255, 0.004) 32%,
+    rgba(235, 250, 255, 0.012) 42%,
+    rgba(255, 255, 255, 0.025) 50%,
+    rgba(235, 250, 255, 0.012) 58%,
+    rgba(190, 245, 255, 0.004) 68%,
+    rgba(150, 235, 255, 0) 100%
   );
 }
 
-/* Travel starts fully above the fold and ends fully below it, so the band is
-   never clipped mid-sweep at either end. */
 @keyframes crt-roll {
   from {
-    transform: translate3d(0, -150px, 0);
+    transform: translate3d(0, 100vh, 0);
   }
   to {
-    transform: translate3d(0, 100vh, 0);
+    transform: translate3d(0, -10vh, 0);
   }
 }
 

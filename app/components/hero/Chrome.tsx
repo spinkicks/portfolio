@@ -1,33 +1,46 @@
 "use client";
 
+import { motion, useTransform } from "framer-motion";
 import { Github, Linkedin, Mail } from "lucide-react";
 import { heroStats, navLinks, profile, status } from "../../content";
+import { useSceneScroll } from "../scenes/useSceneScroll";
 
 /**
- * Page furniture shared by the hero prototypes: grain, the poster frame, the
- * social rail and the section nav. Kept apart from the hero bodies so the
- * three variants differ only in typography and composition.
+ * Page furniture shared by the hero prototypes: CRT signal noise, the poster
+ * frame, the social rail and the section nav. Kept apart from the hero bodies
+ * so the three variants differ only in typography and composition.
  */
 
+/**
+ * Stepped signal grain over the viewport. Turbulence tiles jump in discrete
+ * steps rather than drifting diagonally, which reads as tube noise rather
+ * than film stock.
+ */
 export function Grain() {
   return <div aria-hidden="true" className="grain" />;
 }
 
 /**
- * Line structure over the whole page, not just the artwork.
+ * Fine scanlines, a subtle ink grade, RGB aperture grille, and corner vignette.
  *
- * The backdrop gets its tube treatment in the shader, but that stops at the
- * canvas. Without this the copy on top would read as sitting in front of a
- * screen rather than on one. Kept far lighter than the shader's own lines,
- * since text is much less forgiving of them than a photograph is.
+ * The backdrop shader stops at the canvas edge; this stack carries the tube
+ * read onto typography. Fine 2px lines plus a uniform grade keep A's richer
+ * contrast without restoring its coarse horizontal bands.
  */
 export function Scanlines() {
   return <div aria-hidden="true" className="scanlines" />;
 }
 
-/** The bright band crawling down the tube. Pairs with Scanlines. */
+/** Broad bottom-to-top refresh glow. Pairs with Scanlines. */
 export function CrtRoll() {
-  return <div aria-hidden="true" className="crt-roll" />;
+  const { scrollY, vh } = useSceneScroll();
+  const opacity = useTransform(
+    scrollY,
+    [0, vh * 0.84, vh * 1.39, vh * 10],
+    [1, 1, 0.19, 0.19]
+  );
+
+  return <motion.div aria-hidden="true" className="crt-roll" style={{ opacity }} />;
 }
 
 export function FrameEdge() {
