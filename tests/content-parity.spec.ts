@@ -672,6 +672,19 @@ test("experience uses the Alpha AI organization name", () => {
   expect(experience.some((job) => job.company === "Alpha AI")).toBe(true);
 });
 
+test("project summaries include verified user adoption metrics", () => {
+  const subwoofer = richProjects.find((project) => project.name === "Subwoofer Central");
+  const utmax = richProjects.find((project) => project.name === "UTMAX");
+  const utmap = richProjects.find((project) => project.name === "UTMap");
+
+  expect(subwoofer?.summary).toMatch(/1,000\+ users/i);
+  expect(subwoofer?.summary).toMatch(/growing/i);
+  expect(utmax?.summary).toMatch(/200\+ UT Austin students/i);
+  expect(utmap?.summary).toMatch(/200\+ UT Austin students/i);
+  expect(utmax?.summary).toMatch(/before the 2026-27 school year began/i);
+  expect(utmap?.summary).toMatch(/before the 2026-27 school year began/i);
+});
+
 test("terminal layout renders list-based experience content", async ({ page }) => {
   await openLayout(page, true);
   await expectTerminalExperienceContent(page);

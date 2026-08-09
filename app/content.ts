@@ -143,7 +143,7 @@ export const projects: Project[] = [
     tier: "featured",
     status: "live",
     summary:
-      "Browser enclosure-engineering workstation connecting acoustic simulation, physical geometry, Three.js visualization, warnings, charts, cut sheets, nesting, persistence, and sharing.",
+      "Live browser enclosure-engineering workstation used by 1,000+ users and growing, connecting acoustic simulation, physical geometry, Three.js visualization, warnings, charts, cut sheets, nesting, persistence, and sharing.",
     details: [
       "One normalized design model drives sealed, ported, passive-radiator, and release-gated bandpass calculations plus fabrication geometry.",
       "WebGL and geometry work use independent computation fingerprints, demand rendering, a persistent canvas, and adaptive worker offload.",
@@ -278,7 +278,7 @@ export const projects: Project[] = [
     tier: "more",
     status: "live",
     summary:
-      "Ongoing contributor to the team-built UT Austin schedule-planning platform, including an 18-file UI revamp.",
+      "Ongoing contributor to the team-built UT Austin schedule-planning platform, used by 200+ UT Austin students before the 2026-27 school year began, including an 18-file UI revamp.",
     details: [
       "The 18-file contribution tightened frontend presentation and interaction quality across the shared product.",
     ],
@@ -291,7 +291,7 @@ export const projects: Project[] = [
     tier: "more",
     status: "live",
     summary:
-      "Ongoing co-development on the team-built UT Austin campus map with a focus on mobile interaction and map readability.",
+      "Ongoing co-development on the team-built UT Austin campus map, used by 200+ UT Austin students before the 2026-27 school year began, with a focus on mobile interaction and map readability.",
     details: [
       "Worked on mobile UX, label clustering, overlay handling, and shuttle styling.",
     ],
