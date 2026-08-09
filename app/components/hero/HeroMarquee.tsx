@@ -10,7 +10,7 @@ import { HeroActions, SocialRail, StatusTag } from "./Chrome";
  */
 export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
   return (
-    <section className="relative flex min-h-svh flex-col items-center justify-center px-6 pb-24 pt-32 text-center sm:px-10">
+    <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-24 sm:pt-32">
       {/* Centred copy lands on the brightest part of the artwork, where the
           scene's left-weighted scrim does nothing for it.
 
@@ -30,44 +30,44 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
       <div className="relative mx-auto w-full max-w-4xl">
         <StatusTag />
 
-        <h1 className="font-marquee type-tube mt-9 text-[clamp(2.4rem,9vw,6.5rem)]">
+        <h1 className="font-marquee type-tube mt-5 text-[clamp(2.4rem,9vw,6.5rem)] sm:mt-9">
           David O.
         </h1>
 
         <div
           aria-hidden="true"
-          className="mx-auto mt-8 h-px w-40 bg-gradient-to-r from-transparent via-magenta to-transparent"
+          className="mx-auto mt-4 h-px w-40 bg-gradient-to-r from-transparent via-magenta to-transparent sm:mt-8"
         />
 
-        <p className="label mt-8 text-cyan">
+        <p className="label mt-4 text-cyan sm:mt-8">
           {profile.role} · {profile.location}
         </p>
 
-        <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-dim">
+        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-dim sm:mt-5 sm:text-lg">
           {profile.tagline}
         </p>
 
-        <dl className="mx-auto mt-11 max-w-sm">
+        <dl className="mx-auto mt-6 max-w-sm sm:mt-11">
           {heroStats.map((stat) => (
             <div key={stat.label} className="text-center">
               <dt className="sr-only">{stat.label}</dt>
-              <dd className="font-marquee text-3xl text-magenta sm:text-4xl">
+              <dd className="font-marquee text-2xl text-magenta sm:text-4xl">
                 {stat.value}
               </dd>
-              <p className="label mt-3 leading-snug text-dim">{stat.label}</p>
+              <p className="label mt-2 leading-snug text-dim sm:mt-3">{stat.label}</p>
             </div>
           ))}
         </dl>
 
-        <HeroActions className="mt-11 justify-center" />
-        <SocialRail className="mt-10 justify-center lg:hidden" />
+        <HeroActions className="mt-6 justify-center sm:mt-11" />
+        <SocialRail className="mt-5 justify-center sm:mt-10 lg:hidden" />
       </div>
 
       {/* Pinned to the foot of the hero rather than placed after the copy: in
           flow it would sit halfway up a tall screen, since the copy above it is
           vertically centred. */}
       {switcher && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center px-6">
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(0.875rem+env(safe-area-inset-bottom,0px))] flex justify-center px-6 sm:bottom-7">
           {switcher}
         </div>
       )}

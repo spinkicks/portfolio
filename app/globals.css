@@ -363,6 +363,27 @@
 }
 
 /* ============================================================
+   Hero marquee
+   Short mobile viewports top-align so the stack stays inside the frame;
+   tall mobile and desktop center the compact hero block.
+   ============================================================ */
+.hero-marquee {
+  justify-content: flex-start;
+}
+
+@media (max-width: 639px) and (min-height: 780px) {
+  .hero-marquee {
+    justify-content: center;
+  }
+}
+
+@media (min-width: 640px) {
+  .hero-marquee {
+    justify-content: center;
+  }
+}
+
+/* ============================================================
    Framed edge
    Inset hairline that turns the page into a poster. Gradient border via the
    two-layer mask trick, since border-image can't do rounded corners.
