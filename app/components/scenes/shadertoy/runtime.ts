@@ -66,6 +66,7 @@ precision highp sampler2D;
 
 uniform vec3      iResolution;
 uniform float     iTime;
+uniform float     iDriveTime;
 uniform float     iTimeDelta;
 uniform float     iFrameRate;
 uniform int       iFrame;
@@ -487,8 +488,8 @@ export class ShaderToyRuntime {
     return pass.uniforms.get(name) ?? null;
   }
 
-  /** `time` in seconds. Returns false once the runtime is unusable. */
-  frame(time: number): boolean {
+  /** `time` in seconds; `driveTime` defaults to `time` for non-drive callers. */
+  frame(time: number, driveTime = time): boolean {
     if (this.dead || this.width === 0) return !this.dead;
     const gl = this.gl;
 
@@ -549,6 +550,7 @@ export class ShaderToyRuntime {
 
       gl.uniform3f(this.uniform(pass, "iResolution"), w, h, 1);
       gl.uniform1f(this.uniform(pass, "iTime"), time);
+      gl.uniform1f(this.uniform(pass, "iDriveTime"), driveTime);
       gl.uniform1f(this.uniform(pass, "iTimeDelta"), delta);
       gl.uniform1f(this.uniform(pass, "iFrameRate"), 1 / Math.max(delta, 1e-4));
       gl.uniform1i(this.uniform(pass, "iFrame"), this.frameIndex);

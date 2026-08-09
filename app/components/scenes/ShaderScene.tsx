@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ShaderToyRuntime, type ShaderSpec } from "./shadertoy/runtime";
+import {
+  driveTimeScale,
+  shouldPauseShaderAtDeepScroll,
+} from "./shadertoy/scrollClock";
 import { useSceneScroll } from "./useSceneScroll";
 
 /**
@@ -21,6 +25,9 @@ const MAX_WIDTH = 1920;
 
 /** Frames to settle before freezing, when the visitor asked for no motion. */
 const SETTLE_FRAMES = 45;
+
+/** Dev/test hook for Playwright liveness checks; stripped from production bundles. */
+const TRACK_SHADER_FRAMES = process.env.NODE_ENV !== "production";
 
 export default function ShaderScene({
   spec,
@@ -58,7 +65,10 @@ export default function ShaderScene({
     let disposed = false;
     let needsResize = true;
     let settled = 0;
-    const started = performance.now();
+    let realTime = 0;
+    let driveTime = 0;
+    let lastFrame = 0;
+    const isDrive = spec.name === "sunset-drive";
 
     const remeasure = () => {
       needsResize = true;
@@ -91,18 +101,36 @@ export default function ShaderScene({
         applySize();
       }
 
-      // Nothing below the hero needs the scene still burning GPU. Two
-      // viewports down it is entirely behind the content scrim.
-      if (scrollY.get() > window.innerHeight * 1.6 && settled > SETTLE_FRAMES) {
+      const delta =
+        lastFrame === 0 ? 1 / 60 : Math.min(0.1, (now - lastFrame) / 1000);
+      lastFrame = now;
+
+      const currentScrollY = scrollY.get();
+      const vh = window.innerHeight;
+      const { animate } = live.current;
+
+      if (!animate && settled > SETTLE_FRAMES) return;
+
+      if (
+        shouldPauseShaderAtDeepScroll(spec.name, currentScrollY, vh) &&
+        settled > SETTLE_FRAMES
+      ) {
         return;
       }
 
-      const { animate } = live.current;
-      if (!animate && settled > SETTLE_FRAMES) return;
+      realTime += delta;
+      if (isDrive) {
+        driveTime += delta * driveTimeScale(currentScrollY, vh);
+      } else {
+        driveTime = realTime;
+      }
 
-      runtime.frame((now - started) / 1000);
+      runtime.frame(realTime, driveTime);
       settled++;
       if (settled === 1) setRunning(true);
+      if (TRACK_SHADER_FRAMES && settled % 30 === 0) {
+        canvas.setAttribute("data-shader-frames", String(settled));
+      }
     };
 
     const onContextLost = () => {

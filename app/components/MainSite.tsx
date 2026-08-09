@@ -85,11 +85,12 @@ export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
             page. The fade would still be arriving somewhere around the
             projects list, leaving the first section stranded over the sun. A
             linear-gradient holds its final stop, so past 55vh this is a flat
-            wash all the way down. */}
+            wash all the way down. At 81% ink opacity about 19% of the backdrop
+            remains visible through the scrim. */}
         <div className="relative">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 -top-[16vh] bottom-0 bg-[linear-gradient(to_bottom,transparent_0,color-mix(in_srgb,var(--color-ink)_94%,transparent)_55vh)]"
+            className="pointer-events-none absolute inset-x-0 -top-[16vh] bottom-0 bg-[linear-gradient(to_bottom,transparent_0,color-mix(in_srgb,var(--color-ink)_81%,transparent)_55vh)]"
           />
 
           <div className="relative mx-auto w-full max-w-5xl space-y-24 px-6 pb-24 pt-24 sm:space-y-32 sm:pb-32">

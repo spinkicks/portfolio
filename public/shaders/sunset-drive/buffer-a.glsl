@@ -30,14 +30,9 @@ AppState updateGame( AppState s, float isDemo )
 {
     if ( isDemo > 0.0 )
     {
-        // Read the clock rather than integrate it. The demo multiplier is
-        // exactly 1.0, so the running total is just elapsed time and can be
-        // taken directly, which keeps the odometer out of the feedback
-        // buffer. Accumulating means every frame's delta has to survive a
-        // round trip through the state texture, and on any format short of
-        // full float the deltas eventually fall under one representable step
-        // and the total sticks, freezing the car mid-road.
-        s.timeAccumulated = max( 0.0, iTime - s.timeStarted );
+        // Host-controlled scroll clock: iDriveTime is the accumulated drive
+        // time (scroll-slowed on the page), not integrated here.
+        s.timeAccumulated = max( 0.0, iDriveTime );
     	s.playerPos.y = 5.0 * s.timeAccumulated;
     }
     else
