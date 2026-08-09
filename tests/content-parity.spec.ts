@@ -668,6 +668,10 @@ test("University of Houston highlights cover simulation and TraCI automation con
   expect(text.toLowerCase()).not.toMatch(/trained model/);
 });
 
+test("experience uses the Alpha AI organization name", () => {
+  expect(experience.some((job) => job.company === "Alpha AI")).toBe(true);
+});
+
 test("terminal layout renders list-based experience content", async ({ page }) => {
   await openLayout(page, true);
   await expectTerminalExperienceContent(page);

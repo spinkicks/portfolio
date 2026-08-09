@@ -45,7 +45,7 @@ The metric labels must preserve their qualifiers. The 5,068 count refers to Subw
 
 Render these roles in order:
 
-1. Alpha School, AI Engineering Intern, Jun to Aug 2026
+1. Alpha AI, AI Engineering Intern, Jun to Aug 2026
 2. Mercor Intelligence, AI/ML Data Contractor, Feb to Apr 2025
 3. University of Houston, ML Researcher and SWE Intern, May to Aug 2023
 4. Project: Empower, COO, Aug 2022 to Jan 2024
