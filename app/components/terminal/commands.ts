@@ -20,7 +20,6 @@ import {
 export type Line =
   | { kind: "out"; text: string }
   | { kind: "dim"; text: string }
-  | { kind: "accent"; text: string }
   | { kind: "error"; text: string }
   | { kind: "kv"; key: string; text: string };
 
@@ -29,12 +28,18 @@ export const dim = (text: string): Line => ({ kind: "dim", text });
 export const bad = (text: string): Line => ({ kind: "error", text });
 export const kv = (key: string, text: string): Line => ({ kind: "kv", key, text });
 
-export type Ctx = {
+/** Callbacks the console host must supply; `clear` is owned by Console itself. */
+export type ConsoleCtx = {
   /** Scrolls the reading pane to a section and marks it current. */
   goto: (id: string) => void;
-  clear: () => void;
   toSynthwave: () => void;
   open: (url: string) => void;
+};
+
+export type Ctx = ConsoleCtx & {
+  clear: () => void;
+  /** Cancels an in-flight `ask` when the console unmounts. */
+  signal?: AbortSignal;
 };
 
 export type Command = {
@@ -42,7 +47,7 @@ export type Command = {
   arg?: string;
   summary: string;
   /** Candidate second words, for Tab completion. */
-  completions?: () => string[];
+  completions?: () => readonly string[];
   run: (arg: string, ctx: Ctx) => Line[] | Promise<Line[]>;
 };
 
@@ -54,24 +59,34 @@ export const SECTIONS = [
   { id: "contact", label: "contact", note: "how to reach me" },
 ];
 
-/** Everything `open` will accept, resolved case-insensitively. */
-function openTargets(): { name: string; url: string }[] {
-  return [
-    ...links.map((l) => ({ name: l.label.toLowerCase(), url: l.href })),
-    ...projects
-      .filter((p) => p.href)
-      .map((p) => ({ name: p.name.toLowerCase(), url: p.href as string })),
-    ...projects
-      .filter((p) => p.secondary)
-      .map((p) => ({
-        name: `${p.name.toLowerCase()} ${p.secondary!.label.toLowerCase()}`,
-        url: p.secondary!.href,
-      })),
-    { name: "email", url: `mailto:${profile.email}` },
-  ];
-}
+const SECTION_LABELS: readonly string[] = SECTIONS.map((s) => s.label);
+const SECTION_BY_LABEL = new Map(SECTIONS.map((s) => [s.label, s]));
+
+/** Everything `open` will accept, resolved case-insensitively. Built once. */
+const OPEN_TARGETS: readonly { name: string; url: string }[] = [
+  ...links.map((l) => ({ name: l.label.toLowerCase(), url: l.href })),
+  ...projects
+    .filter((p) => p.href)
+    .map((p) => ({ name: p.name.toLowerCase(), url: p.href as string })),
+  ...projects
+    .filter((p) => p.secondary)
+    .map((p) => ({
+      name: `${p.name.toLowerCase()} ${p.secondary!.label.toLowerCase()}`,
+      url: p.secondary!.href,
+    })),
+  { name: "email", url: `mailto:${profile.email}` },
+];
+
+const OPEN_TARGET_NAMES: readonly string[] = OPEN_TARGETS.map((t) => t.name);
+const OPEN_TARGET_LIST = OPEN_TARGET_NAMES.join(", ");
 
 const pad = (s: string, n: number) => s.padEnd(n, " ");
+
+function isAbortError(error: unknown) {
+  return error instanceof DOMException
+    ? error.name === "AbortError"
+    : error instanceof Error && error.name === "AbortError";
+}
 
 export const COMMANDS: Command[] = [
   {
@@ -83,7 +98,7 @@ export const COMMANDS: Command[] = [
         kv(pad(c.arg ? `${c.name} ${c.arg}` : c.name, 16), c.summary)
       ),
       dim(""),
-      dim("Section names also work on their own, so `projects` is the same as `cd projects`."),
+      dim("Bare section names also work, so `about` is the same as `cd about`."),
     ],
   },
   {
@@ -95,11 +110,11 @@ export const COMMANDS: Command[] = [
     name: "cd",
     arg: "<section>",
     summary: "jump to a section",
-    completions: () => SECTIONS.map((s) => s.label),
+    completions: () => SECTION_LABELS,
     run: (arg, ctx) => {
-      const target = SECTIONS.find((s) => s.label === arg.trim().toLowerCase());
+      const target = SECTION_BY_LABEL.get(arg.trim().toLowerCase());
       if (!target) {
-        return [bad(`No section "${arg}". Try: ${SECTIONS.map((s) => s.label).join(", ")}`)];
+        return [bad(`No section "${arg}". Try: ${SECTION_LABELS.join(", ")}`)];
       }
       ctx.goto(target.id);
       return [dim(`~/${target.label}`)];
@@ -169,25 +184,37 @@ export const COMMANDS: Command[] = [
     name: "open",
     arg: "<target>",
     summary: "open a link in a new tab",
-    completions: () => openTargets().map((t) => t.name),
+    completions: () => OPEN_TARGET_NAMES,
     run: (arg, ctx) => {
       const wanted = arg.trim().toLowerCase();
       if (!wanted) {
-        return [bad(`Usage: open <target>. Try: ${openTargets().map((t) => t.name).join(", ")}`)];
+        return [bad(`Usage: open <target>. Try: ${OPEN_TARGET_LIST}`)];
       }
-      const hit =
-        openTargets().find((t) => t.name === wanted) ??
-        openTargets().find((t) => t.name.startsWith(wanted));
-      if (!hit) return [bad(`Nothing called "${arg}".`)];
-      ctx.open(hit.url);
-      return [dim(`Opening ${hit.url}`)];
+      const exact = OPEN_TARGETS.find((t) => t.name === wanted);
+      if (exact) {
+        ctx.open(exact.url);
+        return [dim(`Opening ${exact.url}`)];
+      }
+      const prefixHits = OPEN_TARGETS.filter((t) => t.name.startsWith(wanted));
+      if (prefixHits.length === 1) {
+        ctx.open(prefixHits[0].url);
+        return [dim(`Opening ${prefixHits[0].url}`)];
+      }
+      if (prefixHits.length > 1) {
+        return [
+          bad(
+            `Ambiguous "${arg}". Try: ${prefixHits.map((t) => t.name).join(", ")}`
+          ),
+        ];
+      }
+      return [bad(`Nothing called "${arg}".`)];
     },
   },
   {
     name: "ask",
     arg: "<question>",
     summary: "ask about my background",
-    run: async (arg) => {
+    run: async (arg, ctx) => {
       const question = arg.trim();
       if (!question) {
         return [bad("Usage: ask <question>. For example: ask what did you do at Mercor")];
@@ -197,13 +224,15 @@ export const COMMANDS: Command[] = [
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question }),
+          signal: ctx.signal,
         });
         const data = await response.json().catch(() => null);
         if (!response.ok) {
           return [bad(data?.error ?? `Request failed (${response.status}).`)];
         }
         return [out(data.answer)];
-      } catch {
+      } catch (error) {
+        if (isAbortError(error) || ctx.signal?.aborted) return [];
         return [bad("Could not reach the server.")];
       }
     },
@@ -227,6 +256,9 @@ export const COMMANDS: Command[] = [
 ];
 
 const BY_NAME = new Map(COMMANDS.map((c) => [c.name, c]));
+const COMMAND_NAME_POOL: readonly string[] = [
+  ...new Set([...COMMANDS.map((c) => c.name), ...SECTION_LABELS]),
+];
 
 /** Bare section names are accepted as shorthand for `cd <section>`. */
 export function resolve(input: string): { command: Command; arg: string } | null {
@@ -239,7 +271,7 @@ export function resolve(input: string): { command: Command; arg: string } | null
   const direct = BY_NAME.get(name);
   if (direct) return { command: direct, arg: rest.join(" ") };
 
-  if (SECTIONS.some((s) => s.label === name)) {
+  if (SECTION_BY_LABEL.has(name)) {
     return { command: BY_NAME.get("cd")!, arg: name };
   }
   return null;
@@ -249,7 +281,7 @@ export function resolve(input: string): { command: Command; arg: string } | null
  * Longest common prefix of the candidates, which is what a shell fills in when
  * Tab is ambiguous. Returns the whole word when only one candidate matches.
  */
-function commonPrefix(values: string[]) {
+function commonPrefix(values: readonly string[]) {
   if (values.length === 0) return "";
   return values.reduce((prefix, value) => {
     let i = 0;
@@ -264,30 +296,30 @@ export type Completion = { value: string; candidates: string[] };
 export function complete(input: string): Completion {
   const leading = input.match(/^\s*/)?.[0] ?? "";
   const trimmed = input.trimStart();
-  const parts = trimmed.split(/\s+/);
-  const typingArg = /\s/.test(trimmed) || parts.length > 1;
+  const space = trimmed.search(/\s/);
+  const typingArg = space !== -1;
 
   if (!typingArg) {
-    const word = parts[0]?.toLowerCase() ?? "";
-    const pool = [...COMMANDS.map((c) => c.name), ...SECTIONS.map((s) => s.label)];
-    const candidates = pool.filter((n) => n.startsWith(word));
+    const word = trimmed.toLowerCase();
+    const candidates = COMMAND_NAME_POOL.filter((n) => n.startsWith(word));
     if (candidates.length === 0) return { value: input, candidates: [] };
     const filled = commonPrefix(candidates);
     return {
       value: leading + filled + (candidates.length === 1 ? " " : ""),
-      candidates,
+      candidates: [...candidates],
     };
   }
 
-  const command = BY_NAME.get(parts[0].toLowerCase());
+  const name = trimmed.slice(0, space).toLowerCase();
+  const command = BY_NAME.get(name);
   if (!command?.completions) return { value: input, candidates: [] };
 
-  const word = (parts[1] ?? "").toLowerCase();
-  const candidates = command.completions().filter((n) => n.startsWith(word));
+  const arg = trimmed.slice(space).trimStart().toLowerCase();
+  const candidates = command.completions().filter((n) => n.startsWith(arg));
   if (candidates.length === 0) return { value: input, candidates: [] };
   const filled = commonPrefix(candidates);
   return {
     value: `${leading}${command.name} ${filled}${candidates.length === 1 ? " " : ""}`,
-    candidates,
+    candidates: [...candidates],
   };
 }

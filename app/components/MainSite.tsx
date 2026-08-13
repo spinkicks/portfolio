@@ -29,6 +29,7 @@ import {
   profile,
   skills,
   type Experience,
+  type Project,
 } from "../content";
 
 const DESKTOP_TABLIST_QUERY = "(min-width: 1024px)";
@@ -277,7 +278,7 @@ function Projects() {
     <Section id="projects" title="Featured Work">
       <ol className="grid border-y border-line-soft md:grid-cols-2">
         {featuredProjects.map((project) => (
-          <FeaturedProjectEntry key={project.name} project={project} />
+          <ProjectEntry key={project.name} project={project} heading="h3" />
         ))}
       </ol>
 
@@ -290,7 +291,7 @@ function Projects() {
         </div>
         <ol className="grid border-y border-line-soft md:grid-cols-2">
           {moreProjects.map((project) => (
-            <MoreProjectEntry key={project.name} project={project} />
+            <ProjectEntry key={project.name} project={project} heading="h4" />
           ))}
         </ol>
       </div>
@@ -320,17 +321,19 @@ function ProjectLinks({
   );
 }
 
-function FeaturedProjectEntry({
+function ProjectEntry({
   project,
+  heading: Heading,
 }: {
-  project: (typeof featuredProjects)[number];
+  project: Project;
+  heading: "h3" | "h4";
 }) {
   return (
     <li className="border-line-soft py-6 md:odd:border-r md:odd:pr-8 md:even:pl-8">
       <article>
         <div className="flex items-start justify-between gap-5">
           <div>
-            <h3 className="display text-xl text-fg">
+            <Heading className="display text-xl text-fg">
               {project.href ? (
                 <a
                   href={project.href}
@@ -344,7 +347,7 @@ function FeaturedProjectEntry({
               ) : (
                 project.name
               )}
-            </h3>
+            </Heading>
             <p className="mt-1.5 font-mono text-xs text-cyan">{project.status}</p>
           </div>
           <span className="font-mono text-xs text-faint">{project.year}</span>
@@ -360,67 +363,15 @@ function FeaturedProjectEntry({
             </li>
           ))}
         </ul>
-        <ProjectDetails details={project.details} compact />
+        <ProjectDetails details={project.details} />
       </article>
     </li>
   );
 }
 
-function MoreProjectEntry({
-  project,
-}: {
-  project: (typeof moreProjects)[number];
-}) {
+function ProjectDetails({ details }: { details: string[] }) {
   return (
-    <li className="border-line-soft py-6 md:odd:border-r md:odd:pr-8 md:even:pl-8">
-      <article>
-        <div className="flex items-start justify-between gap-5">
-          <div>
-            <h4 className="display text-xl text-fg">
-              {project.href ? (
-                <a
-                  href={project.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 transition-colors duration-200 hover:text-magenta"
-                >
-                  {project.name}
-                  <ArrowUpRight size={14} aria-hidden="true" />
-                </a>
-              ) : (
-                project.name
-              )}
-            </h4>
-            <p className="mt-1.5 font-mono text-xs text-cyan">{project.status}</p>
-          </div>
-          <span className="font-mono text-xs text-faint">{project.year}</span>
-        </div>
-        <p className="mt-3 text-pretty text-sm leading-relaxed text-dim">
-          {project.summary}
-        </p>
-        <ProjectLinks project={project} />
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {project.stack.map((tech) => (
-            <li key={tech} className="chip">
-              {tech}
-            </li>
-          ))}
-        </ul>
-        <ProjectDetails details={project.details} compact />
-      </article>
-    </li>
-  );
-}
-
-function ProjectDetails({
-  details,
-  compact = false,
-}: {
-  details: string[];
-  compact?: boolean;
-}) {
-  return (
-    <details className={`${compact ? "mt-4" : "mt-6"} group/details`}>
+    <details className="mt-4 group/details">
       <summary className="flex min-h-11 w-fit list-none items-center gap-2 font-mono text-xs text-faint transition-colors duration-200 hover:text-cyan [&::-webkit-details-marker]:hidden">
         <span
           aria-hidden="true"

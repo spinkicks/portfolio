@@ -3,10 +3,14 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ShaderToyRuntime, type ShaderSpec } from "./shadertoy/runtime";
 import {
-  driveRenderIntervalMs,
   driveTimeScale,
+  shaderFrameDelta,
+  shouldParkShaderLoop,
   shouldPauseShaderAtDeepScroll,
+  SHADER_SETTLE_FRAMES,
+  synthwaveRenderIntervalMs,
 } from "./shadertoy/scrollClock";
+import { RafScheduler, ShaderLoadAttempt } from "./shadertoy/loopControl";
 import { useSceneScroll } from "./useSceneScroll";
 
 /**
@@ -25,7 +29,7 @@ const MAX_DPR = 1.5;
 const MAX_WIDTH = 1920;
 
 /** Frames to settle before freezing, when the visitor asked for no motion. */
-const SETTLE_FRAMES = 45;
+const SETTLE_FRAMES = SHADER_SETTLE_FRAMES;
 
 /** Dev/test hook for Playwright liveness checks; stripped from production bundles. */
 const TRACK_SHADER_FRAMES = process.env.NODE_ENV !== "production";
@@ -57,12 +61,13 @@ export default function ShaderScene({
   live.current = { animate: !reduceMotion };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvasNode = canvasRef.current;
+    if (!canvasNode) return;
+    const canvas: HTMLCanvasElement = canvasNode;
 
-    const abort = new AbortController();
+    const load = new ShaderLoadAttempt();
+    const frames = new RafScheduler();
     let runtime: ShaderToyRuntime | null = null;
-    let frame = 0;
     let disposed = false;
     let needsResize = true;
     let settled = 0;
@@ -72,8 +77,14 @@ export default function ShaderScene({
     let lastRender = 0;
     const isDrive = spec.name === "sunset-drive";
 
+    const resetClock = () => {
+      lastFrame = 0;
+      lastRender = 0;
+    };
+
     const remeasure = () => {
       needsResize = true;
+      wake();
     };
 
     const applySize = () => {
@@ -94,31 +105,57 @@ export default function ShaderScene({
       settled = 0;
     };
 
-    const loop = (now: number) => {
-      frame = requestAnimationFrame(loop);
-      if (disposed || !runtime || runtime.isDead || document.hidden) return;
+    const park = () => {
+      frames.park();
+      resetClock();
+    };
+
+    const shouldContinue = () => {
+      if (disposed || !runtime || runtime.isDead || document.hidden) {
+        resetClock();
+        return false;
+      }
+      return true;
+    };
+
+    const wake = () => {
+      if (disposed) return;
+      if (!runtime || runtime.isDead || document.hidden) return;
+      frames.wake(loop);
+    };
+
+    function loop(now: number): boolean {
+      if (disposed || !runtime) return false;
 
       if (needsResize) {
         needsResize = false;
         applySize();
       }
 
-      const delta =
-        lastFrame === 0 ? 1 / 60 : Math.min(0.1, (now - lastFrame) / 1000);
+      if (
+        shouldParkShaderLoop({
+          dead: runtime.isDead,
+          hidden: document.hidden,
+          isDrive,
+          animate: live.current.animate,
+          settled,
+          deepPaused: shouldPauseShaderAtDeepScroll(
+            spec.name,
+            scrollY.get(),
+            window.innerHeight
+          ),
+          settleFrames: SETTLE_FRAMES,
+        })
+      ) {
+        resetClock();
+        return false;
+      }
+
+      const delta = shaderFrameDelta(lastFrame, now);
       lastFrame = now;
 
       const currentScrollY = scrollY.get();
       const vh = window.innerHeight;
-      const { animate } = live.current;
-
-      if (!animate && settled > SETTLE_FRAMES) return;
-
-      if (
-        shouldPauseShaderAtDeepScroll(spec.name, currentScrollY, vh) &&
-        settled > SETTLE_FRAMES
-      ) {
-        return;
-      }
 
       realTime += delta;
       if (isDrive) {
@@ -127,12 +164,10 @@ export default function ShaderScene({
         driveTime = realTime;
       }
 
-      const renderIntervalMs = isDrive
-        ? driveRenderIntervalMs(currentScrollY, vh)
-        : 0;
+      const renderIntervalMs = synthwaveRenderIntervalMs(spec.name);
       const elapsedSinceRender = lastRender === 0 ? renderIntervalMs : now - lastRender;
       if (renderIntervalMs > 0 && elapsedSinceRender < renderIntervalMs) {
-        return;
+        return shouldContinue();
       }
 
       runtime.frame(realTime, driveTime);
@@ -142,36 +177,73 @@ export default function ShaderScene({
       if (TRACK_SHADER_FRAMES && settled % 30 === 0) {
         canvas.setAttribute("data-shader-frames", String(settled));
       }
-    };
+      return shouldContinue();
+    }
 
-    const onContextLost = () => {
-      runtime?.markDead();
-      setRunning(false);
-    };
-
-    const observer = new ResizeObserver(remeasure);
-    observer.observe(canvas);
-    window.addEventListener("resize", remeasure);
-    canvas.addEventListener("webglcontextlost", onContextLost);
-
-    ShaderToyRuntime.create(canvas, spec, abort.signal).then((created) => {
-      if (disposed) {
+    const attachRuntime = (created: ShaderToyRuntime | null, generation: number) => {
+      if (!load.isCurrent(generation) || disposed) {
         created?.dispose();
         return;
       }
       if (!created) return;
       runtime = created;
       needsResize = true;
-      frame = requestAnimationFrame(loop);
-    });
+      settled = 0;
+      resetClock();
+      if (TRACK_SHADER_FRAMES) canvas.removeAttribute("data-shader-frames");
+      wake();
+    };
+
+    const startRuntime = () => {
+      const attempt = load.next();
+      if (!attempt) return;
+      ShaderToyRuntime.create(canvas, spec, attempt.signal).then((created) => {
+        attachRuntime(created, attempt.generation);
+      });
+    };
+
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      load.abort();
+      park();
+      runtime?.markDead();
+      if (TRACK_SHADER_FRAMES) canvas.removeAttribute("data-shader-frames");
+      setRunning(false);
+    };
+
+    const onContextRestored = () => {
+      if (disposed) return;
+      const previous = runtime;
+      runtime = null;
+      previous?.dispose();
+      startRuntime();
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) park();
+      else wake();
+    };
+
+    const observer = new ResizeObserver(remeasure);
+    observer.observe(canvas);
+    window.addEventListener("resize", remeasure);
+    document.addEventListener("visibilitychange", onVisibility);
+    canvas.addEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
+    const unsubScroll = scrollY.on("change", wake);
+
+    startRuntime();
 
     return () => {
       disposed = true;
-      abort.abort();
-      cancelAnimationFrame(frame);
+      load.close();
+      park();
+      unsubScroll();
       observer.disconnect();
       window.removeEventListener("resize", remeasure);
+      document.removeEventListener("visibilitychange", onVisibility);
       canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
       runtime?.dispose();
     };
   }, [scale, spec, scrollY]);

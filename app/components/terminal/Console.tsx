@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { bad, complete, dim, resolve, type Ctx, type Line } from "./commands";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { bad, complete, dim, resolve, type ConsoleCtx, type Ctx, type Line } from "./commands";
 
 /**
  * The prompt and its scrollback.
@@ -24,7 +24,7 @@ const HOLD_MS = 6000;
 /** Long enough to register as a fade rather than a disappearance. */
 const FADE_MS = 700;
 
-export default function Console({ ctx }: { ctx: Ctx }) {
+function Console({ ctx }: { ctx: ConsoleCtx }) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -39,8 +39,16 @@ export default function Console({ ctx }: { ctx: Ctx }) {
   const [held, setHeld] = useState(false);
 
   const nextId = useRef(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef(new AbortController());
   const logRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (abortRef.current.signal.aborted) {
+      abortRef.current = new AbortController();
+    }
+    const controller = abortRef.current;
+    return () => controller.abort();
+  }, []);
 
   const clear = useCallback(() => {
     setEntries([]);
@@ -103,7 +111,8 @@ export default function Console({ ctx }: { ctx: Ctx }) {
         return;
       }
 
-      const scoped: Ctx = { ...ctx, clear };
+      const signal = abortRef.current.signal;
+      const scoped: Ctx = { ...ctx, clear, signal };
       const result = match.command.run(match.arg, scoped);
 
       // Synchronous commands must not flash a pending row, so only the async
@@ -117,6 +126,7 @@ export default function Console({ ctx }: { ctx: Ctx }) {
       push({ id, input: text, lines: [], pending: true });
       setBusy(true);
       const lines = await result;
+      if (signal.aborted) return;
       setBusy(false);
       setEntries((e) =>
         e.map((entry) => (entry.id === id ? { ...entry, lines, pending: false } : entry))
@@ -214,7 +224,6 @@ export default function Console({ ctx }: { ctx: Ctx }) {
       <label className="flex cursor-text items-center gap-2 px-4 py-2.5 text-sm sm:px-6">
         <span className="shrink-0 text-lime">{PROMPT}</span>
         <input
-          ref={inputRef}
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
@@ -251,15 +260,11 @@ function Row({ line }: { line: Line }) {
   }
 
   const tone =
-    line.kind === "error"
-      ? "text-magenta"
-      : line.kind === "accent"
-        ? "text-lime"
-        : line.kind === "dim"
-          ? "text-dim"
-          : "text-fg";
+    line.kind === "error" ? "text-magenta" : line.kind === "dim" ? "text-dim" : "text-fg";
 
   // An empty dim line is deliberate spacing in help output.
   if (!line.text) return <div className="h-3" />;
   return <p className={`break-words ${tone}`}>{line.text}</p>;
 }
+
+export default memo(Console);

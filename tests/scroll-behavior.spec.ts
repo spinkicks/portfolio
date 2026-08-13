@@ -80,3 +80,54 @@ test("sunset drive canvas keeps rendering after deep scroll", async ({ page }) =
     )
     .toBeGreaterThanOrEqual(MIN_FRAME_ADVANCE);
 });
+
+test("shader resumes frame advancement after WebGL context restore", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openSynthwave(page);
+
+  const canvas = page.locator("canvas").first();
+  await expect(canvas).toBeVisible();
+
+  await expect
+    .poll(async () => readShaderFrames(page), {
+      message: "wait for shader frame counter before context loss",
+      timeout: 20_000,
+    })
+    .toBeGreaterThanOrEqual(MIN_FRAME_ADVANCE);
+
+  const canLose = await page.evaluate(() => {
+    const node = document.querySelector("canvas");
+    if (!(node instanceof HTMLCanvasElement)) return false;
+    const gl = node.getContext("webgl2");
+    const ext = gl?.getExtension("WEBGL_lose_context");
+    if (!ext) return false;
+    (window as Window & { __shaderLoseContext?: typeof ext }).__shaderLoseContext = ext;
+    ext.loseContext();
+    return true;
+  });
+
+  test.skip(
+    !canLose,
+    "WEBGL_lose_context is unavailable in this browser"
+  );
+
+  await expect
+    .poll(async () => readShaderFrames(page), {
+      message: "frame counter should clear after context loss",
+      timeout: 5_000,
+    })
+    .toBe(0);
+
+  await page.evaluate(() => {
+    (window as Window & { __shaderLoseContext?: { restoreContext: () => void } })
+      .__shaderLoseContext?.restoreContext();
+  });
+
+  await expect
+    .poll(async () => readShaderFrames(page), {
+      message: "shader should advance after context restore",
+      timeout: 20_000,
+    })
+    .toBeGreaterThanOrEqual(MIN_FRAME_ADVANCE);
+});
+

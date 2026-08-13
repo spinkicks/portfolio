@@ -737,14 +737,20 @@ test("both layouts render every canonical portfolio field", async ({ page }) => 
   await synthwave.close();
 });
 
-test("Gemini knowledge includes hero stats", () => {
+test("Gemini knowledge includes compact canonical fields", () => {
   const serialized = JSON.stringify(portfolioKnowledge());
+  const factValue = (label: string) => facts.find((fact) => fact.label === label)?.value;
 
   expect(JSON.parse(serialized)).toEqual({
     profile,
     status,
-    heroStats,
-    facts,
+    education: {
+      classYear: heroStats[0].value,
+      degree: factValue("Education"),
+      minor: factValue("Minor"),
+    },
+    languages: factValue("Languages"),
+    focus: factValue("Focus"),
     experience,
     projects,
     skills,

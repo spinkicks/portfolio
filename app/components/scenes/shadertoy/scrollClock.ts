@@ -7,14 +7,36 @@ export const DRIVE_SLOWDOWN_VH = 4;
 /** Viewport heights past which non-drive shaders may stop rendering. */
 export const DEEP_SCROLL_PAUSE_VH = 1.6;
 
-/** Viewport heights where drive render throttling begins (no cap at or below). */
-export const DRIVE_RENDER_INTERVAL_START_VH = DEEP_SCROLL_PAUSE_VH;
+/** High-refresh cap; rAF quantization keeps common displays around 72-90fps. */
+export const SYNTHWAVE_RENDER_INTERVAL_MS = 1000 / 90;
 
-/** Viewport heights where drive render throttling reaches its maximum interval. */
-export const DRIVE_RENDER_INTERVAL_END_VH = 4;
+/** Frames to draw before a non-drive scene may freeze. */
+export const SHADER_SETTLE_FRAMES = 45;
 
-/** Maximum milliseconds between drive shader draws (~72fps) once fully throttled. */
-export const DRIVE_RENDER_MAX_INTERVAL_MS = 1000 / 72;
+/** Intentional first-frame / resume delta, in seconds. */
+export const SHADER_FIRST_FRAME_DELTA = 1 / 60;
+
+/** Elapsed hidden time must not leak into the next tick; a zero last-frame means resume. */
+export function shaderFrameDelta(lastFrameMs: number, nowMs: number): number {
+  if (lastFrameMs === 0) return SHADER_FIRST_FRAME_DELTA;
+  return Math.min(0.1, (nowMs - lastFrameMs) / 1000);
+}
+
+export function shouldParkShaderLoop(opts: {
+  dead: boolean;
+  hidden: boolean;
+  isDrive: boolean;
+  animate: boolean;
+  settled: number;
+  deepPaused: boolean;
+  settleFrames?: number;
+}): boolean {
+  if (opts.dead || opts.hidden) return true;
+  if (opts.isDrive) return false;
+  const settle = opts.settleFrames ?? SHADER_SETTLE_FRAMES;
+  if (opts.settled <= settle) return false;
+  return !opts.animate || opts.deepPaused;
+}
 
 function easeOutQuadratic(t: number): number {
   const clamped = Math.max(0, Math.min(1, t));
@@ -43,23 +65,9 @@ export function shouldPauseShaderAtDeepScroll(
   return scrollY > vh * DEEP_SCROLL_PAUSE_VH;
 }
 
-/**
- * Milliseconds to wait between drive shader draws once the visitor scrolls past
- * {@link DRIVE_RENDER_INTERVAL_START_VH}. Returns 0 below that span so 60Hz
- * displays still render every refresh; high-refresh displays cap near 72fps deep.
- */
-export function driveRenderIntervalMs(
-  scrollY: number,
-  viewportHeight: number
-): number {
-  const vh = Math.max(1, viewportHeight);
-  const scrollVh = scrollY / vh;
-
-  if (scrollVh <= DRIVE_RENDER_INTERVAL_START_VH) {
-    return 0;
-  }
-
-  const span = DRIVE_RENDER_INTERVAL_END_VH - DRIVE_RENDER_INTERVAL_START_VH;
-  const t = Math.min(1, Math.max(0, (scrollVh - DRIVE_RENDER_INTERVAL_START_VH) / span));
-  return easeOutQuadratic(t) * DRIVE_RENDER_MAX_INTERVAL_MS;
+/** Caps only the two synthwave-side shaders; terminal rain keeps native pacing. */
+export function synthwaveRenderIntervalMs(shaderName: string): number {
+  return shaderName === "sunset-drive" || shaderName === "synthwave-theme"
+    ? SYNTHWAVE_RENDER_INTERVAL_MS
+    : 0;
 }

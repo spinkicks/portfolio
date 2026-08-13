@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Console from "./Console";
-import { SECTIONS, type Ctx } from "./commands";
+import { SECTIONS, type ConsoleCtx } from "./commands";
 import ShaderScene from "../scenes/ShaderScene";
 import { MATRIX_RAIN } from "../scenes/shadertoy/specs";
 import {
@@ -69,10 +69,9 @@ export default function TerminalSite({ onSwitch }: { onSwitch: () => void }) {
     return () => observer.disconnect();
   }, []);
 
-  const ctx: Ctx = useMemo(
+  const ctx: ConsoleCtx = useMemo(
     () => ({
       goto,
-      clear: () => {},
       toSynthwave: onSwitch,
       open: (url) => window.open(url, "_blank", "noopener,noreferrer"),
     }),

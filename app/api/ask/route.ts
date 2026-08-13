@@ -26,21 +26,37 @@ const MAX_QUESTION = 400;
  * It exists so a single visitor holding down enter cannot empty the quota.
  */
 const RATE = { windowMs: 60_000, max: 8 };
+const MAX_TRACKED_IPS = 500;
 const hits = new Map<string, number[]>();
+
+function pruneHits(now: number) {
+  if (hits.size <= MAX_TRACKED_IPS) return;
+  for (const [key, times] of hits) {
+    const live = times.filter((t) => now - t < RATE.windowMs);
+    if (live.length === 0) hits.delete(key);
+    else hits.set(key, live);
+    if (hits.size <= MAX_TRACKED_IPS) return;
+  }
+  for (const key of hits.keys()) {
+    if (hits.size <= MAX_TRACKED_IPS) break;
+    hits.delete(key);
+  }
+}
 
 function throttled(ip: string) {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE.windowMs);
+
+  if (recent.length >= RATE.max) {
+    hits.set(ip, recent);
+    pruneHits(now);
+    return true;
+  }
+
   recent.push(now);
   hits.set(ip, recent);
-
-  // The map would otherwise grow for the life of the process.
-  if (hits.size > 500) {
-    for (const [key, times] of hits) {
-      if (times.every((t) => now - t >= RATE.windowMs)) hits.delete(key);
-    }
-  }
-  return recent.length > RATE.max;
+  pruneHits(now);
+  return false;
 }
 
 /** Built here rather than shipped to the client, so the prompt stays private. */

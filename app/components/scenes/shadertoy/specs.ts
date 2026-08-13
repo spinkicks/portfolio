@@ -1,4 +1,4 @@
-import type { ShaderSpec } from "./runtime";
+import type { ShaderSpec } from "./types";
 
 /**
  * Pass graphs for the two Shadertoy pieces, transcribed from each shader's own
@@ -71,6 +71,9 @@ export const SUNSET_DRIVE: ShaderSpec = {
     {
       id: "A",
       url: "/shaders/sunset-drive/buffer-a.glsl",
+      width: 8,
+      height: 8,
+      filter: "nearest",
       channels: {
         0: { kind: "buffer", buffer: "A" },
         1: { kind: "keyboard" },
@@ -101,12 +104,6 @@ export const SUNSET_DRIVE: ShaderSpec = {
       channels: {
         0: { kind: "buffer", buffer: "B" },
         1: { kind: "buffer", buffer: "A", filter: "nearest" },
-        3: {
-          kind: "texture",
-          url: "/shaders/media/organic-rgba.png",
-          filter: "linear",
-          wrap: "clamp",
-        },
       },
     },
     {
@@ -170,7 +167,4 @@ export const MATRIX_RAIN: ShaderSpec = {
 export const SHADERS = {
   "synthwave-theme": SYNTHWAVE_THEME,
   "sunset-drive": SUNSET_DRIVE,
-  "matrix-rain": MATRIX_RAIN,
 } as const;
-
-export type ShaderKey = keyof typeof SHADERS;

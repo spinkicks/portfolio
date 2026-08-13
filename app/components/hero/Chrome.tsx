@@ -2,7 +2,7 @@
 
 import { motion, useTransform } from "framer-motion";
 import { Github, Linkedin, Mail, Trophy } from "lucide-react";
-import { heroStats, navLinks, profile, status } from "../../content";
+import { navLinks, profile, status } from "../../content";
 import { useSceneScroll } from "../scenes/useSceneScroll";
 
 /**
@@ -118,30 +118,6 @@ export function StatusTag({ className = "" }: { className?: string }) {
         {status.detail}
       </span>
     </p>
-  );
-}
-
-/**
- * The same four facts as one rule-separated run, for layouts where a four
- * column grid would compete with the sign for attention.
- */
-export function StatLine({ className = "" }: { className?: string }) {
-  return (
-    <ul
-      className={`flex flex-wrap items-center gap-x-4 gap-y-3 font-mono text-sm ${className}`}
-    >
-      {heroStats.map((stat, i) => (
-        <li key={stat.label} className="flex items-center gap-4">
-          {i > 0 && (
-            <span aria-hidden="true" className="h-3.5 w-px bg-line-soft" />
-          )}
-          <span>
-            <span className="text-magenta">{stat.value}</span>{" "}
-            <span className="text-dim">{stat.label}</span>
-          </span>
-        </li>
-      ))}
-    </ul>
   );
 }
 

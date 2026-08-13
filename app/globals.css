@@ -11,7 +11,6 @@
   --ink-800: #0c0519;
   --ink-700: #150a29;
   --surface: rgba(21, 10, 41, 0.62);
-  --surface-strong: rgba(30, 15, 57, 0.88);
 
   /* Neon spectrum */
   --magenta: #ff3ea5;
@@ -30,19 +29,8 @@
   --line: rgba(255, 62, 165, 0.18);
   --line-soft: rgba(198, 160, 255, 0.11);
 
-  /* Spacing scale */
-  --space-2xs: 0.5rem;
-  --space-xs: 0.75rem;
-  --space-sm: 1rem;
-  --space-md: 1.5rem;
-  --space-lg: 2.5rem;
-  --space-xl: 4rem;
-  --space-2xl: 6rem;
-
   /* Motion */
-  --dur-fast: 150ms;
   --dur: 220ms;
-  --dur-slow: 380ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -148,19 +136,8 @@
   color: var(--fg-faint);
 }
 
-/* Chromatic-fringe glow. Offsets stay under 2px so text remains crisp. */
-.text-chroma {
-  text-shadow:
-    -0.02em 0 0 rgba(255, 62, 165, 0.55),
-    0.02em 0 0 rgba(46, 230, 255, 0.45),
-    0 0 0.5em rgba(255, 62, 165, 0.25);
-}
-
 .glow-magenta {
   text-shadow: 0 0 0.6em rgba(255, 62, 165, 0.45);
-}
-.glow-cyan {
-  text-shadow: 0 0 0.6em rgba(46, 230, 255, 0.4);
 }
 
 /* ============================================================
@@ -338,18 +315,6 @@
     0 0 1.9em rgba(var(--tube), 0.45);
 }
 
-.type-tube-cyan {
-  --tube: 46, 230, 255;
-  color: #f0fdff;
-}
-
-/* Glass with no gas in it, for runs that read as part of the sign but aren't
-   lit. Monoton draws its own inline stroke, so dimming the fill is enough. */
-.type-tube-off {
-  color: rgba(246, 240, 255, 0.24);
-  text-shadow: none;
-}
-
 /* Local darkening for heroes that put copy over the bright side of the
    artwork. The scene's own scrim is directional and only covers the left. */
 .copy-scrim {
@@ -493,7 +458,6 @@
   --ink-800: #090c11;
   --ink-700: #10151b;
   --surface: rgba(9, 12, 17, 0.82);
-  --surface-strong: rgba(16, 21, 27, 0.96);
 
   --lime: #5df2a0;
   --amber: #ffc061;

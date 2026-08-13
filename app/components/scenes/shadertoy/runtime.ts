@@ -13,51 +13,38 @@
  * missing context is a clean "don't run this" rather than a degraded path.
  */
 
-export type BufferId = "A" | "B" | "C" | "D";
-export type PassId = BufferId | "image";
+import type { BufferId, Channel, PassId, ShaderSpec } from "./types";
 
-export type Filter = "linear" | "nearest" | "mipmap";
-export type Wrap = "repeat" | "clamp";
+export type {
+  BufferId,
+  Channel,
+  Filter,
+  PassId,
+  PassSpec,
+  ShaderSpec,
+  Wrap,
+} from "./types";
 
-export type Channel =
-  | { kind: "buffer"; buffer: BufferId; filter?: Filter; wrap?: Wrap }
-  | { kind: "texture"; url: string; filter?: Filter; wrap?: Wrap; vflip?: boolean }
-  /** 256x3 key state map. Zero-filled unless the spec opts into input. */
-  | { kind: "keyboard" }
-  /**
-   * Stand-in for a Shadertoy music input: a 512x2 texture holding an empty
-   * spectrum and a centred, flat waveform. Leaving the sampler unbound instead
-   * would read as a hard -0.5 on the waveform row and permanently skew any
-   * shader that reacts to it.
-   */
-  | { kind: "silence" };
-
-export type PassSpec = {
-  id: PassId;
-  /** Path under /public. Fetched rather than bundled: the larger of these is
-   *  65k characters, which has no business sitting in the JS payload. */
-  url: string;
-  channels?: Partial<Record<0 | 1 | 2 | 3, Channel>>;
-};
-
-export type ShaderSpec = {
-  name: string;
-  credit: { author: string; title: string; url: string; license: string };
-  commonUrl?: string;
-  /** Buffer passes in execution order; the image pass runs last. */
-  passes: PassSpec[];
-  /** Buffers render at this fraction of the canvas. Raymarchers get expensive
-   *  fast, and the image pass resamples the result anyway. */
-  bufferScale?: number;
-  /** Inserted before the Common tab. */
-  defines?: string[];
-  /**
-   * Inserted after the Common tab. Both of these shaders declare their feature
-   * switches inside Common itself, so turning one off means undefining it
-   * downstream rather than defining it upstream.
-   */
-  overrides?: string[];
-};
+/** Canvas-relative size unless the pass declares a fixed width/height. */
+export function resolveBufferSize(
+  spec: ShaderSpec,
+  id: BufferId,
+  canvasWidth: number,
+  canvasHeight: number
+): { width: number; height: number } {
+  const pass = spec.passes.find((candidate) => candidate.id === id);
+  if (pass && pass.width != null && pass.height != null) {
+    return {
+      width: Math.max(1, Math.round(pass.width)),
+      height: Math.max(1, Math.round(pass.height)),
+    };
+  }
+  const scale = spec.bufferScale ?? 1;
+  return {
+    width: Math.max(1, Math.round(canvasWidth * scale)),
+    height: Math.max(1, Math.round(canvasHeight * scale)),
+  };
+}
 
 const PRELUDE = `#version 300 es
 precision highp float;
@@ -107,6 +94,8 @@ type PingPong = {
   read: WebGLTexture;
   write: WebGLTexture;
   fbo: WebGLFramebuffer;
+  width: number;
+  height: number;
 };
 
 function compileStage(
@@ -153,27 +142,31 @@ export class ShaderToyRuntime {
   private keyboardData = new Uint8Array(256 * 3 * 4);
   private silence: WebGLTexture | null = null;
   private format: number;
+  private stateFormat: number;
 
   private width = 0;
   private height = 0;
-  private bufferWidth = 0;
-  private bufferHeight = 0;
   private frameIndex = 0;
   private lastTime = 0;
   private dead = false;
+  private channelTime = new Float32Array(4);
+  private channelRes = new Float32Array(12);
+  private date = new Date();
 
   private constructor(
     gl: WebGL2RenderingContext,
     spec: ShaderSpec,
     quad: WebGLBuffer,
     vao: WebGLVertexArrayObject,
-    format: number
+    format: number,
+    stateFormat: number
   ) {
     this.gl = gl;
     this.spec = spec;
     this.quad = quad;
     this.vao = vao;
     this.format = format;
+    this.stateFormat = stateFormat;
   }
 
   static async create(
@@ -218,6 +211,9 @@ export class ShaderToyRuntime {
         : canHalf
           ? gl.RGBA16F
           : gl.RGBA8;
+    // State buffers use nearest sampling, so they can keep full float without
+    // OES_texture_float_linear. Visual passes still need a filterable format.
+    const stateFormat = canFloat ? gl.RGBA32F : canHalf ? gl.RGBA16F : gl.RGBA8;
 
     const quad = gl.createBuffer();
     const vao = gl.createVertexArray();
@@ -230,7 +226,7 @@ export class ShaderToyRuntime {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.bindVertexArray(null);
 
-    const runtime = new ShaderToyRuntime(gl, spec, quad, vao, format);
+    const runtime = new ShaderToyRuntime(gl, spec, quad, vao, format, stateFormat);
     const ok = await runtime.load(signal);
     if (!ok) {
       runtime.dispose();
@@ -433,14 +429,18 @@ export class ShaderToyRuntime {
 
   private allocate(id: BufferId, width: number, height: number): PingPong {
     const gl = this.gl;
+    const pass = this.spec.passes.find((candidate) => candidate.id === id);
+    const nearest = pass?.filter === "nearest";
+    const format = nearest ? this.stateFormat : this.format;
+    const sampling = nearest ? gl.NEAREST : gl.LINEAR;
     const make = () => {
       const tex = gl.createTexture()!;
       gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texStorage2D(gl.TEXTURE_2D, 1, this.format, width, height);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, format, width, height);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, sampling);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, sampling);
       return tex;
     };
     const read = make();
@@ -456,7 +456,7 @@ export class ShaderToyRuntime {
       gl.clear(gl.COLOR_BUFFER_BIT);
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    return { read, write, fbo };
+    return { read, write, fbo, width, height };
   }
 
   resize(width: number, height: number) {
@@ -465,20 +465,19 @@ export class ShaderToyRuntime {
     this.width = width;
     this.height = height;
 
-    const scale = this.spec.bufferScale ?? 1;
-    this.bufferWidth = Math.max(1, Math.round(width * scale));
-    this.bufferHeight = Math.max(1, Math.round(height * scale));
-
     for (const [id, pp] of this.buffers) {
+      const size = resolveBufferSize(this.spec, id, width, height);
+      if (pp && pp.width === size.width && pp.height === size.height) continue;
       if (pp) {
         gl.deleteTexture(pp.read);
         gl.deleteTexture(pp.write);
         gl.deleteFramebuffer(pp.fbo);
+        // iFrame <= 0 re-seeds Sunset Drive state; only rewind if that target
+        // actually changed size.
+        if (id === "A") this.frameIndex = 0;
       }
-      this.buffers.set(id, this.allocate(id, this.bufferWidth, this.bufferHeight));
+      this.buffers.set(id, this.allocate(id, size.width, size.height));
     }
-    // A feedback buffer that suddenly changes size has garbage history.
-    this.frameIndex = 0;
   }
 
   private uniform(pass: CompiledPass, name: string) {
@@ -500,11 +499,20 @@ export class ShaderToyRuntime {
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.BLEND);
 
+    this.channelTime[0] = this.channelTime[1] = this.channelTime[2] = this.channelTime[3] = time;
+    this.date.setTime(Date.now());
+    const dateYear = this.date.getFullYear();
+    const dateMonth = this.date.getMonth();
+    const dateDay = this.date.getDate();
+    const dateSeconds =
+      this.date.getHours() * 3600 + this.date.getMinutes() * 60 + this.date.getSeconds();
+
     for (const pass of this.passes) {
       const toScreen = pass.id === "image";
-      const target = toScreen ? null : this.buffers.get(pass.id as BufferId)!;
-      const w = toScreen ? this.width : this.bufferWidth;
-      const h = toScreen ? this.height : this.bufferHeight;
+      const target = toScreen ? null : this.buffers.get(pass.id as BufferId);
+      const w = toScreen ? this.width : target?.width ?? 0;
+      const h = toScreen ? this.height : target?.height ?? 0;
+      if (w === 0 || h === 0) continue;
 
       if (target) {
         gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
@@ -517,7 +525,7 @@ export class ShaderToyRuntime {
       gl.viewport(0, 0, w, h);
       gl.useProgram(pass.program);
 
-      const chRes = new Float32Array(12);
+      const chRes = this.channelRes;
       for (const unit of CHANNELS) {
         const ch = pass.channels[unit];
         gl.activeTexture(gl.TEXTURE0 + unit);
@@ -530,7 +538,7 @@ export class ShaderToyRuntime {
           // reading last frame, which is the whole point of the feedback.
           const src = this.buffers.get(ch.buffer);
           gl.bindTexture(gl.TEXTURE_2D, src ? src.read : null);
-          if (src) size = [this.bufferWidth, this.bufferHeight];
+          if (src) size = [src.width, src.height];
         } else if (ch.kind === "texture") {
           const t = this.textures.get(ch.url);
           gl.bindTexture(gl.TEXTURE_2D, t?.tex ?? null);
@@ -557,18 +565,8 @@ export class ShaderToyRuntime {
       gl.uniform4f(this.uniform(pass, "iMouse"), 0, 0, 0, 0);
       gl.uniform1f(this.uniform(pass, "iSampleRate"), 44100);
       gl.uniform3fv(this.uniform(pass, "iChannelResolution[0]"), chRes);
-      gl.uniform1fv(
-        this.uniform(pass, "iChannelTime[0]"),
-        new Float32Array([time, time, time, time])
-      );
-      const now = new Date();
-      gl.uniform4f(
-        this.uniform(pass, "iDate"),
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()
-      );
+      gl.uniform1fv(this.uniform(pass, "iChannelTime[0]"), this.channelTime);
+      gl.uniform4f(this.uniform(pass, "iDate"), dateYear, dateMonth, dateDay, dateSeconds);
 
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 

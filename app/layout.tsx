@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["500", "700"],
+  weight: ["700"],
 });
 
 // Display face for the hero. Monoton draws its own inline stroke, which is what
@@ -42,7 +42,6 @@ export const metadata: Metadata = {
     title: "David Ordonez | Software Engineer & Applied AI",
     description:
       "Evaluated AI systems, agentic developer tools, and interactive engineering software.",
-    images: [],
   },
 };
 
