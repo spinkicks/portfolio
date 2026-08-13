@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useTransform } from "framer-motion";
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Github, Linkedin, Mail, Trophy } from "lucide-react";
 import { heroStats, navLinks, profile, status } from "../../content";
 import { useSceneScroll } from "../scenes/useSceneScroll";
 
@@ -51,6 +51,7 @@ const socials = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/calmguy/", Icon: Linkedin },
   { label: "Email", href: `mailto:${profile.email}`, Icon: Mail },
   { label: "GitHub", href: "https://github.com/spinkicks", Icon: Github },
+  { label: "Devpost", href: "https://devpost.com/davidos", Icon: Trophy },
 ];
 
 /**
@@ -60,6 +61,7 @@ const socials = [
 export function SocialRail({ className = "" }: { className?: string }) {
   return (
     <ul
+      aria-label="Social links"
       className={`flex items-center gap-2.5 sm:gap-3 lg:fixed lg:left-7 lg:top-1/2 lg:z-40 lg:-translate-y-1/2 lg:flex-col ${className}`}
     >
       {socials.map(({ label, href, Icon }) => (

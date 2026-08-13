@@ -685,6 +685,17 @@ test("project summaries include verified user adoption metrics", () => {
   expect(utmap?.summary).toMatch(/before the 2026-27 school year began/i);
 });
 
+test("Devpost is available in shared links and the synthwave social rail", async ({ page }) => {
+  const devpostUrl = "https://devpost.com/davidos";
+  expect(links).toContainEqual({ label: "Devpost", href: devpostUrl });
+
+  await openLayout(page, false);
+  const socialLinks = page.getByRole("list", { name: "Social links" });
+  await expect(
+    socialLinks.getByRole("link", { name: "Devpost", exact: true })
+  ).toHaveAttribute("href", devpostUrl);
+});
+
 test("terminal layout renders list-based experience content", async ({ page }) => {
   await openLayout(page, true);
   await expectTerminalExperienceContent(page);
