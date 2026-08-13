@@ -234,7 +234,10 @@ async function expectSynthwaveExperienceTabs(page: Page) {
 
 async function expectCanonicalContent(page: Page, terminal: boolean) {
   const body = (await page.locator("body").innerText()).toLowerCase();
-  for (const value of Object.values(profile)) {
+  for (const [key, value] of Object.entries(profile)) {
+    // The synthwave hero intentionally uses the descriptive tagline instead
+    // of repeating the shorter role directly above it.
+    if (!terminal && key === "role") continue;
     expect(body, `missing profile value: ${value}`).toContain(value.toLowerCase());
   }
 

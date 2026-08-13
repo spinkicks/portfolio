@@ -56,3 +56,13 @@ test("terminal layout and rain shader stay idle until the visitor switches", asy
   await page.getByRole("button", { name: "Synthwave layout" }).click();
   await expect(page.getByRole("button", { name: "Terminal view" })).toBeVisible();
 });
+
+test("synthwave hero uses location without repeating the role", async ({ page }) => {
+  await page.goto(baseUrl, { waitUntil: "commit" });
+  const hero = page.locator(".hero-marquee");
+
+  await expect(hero.getByText("Austin, TX", { exact: true })).toBeVisible();
+  await expect(
+    hero.getByText("Software Engineer · Applied AI · Austin, TX", { exact: true })
+  ).toHaveCount(0);
+});

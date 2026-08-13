@@ -39,9 +39,7 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
           className="mx-auto mt-4 h-px w-40 bg-gradient-to-r from-transparent via-magenta to-transparent sm:mt-8"
         />
 
-        <p className="label mt-4 text-cyan sm:mt-8">
-          {profile.role} · {profile.location}
-        </p>
+        <p className="label mt-4 text-cyan sm:mt-8">{profile.location}</p>
 
         <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-dim sm:mt-5 sm:text-lg">
           {profile.tagline}
