@@ -22,7 +22,7 @@ export const status = {
 };
 
 /** Single credential shown in the hero before anyone scrolls. */
-export const heroStats = [{ value: "'28", label: "UT Austin BS CS" }];
+export const heroStats = [{ value: "'28", label: "UT Austin Computer Science" }];
 
 export const navLinks = [
   { label: "About", href: "#about" },

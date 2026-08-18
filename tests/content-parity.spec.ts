@@ -47,7 +47,7 @@ type RichProject = {
 };
 
 const expectedHeroStats = [
-  { value: "'28", label: "UT Austin BS CS" },
+  { value: "'28", label: "UT Austin Computer Science" },
 ] as const;
 
 const slmDatasetUrl =
