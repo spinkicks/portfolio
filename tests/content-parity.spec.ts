@@ -709,6 +709,17 @@ test("Devpost is available in shared links and the synthwave social rail", async
   ).toHaveAttribute("href", devpostUrl);
 });
 
+test("X is available in shared links and the synthwave social rail", async ({ page }) => {
+  const xUrl = "https://x.com/audiuphile";
+  expect(links).toContainEqual({ label: "X", href: xUrl });
+
+  await openLayout(page, false);
+  const socialLinks = page.getByRole("list", { name: "Social links" });
+  await expect(
+    socialLinks.getByRole("link", { name: "X", exact: true })
+  ).toHaveAttribute("href", xUrl);
+});
+
 test("terminal layout renders list-based experience content", async ({ page }) => {
   await openLayout(page, true);
   await expectTerminalExperienceContent(page);

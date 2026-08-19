@@ -376,5 +376,6 @@ export const skills = [
 export const links = [
   { label: "GitHub", href: "https://github.com/spinkicks" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/calmguy/" },
+  { label: "X", href: "https://x.com/audiuphile" },
   { label: "Devpost", href: "https://devpost.com/davidos" },
 ];
