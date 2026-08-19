@@ -442,7 +442,15 @@ test("Virgilio Acoustics summary states founder ownership and revenue", () => {
   expect(virgilio, "missing Virgilio Acoustics project").toBeDefined();
   expect(virgilio?.summary).toMatch(/founded/i);
   expect(virgilio?.summary).toMatch(/virgilio acoustics/i);
-  expect(virgilio?.summary).toMatch(/\$3,000\+ in revenue/);
+  expect(virgilio?.summary).toMatch(/\$14,000 in revenue/);
+  expect(virgilio?.summary).toMatch(/\$5,000 in net profit/);
+  expect(virgilio?.summary).toMatch(/10\+ clients/);
+
+  const detailText = (virgilio?.details ?? []).join(" ");
+  expect(detailText).toMatch(/\$14,000 in revenue/);
+  expect(detailText).toMatch(/\$5,000 in net profit/);
+  expect(detailText).toMatch(/\$9,000 in costs/);
+  expect(detailText).toMatch(/500\+ site visitors/);
 });
 
 test("Short-video MVP links to the short-form-video-app repository", () => {

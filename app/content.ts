@@ -264,10 +264,10 @@ export const projects: Project[] = [
     tier: "more",
     status: "live",
     summary:
-      "Founded Virgilio Acoustics, an Austin audio installation business that has generated $3,000+ in revenue, and built its public site and administration workflow.",
+      "Founded Virgilio Acoustics, an Austin audio installation business that has served 10+ clients with $14,000 in revenue ($5,000 in net profit), and built its public site and administration workflow.",
     details: [
-      "Design and install custom stereo, home-theater, and high-output audio systems for Austin clients.",
-      "Combined a Next.js and TypeScript marketing site with Vercel Analytics and a password-protected Neon and Vercel Blob administration workflow.",
+      "Served 10+ Austin clients across custom stereo, home-theater, and high-output audio installations, generating $14,000 in revenue ($5,000 in net profit on $9,000 in costs).",
+      "Combined a Next.js and TypeScript marketing site with Vercel Analytics and a password-protected Neon and Vercel Blob administration workflow, reaching 500+ site visitors.",
     ],
     stack: ["Next.js", "TypeScript", "Neon", "Vercel Blob"],
     href: "https://www.virgilio.systems/",
