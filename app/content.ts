@@ -74,7 +74,7 @@ export const experience: Experience[] = [
     highlights: [
       "Used Python scripts to inspect mathematical solution failure patterns and target corrections across the set.",
       "Authored structured LaTeX solutions across discrete mathematics, geometry, algorithms, and statistics/calculus as appropriate, with independent reasoning and final-answer verification.",
-      "Contributed verified corrections for roughly 0.5% of a 3,000-problem frontier-model mathematics set, about 15 problems, measured as share of problems corrected in the set.",
+      "Contributed verified corrections for roughly 0.5% of an 80,000-problem frontier-model mathematics set, about 400 problems, measured as share of problems corrected in the set.",
     ],
     stack: ["Python", "LaTeX", "Mathematical Reasoning", "Data Verification"],
   },

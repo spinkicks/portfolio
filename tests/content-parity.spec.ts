@@ -636,8 +636,8 @@ test("Mercor highlights frame 0.5% as problem-set coverage, not accuracy gain", 
 
   expect(mercor, "missing Mercor Intelligence experience").toBeDefined();
   const text = mercor!.highlights.join(" ");
-  expect(text).toMatch(/3,000/);
-  expect(text).toMatch(/15/);
+  expect(text).toMatch(/80,000/);
+  expect(text).toMatch(/400/);
   expect(text).toMatch(/0\.5%/);
   expect(text.toLowerCase()).toMatch(/share of problems corrected/);
   expect(text.toLowerCase()).not.toMatch(/accuracy/);
