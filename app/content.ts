@@ -162,7 +162,7 @@ export const projects: Project[] = [
     details: [
       "A historical V7.2 tuned-model-plus-executor evaluation scored 94.4% versus 30.7% for base on 319 frozen value-and-unit items.",
       "V7.4 reached 91.9% numeric accuracy but remained development-only after failing strict family and behavioral release gates.",
-      "As of August 2026, the public V7.4 development checkpoint had 377 model downloads and its companion dataset had 50 dataset downloads.",
+      "As of August 2026, the public V7.4 development checkpoint had 434 all-time model downloads (400+ downloads) and its companion dataset had 54 all-time dataset downloads (50+ downloads).",
       "The pipeline includes deterministic data generation, fail-closed tool compilation, hash-pinned training, Gradio inference, and a 387-row evaluation manifest.",
     ],
     stack: ["Qwen3", "QLoRA", "PyTorch", "Python"],

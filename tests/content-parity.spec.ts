@@ -428,8 +428,10 @@ test("Small Learning Model exposes dataset secondary link and download metrics",
   });
 
   const detailText = (slm?.details ?? []).join(" ");
-  expect(detailText).toMatch(/377 model downloads/);
-  expect(detailText).toMatch(/50 dataset downloads/);
+  expect(detailText).toMatch(/434.*model downloads/);
+  expect(detailText).toMatch(/400\+\s*downloads/);
+  expect(detailText).toMatch(/54.*dataset downloads/);
+  expect(detailText).toMatch(/50\+\s*downloads/);
 });
 
 test("Virgilio Acoustics summary states founder ownership and revenue", () => {
