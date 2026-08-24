@@ -65,7 +65,7 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
           flow it would sit halfway up a tall screen, since the copy above it is
           vertically centred. */}
       {switcher && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(0.875rem+env(safe-area-inset-bottom,0px))] flex justify-center px-6 sm:bottom-7">
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex justify-center px-6 sm:bottom-10">
           {switcher}
         </div>
       )}
