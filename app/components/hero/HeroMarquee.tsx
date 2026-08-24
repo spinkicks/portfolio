@@ -10,7 +10,7 @@ import { HeroActions, SocialRail, StatusTag } from "./Chrome";
  */
 export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
   return (
-    <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-24 sm:pt-32">
+    <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-40 sm:pt-32">
       {/* Centred copy lands on the brightest part of the artwork, where the
           scene's left-weighted scrim does nothing for it.
 
@@ -65,7 +65,7 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
           flow it would sit halfway up a tall screen, since the copy above it is
           vertically centred. */}
       {switcher && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] z-50 flex justify-center px-6 sm:bottom-16">
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex justify-center px-6 sm:bottom-10">
           {switcher}
         </div>
       )}
