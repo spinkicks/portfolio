@@ -10,7 +10,7 @@ import { HeroActions, SocialRail, StatusTag } from "./Chrome";
  */
 export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
   return (
-    <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-40 sm:pt-32">
+    <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-32 sm:pt-20">
       {/* Centred copy lands on the brightest part of the artwork, where the
           scene's left-weighted scrim does nothing for it.
 
@@ -30,35 +30,35 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
       <div className="relative mx-auto w-full max-w-4xl">
         <StatusTag />
 
-        <h1 className="font-marquee type-tube mt-5 text-[clamp(2.4rem,9vw,6.5rem)] sm:mt-9">
+        <h1 className="font-marquee type-tube mt-4 text-[clamp(2.4rem,9vw,6.5rem)] sm:mt-6">
           David O.
         </h1>
 
         <div
           aria-hidden="true"
-          className="mx-auto mt-4 h-px w-40 bg-gradient-to-r from-transparent via-magenta to-transparent sm:mt-8"
+          className="mx-auto mt-3 h-px w-40 bg-gradient-to-r from-transparent via-magenta to-transparent sm:mt-5"
         />
 
-        <p className="label mt-4 text-cyan sm:mt-8">{profile.location}</p>
+        <p className="label mt-3 text-cyan sm:mt-4">{profile.location}</p>
 
-        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-dim sm:mt-5 sm:text-lg">
+        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-dim sm:mt-4 sm:text-lg">
           {profile.tagline}
         </p>
 
-        <dl className="mx-auto mt-6 max-w-sm sm:mt-11">
+        <dl className="mx-auto mt-5 max-w-sm sm:mt-7">
           {heroStats.map((stat) => (
             <div key={stat.label} className="text-center">
               <dt className="sr-only">{stat.label}</dt>
               <dd className="font-marquee text-2xl text-magenta sm:text-4xl">
                 {stat.value}
               </dd>
-              <p className="label mt-2 leading-snug text-dim sm:mt-3">{stat.label}</p>
+              <p className="label mt-1.5 leading-snug text-dim sm:mt-2">{stat.label}</p>
             </div>
           ))}
         </dl>
 
-        <HeroActions className="mt-6 justify-center sm:mt-11" />
-        <SocialRail className="mt-5 justify-center sm:mt-10 lg:hidden" />
+        <HeroActions className="mt-6 justify-center sm:mt-7" />
+        <SocialRail className="mt-5 justify-center sm:mt-8 lg:hidden" />
       </div>
 
       {/* Pinned to the foot of the hero rather than placed after the copy: in

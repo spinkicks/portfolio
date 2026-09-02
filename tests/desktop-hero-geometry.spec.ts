@@ -10,15 +10,26 @@ async function boundingBox(selector: string, page: Page): Promise<Box> {
   return { top: box!.y, bottom: box!.y + box!.height };
 }
 
-test("desktop hero reserves space between CTAs, theme switcher, and frame", async ({ page }) => {
-  // A 2880px-wide laptop with 150% display scaling exposes roughly this CSS viewport.
-  await page.setViewportSize({ width: 1920, height: 976 });
-  await page.goto(baseUrl, { waitUntil: "commit" });
+const desktopViewports = [
+  { width: 1920, height: 976, name: "high-res display scaled" },
+  { width: 1440, height: 800, name: "1440x800 laptop" },
+  { width: 1366, height: 768, name: "1366x768 laptop" },
+  { width: 1280, height: 720, name: "1280x720 compact laptop" },
+];
 
-  const cta = await boundingBox(".hero-marquee .mt-6.justify-center", page);
-  const switcher = await boundingBox('[role="radiogroup"]', page);
-  const frame = await boundingBox(".frame-edge", page);
+for (const { width, height, name } of desktopViewports) {
+  test(`desktop hero reserves space between CTAs, theme switcher, and frame @ ${name}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto(baseUrl, { waitUntil: "commit" });
 
-  expect(switcher.top - cta.bottom, "CTA-to-switcher clearance").toBeGreaterThanOrEqual(48);
-  expect(frame.bottom - switcher.bottom, "switcher-to-frame clearance").toBeGreaterThanOrEqual(20);
-});
+    const cta = await boundingBox(".hero-marquee .mt-6.justify-center", page);
+    const switcher = await boundingBox('[role="radiogroup"]', page);
+    const frame = await boundingBox(".frame-edge", page);
+
+    expect(switcher.top - cta.bottom, "CTA-to-switcher clearance").toBeGreaterThanOrEqual(48);
+    expect(frame.bottom - switcher.bottom, "switcher-to-frame clearance").toBeGreaterThanOrEqual(20);
+    expect(switcher.bottom, "switcher stays inside viewport").toBeLessThanOrEqual(height);
+  });
+}
