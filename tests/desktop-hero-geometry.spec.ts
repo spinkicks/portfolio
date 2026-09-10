@@ -18,17 +18,20 @@ const desktopViewports = [
 ];
 
 for (const { width, height, name } of desktopViewports) {
-  test(`desktop hero reserves space between CTAs, theme switcher, and frame @ ${name}`, async ({
+  test(`desktop hero reserves space between hero content, theme switcher, and frame @ ${name}`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height });
     await page.goto(baseUrl, { waitUntil: "commit" });
 
-    const cta = await boundingBox(".hero-marquee .mt-6.justify-center", page);
+    await expect(page.getByRole("link", { name: "View work", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Get in touch", exact: true })).toHaveCount(0);
+
+    const stats = await boundingBox(".hero-marquee dl", page);
     const switcher = await boundingBox('[role="radiogroup"]', page);
     const frame = await boundingBox(".frame-edge", page);
 
-    expect(switcher.top - cta.bottom, "CTA-to-switcher clearance").toBeGreaterThanOrEqual(48);
+    expect(switcher.top - stats.bottom, "stats-to-switcher clearance").toBeGreaterThanOrEqual(48);
     expect(frame.bottom - switcher.bottom, "switcher-to-frame clearance").toBeGreaterThanOrEqual(20);
     expect(switcher.bottom, "switcher stays inside viewport").toBeLessThanOrEqual(height);
   });

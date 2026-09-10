@@ -2,7 +2,6 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const baseUrl = process.env.PORTFOLIO_URL ?? "http://127.0.0.1:8422";
 const FRAME_CLEARANCE_PX = 8;
-const MIN_CTA_HEIGHT_PX = 44;
 const MIN_SOCIAL_TOUCH_PX = 44;
 const TALL_MOBILE_HEIGHT_PX = 780;
 
@@ -82,25 +81,15 @@ async function assertMobileHeroGeometry(
   }
 
   const socialRow = socialLinks.first().locator("xpath=ancestor::ul[1]");
-  const ctaRow = page.getByRole("link", { name: "View work", exact: true });
   const backdropSwitcher = page.getByRole("radiogroup", { name: "Backdrop" });
 
   const socialBox = await boundingBox(socialRow);
-  const ctaBox = await boundingBox(ctaRow);
   const switcherBox = await boundingBox(backdropSwitcher);
 
-  expect(boxesOverlap(socialBox, ctaBox)).toBe(false);
   expect(boxesOverlap(socialBox, switcherBox)).toBe(false);
 
-  const viewWork = page.getByRole("link", { name: "View work", exact: true });
-  const getInTouch = page.getByRole("link", { name: "Get in touch", exact: true });
-
-  for (const cta of [viewWork, getInTouch]) {
-    const box = await boundingBox(cta);
-    expect(box.height).toBeGreaterThanOrEqual(MIN_CTA_HEIGHT_PX);
-    expect(box.x).toBeGreaterThanOrEqual(frame.x);
-    expect(right(box)).toBeLessThanOrEqual(right(frame));
-  }
+  await expect(page.getByRole("link", { name: "View work", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Get in touch", exact: true })).toHaveCount(0);
 
   const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
   const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);

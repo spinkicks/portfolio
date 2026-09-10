@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { heroStats, profile } from "../../content";
-import { HeroActions, SocialRail, StatusTag } from "./Chrome";
+import { SocialRail, StatusTag } from "./Chrome";
 
 /**
  * Attract screen: symmetric, with the name lit as a single run of tubing and
@@ -57,8 +57,7 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
           ))}
         </dl>
 
-        <HeroActions className="mt-6 justify-center sm:mt-7" />
-        <SocialRail className="mt-5 justify-center sm:mt-8 lg:hidden" />
+        <SocialRail className="mt-6 justify-center sm:mt-8 lg:hidden" />
       </div>
 
       {/* Pinned to the foot of the hero rather than placed after the copy: in

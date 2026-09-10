@@ -137,23 +137,3 @@ export function StatusTag({ className = "" }: { className?: string }) {
   );
 }
 
-export function HeroActions({ className = "" }: { className?: string }) {
-  return (
-    <div className={`flex flex-wrap items-center gap-3 sm:gap-4 ${className}`}>
-      <a
-        href="#work"
-        className="inline-flex min-h-11 items-center rounded-full border border-magenta bg-magenta/15 px-6 font-mono text-xs text-fg transition-colors duration-200 hover:bg-magenta/30 sm:min-h-12 sm:px-8 sm:text-sm"
-      >
-        View work
-      </a>
-      <a
-        href={`mailto:${profile.email}`}
-        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-soft px-5 font-mono text-xs text-dim transition-colors duration-200 hover:border-cyan hover:text-fg sm:min-h-12 sm:px-6 sm:text-sm"
-      >
-        <Mail size={14} aria-hidden="true" className="sm:hidden" />
-        <Mail size={15} aria-hidden="true" className="hidden sm:block" />
-        Get in touch
-      </a>
-    </div>
-  );
-}
