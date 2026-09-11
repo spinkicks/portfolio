@@ -11,8 +11,7 @@ import { SocialRail } from "./Chrome";
 export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
   return (
     <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-24 sm:pt-24">
-      {/* Centred copy lands on the brightest part of the artwork, where the
-          scene's left-weighted scrim does nothing for it.
+      {/* Centred copy lands on the brightest part of the artwork.
 
           Fixed rather than absolute. The hero is exactly one viewport tall, so
           at rest the two are the same box and the page looks identical either

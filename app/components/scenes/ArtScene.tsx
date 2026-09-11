@@ -59,11 +59,6 @@ export default function ArtScene() {
 
       {/* Darken the base of the frame so a lifted plate never shows its edge */}
       <div className="absolute inset-x-0 bottom-0 h-[22vh] bg-gradient-to-t from-ink via-ink/70 to-transparent" />
-
-      {/* Directional scrim: the copy column gets contrast, the right-hand side
-          keeps the artwork at full strength. */}
-      <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/72 to-transparent sm:to-40% lg:via-ink/55 lg:to-65%" />
-
       {/* Gentle overall settle so nothing in the art out-shouts the headline */}
       <div className="absolute inset-0 bg-ink/25" />
       <div className="absolute inset-0 bg-[radial-gradient(115%_85%_at_50%_40%,transparent_0%,rgba(4,2,12,0.22)_66%,rgba(4,2,12,0.66)_100%)]" />

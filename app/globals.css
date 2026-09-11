@@ -316,7 +316,7 @@
 }
 
 /* Local darkening for heroes that put copy over the bright side of the
-   artwork. The scene's own scrim is directional and only covers the left. */
+   artwork. */
 .copy-scrim {
   background: radial-gradient(
     72% 66% at 50% 50%,

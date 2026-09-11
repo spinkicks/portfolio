@@ -23,6 +23,7 @@ for (const { width, height, name } of desktopViewports) {
   }) => {
     await page.setViewportSize({ width, height });
     await page.goto(baseUrl, { waitUntil: "commit" });
+    await page.evaluate(() => document.fonts.ready);
 
     await expect(page.getByRole("link", { name: "View work", exact: true })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Get in touch", exact: true })).toHaveCount(0);
@@ -41,3 +42,13 @@ for (const { width, height, name } of desktopViewports) {
     expect(switcher.bottom, "switcher stays inside viewport").toBeLessThanOrEqual(height);
   });
 }
+
+test("artwork theme does not render directional left fade scrim", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  const artworkRadio = page.getByRole("radio", { name: "Artwork" });
+  await artworkRadio.click();
+  await expect(artworkRadio).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator(".bg-gradient-to-r.from-ink")).toHaveCount(0);
+});
+
