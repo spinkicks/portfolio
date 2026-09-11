@@ -44,6 +44,84 @@ function getTablistOrientation() {
   return window.matchMedia(DESKTOP_TABLIST_QUERY).matches ? "vertical" : "horizontal";
 }
 
+let isNavVisible = true;
+let lastScrollY = 0;
+const navListeners = new Set<() => void>();
+
+function setNavVisibleState(visible: boolean) {
+  if (isNavVisible !== visible) {
+    isNavVisible = visible;
+    navListeners.forEach((l) => l());
+  }
+}
+
+function subscribeNav(onStoreChange: () => void) {
+  navListeners.add(onStoreChange);
+  if (typeof window === "undefined") return () => navListeners.delete(onStoreChange);
+
+  if (navListeners.size === 1) {
+    lastScrollY = window.scrollY;
+    if (window.scrollY > 60) {
+      isNavVisible = false;
+    }
+  }
+
+  const threshold = 8;
+  const onScroll = () => {
+    const currentY = window.scrollY;
+    if (currentY <= 60) {
+      setNavVisibleState(true);
+    } else {
+      const delta = currentY - lastScrollY;
+      if (delta > threshold) {
+        setNavVisibleState(false);
+      } else if (delta < -threshold) {
+        setNavVisibleState(true);
+      }
+    }
+    lastScrollY = currentY;
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  return () => {
+    navListeners.delete(onStoreChange);
+    window.removeEventListener("scroll", onScroll);
+  };
+}
+
+function getNavSnapshot() {
+  return isNavVisible;
+}
+
+function getNavServerSnapshot() {
+  return true;
+}
+
+function TopNav({ onSwitch }: { onSwitch: () => void }) {
+  const visible = useSyncExternalStore(subscribeNav, getNavSnapshot, getNavServerSnapshot);
+
+  return (
+    <header
+      onFocus={() => setNavVisibleState(true)}
+      className={`fixed inset-x-0 top-0 z-40 flex items-center justify-end gap-2 p-4 transition-all duration-300 motion-reduce:transition-none sm:p-7 ${
+        visible
+          ? "translate-y-0 opacity-100"
+          : "pointer-events-none -translate-y-full opacity-0"
+      }`}
+    >
+      <SectionNav />
+      <button
+        type="button"
+        onClick={onSwitch}
+        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-soft bg-ink-800/70 px-4 font-mono text-xs tracking-wide text-dim backdrop-blur transition-colors duration-200 hover:border-magenta hover:text-fg"
+      >
+        <Terminal size={14} aria-hidden="true" />
+        Terminal view
+      </button>
+    </header>
+  );
+}
+
 export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
   const [scene, setScene] = useState<BackdropId>(DEFAULT_BACKDROP);
   return (
@@ -57,17 +135,7 @@ export default function MainSite({ onSwitch }: { onSwitch: () => void }) {
 
       <Backdrop id={scene} />
 
-      <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-end gap-2 p-4 sm:p-7">
-        <SectionNav />
-        <button
-          type="button"
-          onClick={onSwitch}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-soft bg-ink-800/70 px-4 font-mono text-xs tracking-wide text-dim backdrop-blur transition-colors duration-200 hover:border-magenta hover:text-fg"
-        >
-          <Terminal size={14} aria-hidden="true" />
-          Terminal view
-        </button>
-      </header>
+      <TopNav onSwitch={onSwitch} />
 
       <SocialRail className="hidden lg:flex" />
 

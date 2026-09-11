@@ -131,3 +131,28 @@ test("shader resumes frame advancement after WebGL context restore", async ({ pa
     .toBeGreaterThanOrEqual(MIN_FRAME_ADVANCE);
 });
 
+test("top navbar disappears when scrolling down and reappears when scrolling up", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await openSynthwave(page);
+
+  const header = page.locator("header");
+  await expect(header).toHaveClass(/translate-y-0/);
+  await expect(header).not.toHaveClass(/-translate-y-full/);
+
+  // Scroll down into content
+  await page.evaluate(() => window.scrollTo({ top: 600, behavior: "instant" }));
+  await expect(header).toHaveClass(/-translate-y-full/);
+  await expect(header).toHaveClass(/opacity-0/);
+
+  // Scroll up slightly
+  await page.evaluate(() => window.scrollTo({ top: 400, behavior: "instant" }));
+  await expect(header).toHaveClass(/translate-y-0/);
+  await expect(header).toHaveClass(/opacity-100/);
+
+  // Scroll back to top
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await expect(header).toHaveClass(/translate-y-0/);
+  await expect(header).toHaveClass(/opacity-100/);
+});
+
+
