@@ -99,15 +99,12 @@ export function SocialRail({ className = "" }: { className?: string }) {
 
 export function SectionNav() {
   return (
-    <nav
-      aria-label="Sections"
-      className="hidden min-h-11 items-center gap-0.5 rounded-full border border-line-soft bg-ink-800/70 px-2 backdrop-blur md:flex"
-    >
+    <nav aria-label="Sections" className="hidden items-center gap-1 md:flex">
       {navLinks.map((link) => (
         <a
           key={link.href}
           href={link.href}
-          className="rounded-full px-3 py-1.5 font-mono text-xs tracking-wide text-dim transition-colors duration-200 hover:text-fg"
+          className="px-3 py-2 font-mono text-xs tracking-wide text-dim transition-colors duration-200 hover:text-fg"
         >
           {link.label}
         </a>
