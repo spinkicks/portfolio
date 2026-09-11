@@ -15,7 +15,7 @@ export const profile = {
  * weights; `label` is the run-together version for screen readers.
  */
 export const status = {
-  open: true,
+  open: false,
   tag: "Open",
   detail: "Summer 2027 internships",
   label: "Open to Summer 2027 internships",

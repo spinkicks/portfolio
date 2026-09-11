@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { heroStats, profile } from "../../content";
-import { SocialRail, StatusTag } from "./Chrome";
+import { SocialRail } from "./Chrome";
 
 /**
  * Attract screen: symmetric, with the name lit as a single run of tubing and
@@ -10,7 +10,7 @@ import { SocialRail, StatusTag } from "./Chrome";
  */
 export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
   return (
-    <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-32 sm:pt-20">
+    <section className="hero-marquee relative flex min-h-svh flex-col items-center px-6 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] pt-24 text-center sm:px-10 sm:pb-24 sm:pt-24">
       {/* Centred copy lands on the brightest part of the artwork, where the
           scene's left-weighted scrim does nothing for it.
 
@@ -28,9 +28,7 @@ export default function HeroMarquee({ switcher }: { switcher?: ReactNode }) {
       />
 
       <div className="relative mx-auto w-full max-w-4xl">
-        <StatusTag />
-
-        <h1 className="font-marquee type-tube mt-4 text-[clamp(2.4rem,9vw,6.5rem)] sm:mt-6">
+        <h1 className="font-marquee type-tube text-[clamp(2.4rem,9vw,6.5rem)]">
           David O.
         </h1>
 

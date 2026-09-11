@@ -27,10 +27,15 @@ for (const { width, height, name } of desktopViewports) {
     await expect(page.getByRole("link", { name: "View work", exact: true })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Get in touch", exact: true })).toHaveCount(0);
 
+    const h1 = await boundingBox(".hero-marquee h1", page);
     const stats = await boundingBox(".hero-marquee dl", page);
     const switcher = await boundingBox('[role="radiogroup"]', page);
     const frame = await boundingBox(".frame-edge", page);
 
+    const contentCenter = (h1.top + stats.bottom) / 2;
+    const viewportCenter = height / 2;
+
+    expect(Math.abs(contentCenter - viewportCenter), "hero text is vertically centered").toBeLessThanOrEqual(16);
     expect(switcher.top - stats.bottom, "stats-to-switcher clearance").toBeGreaterThanOrEqual(48);
     expect(frame.bottom - switcher.bottom, "switcher-to-frame clearance").toBeGreaterThanOrEqual(20);
     expect(switcher.bottom, "switcher stays inside viewport").toBeLessThanOrEqual(height);
