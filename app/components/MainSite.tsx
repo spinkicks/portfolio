@@ -47,6 +47,9 @@ function getTablistOrientation() {
 
 let isNavVisible = true;
 let lastScrollY = 0;
+let scrollListenerAttached = false;
+let isScrollingActive = false;
+let scrollIdleTimer: ReturnType<typeof setTimeout> | null = null;
 const navListeners = new Set<() => void>();
 
 function setNavVisibleState(visible: boolean) {
@@ -56,37 +59,62 @@ function setNavVisibleState(visible: boolean) {
   }
 }
 
+function clearScrollingFlag() {
+  scrollIdleTimer = null;
+  if (isScrollingActive) {
+    isScrollingActive = false;
+    document.documentElement.removeAttribute("data-scrolling");
+  }
+}
+
+function onGlobalScroll() {
+  if (!isScrollingActive) {
+    isScrollingActive = true;
+    document.documentElement.setAttribute("data-scrolling", "true");
+  }
+  if (scrollIdleTimer !== null) {
+    clearTimeout(scrollIdleTimer);
+  }
+  scrollIdleTimer = setTimeout(clearScrollingFlag, 140);
+
+  const threshold = 8;
+  const currentY = window.scrollY;
+  if (currentY <= 60) {
+    setNavVisibleState(true);
+  } else {
+    const delta = currentY - lastScrollY;
+    if (delta > threshold) {
+      setNavVisibleState(false);
+    } else if (delta < -threshold) {
+      setNavVisibleState(true);
+    }
+  }
+  lastScrollY = currentY;
+}
+
 function subscribeNav(onStoreChange: () => void) {
   navListeners.add(onStoreChange);
   if (typeof window === "undefined") return () => navListeners.delete(onStoreChange);
 
-  if (navListeners.size === 1) {
+  if (!scrollListenerAttached) {
     lastScrollY = window.scrollY;
     if (window.scrollY > 60) {
       isNavVisible = false;
     }
+    window.addEventListener("scroll", onGlobalScroll, { passive: true });
+    scrollListenerAttached = true;
   }
 
-  const threshold = 8;
-  const onScroll = () => {
-    const currentY = window.scrollY;
-    if (currentY <= 60) {
-      setNavVisibleState(true);
-    } else {
-      const delta = currentY - lastScrollY;
-      if (delta > threshold) {
-        setNavVisibleState(false);
-      } else if (delta < -threshold) {
-        setNavVisibleState(true);
-      }
-    }
-    lastScrollY = currentY;
-  };
-
-  window.addEventListener("scroll", onScroll, { passive: true });
   return () => {
     navListeners.delete(onStoreChange);
-    window.removeEventListener("scroll", onScroll);
+    if (navListeners.size === 0 && scrollListenerAttached) {
+      window.removeEventListener("scroll", onGlobalScroll);
+      scrollListenerAttached = false;
+      if (scrollIdleTimer !== null) {
+        clearTimeout(scrollIdleTimer);
+      }
+      clearScrollingFlag();
+    }
   };
 }
 
@@ -104,7 +132,7 @@ function TopNav({ onSwitch }: { onSwitch: () => void }) {
   return (
     <header
       onFocus={() => setNavVisibleState(true)}
-      className={`fixed inset-x-0 top-0 z-40 flex items-center justify-end gap-2 p-4 transition-all duration-300 motion-reduce:transition-none sm:p-7 ${
+      className={`fixed inset-x-0 top-0 z-40 flex items-center justify-end gap-2 p-4 will-change-transform transition-all duration-300 motion-reduce:transition-none sm:p-7 ${
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none -translate-y-full opacity-0"
@@ -428,7 +456,7 @@ function ProjectEntry({
   heading: "h3" | "h4";
 }) {
   return (
-    <li className="border-line-soft py-6 md:odd:border-r md:odd:pr-8 md:even:pl-8">
+    <li className="border-line-soft py-6 [contain:layout_style] md:odd:border-r md:odd:pr-8 md:even:pl-8">
       <article>
         <div className="flex items-start justify-between gap-5">
           <div>

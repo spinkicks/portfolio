@@ -1,7 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useReducedMotion, useScroll } from "framer-motion";
+
+const DEFAULT_VH = 900;
+let cachedVh = DEFAULT_VH;
+const vhListeners = new Set<() => void>();
+let resizeAttached = false;
+
+function onWindowResize() {
+  const next = window.innerHeight || DEFAULT_VH;
+  if (next !== cachedVh) {
+    cachedVh = next;
+    vhListeners.forEach((listener) => listener());
+  }
+}
+
+function subscribeVh(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => undefined;
+  vhListeners.add(onStoreChange);
+  if (!resizeAttached) {
+    cachedVh = window.innerHeight || DEFAULT_VH;
+    window.addEventListener("resize", onWindowResize, { passive: true });
+    resizeAttached = true;
+  }
+  return () => {
+    vhListeners.delete(onStoreChange);
+    if (vhListeners.size === 0 && resizeAttached) {
+      window.removeEventListener("resize", onWindowResize);
+      resizeAttached = false;
+    }
+  };
+}
+
+function getVhSnapshot() {
+  return typeof window === "undefined" ? DEFAULT_VH : window.innerHeight || cachedVh;
+}
+
+function getVhServerSnapshot() {
+  return DEFAULT_VH;
+}
 
 /**
  * Scroll plumbing shared by the parallax scenes.
@@ -13,14 +51,8 @@ import { useReducedMotion, useScroll } from "framer-motion";
 export function useSceneScroll() {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const [vh, setVh] = useState(900);
-
-  useEffect(() => {
-    const update = () => setVh(window.innerHeight);
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+  const vh = useSyncExternalStore(subscribeVh, getVhSnapshot, getVhServerSnapshot);
 
   return { reduceMotion, scrollY, vh };
 }
+

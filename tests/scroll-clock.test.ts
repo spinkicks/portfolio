@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   DRIVE_SLOWDOWN_VH,
   DRIVE_TIME_MIN_SCALE,
+  SYNTHWAVE_DEEP_RENDER_INTERVAL_MS,
   SYNTHWAVE_RENDER_INTERVAL_MS,
   driveTimeScale,
   synthwaveRenderIntervalMs,
@@ -72,14 +73,23 @@ test("deep pause only applies after the cutoff viewport span", () => {
   expect(shouldPauseShaderAtDeepScroll("synthwave-theme", deep, VH)).toBe(true);
 });
 
-test("synthwave backdrops cap high-refresh rendering near 72-90fps", () => {
-  expect(SYNTHWAVE_RENDER_INTERVAL_MS).toBeCloseTo(1000 / 90, 5);
-  expect(synthwaveRenderIntervalMs("sunset-drive")).toBeCloseTo(
+test("synthwave backdrops cap hero rendering at 60fps and deep/active scroll at 30fps", () => {
+  expect(SYNTHWAVE_RENDER_INTERVAL_MS).toBeCloseTo(1000 / 60, 5);
+  expect(SYNTHWAVE_DEEP_RENDER_INTERVAL_MS).toBeCloseTo(1000 / 30, 5);
+  expect(synthwaveRenderIntervalMs("sunset-drive", 0, VH, false)).toBeCloseTo(
     SYNTHWAVE_RENDER_INTERVAL_MS,
     5
   );
-  expect(synthwaveRenderIntervalMs("synthwave-theme")).toBeCloseTo(
+  expect(synthwaveRenderIntervalMs("synthwave-theme", 0, VH, false)).toBeCloseTo(
     SYNTHWAVE_RENDER_INTERVAL_MS,
+    5
+  );
+  expect(synthwaveRenderIntervalMs("sunset-drive", VH * 1.5, VH, false)).toBeCloseTo(
+    SYNTHWAVE_DEEP_RENDER_INTERVAL_MS,
+    5
+  );
+  expect(synthwaveRenderIntervalMs("sunset-drive", 0, VH, true)).toBeCloseTo(
+    SYNTHWAVE_DEEP_RENDER_INTERVAL_MS,
     5
   );
 });
@@ -87,3 +97,4 @@ test("synthwave backdrops cap high-refresh rendering near 72-90fps", () => {
 test("terminal matrix rain keeps native display pacing", () => {
   expect(synthwaveRenderIntervalMs("matrix-rain")).toBe(0);
 });
+

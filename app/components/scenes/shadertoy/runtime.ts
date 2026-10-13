@@ -130,9 +130,23 @@ in vec2 aPos;
 void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
 `;
 
+function resolveAssetUrl(url: string, origin?: string): string {
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+  const base =
+    origin ||
+    (typeof self !== "undefined" &&
+    self.location?.origin &&
+    self.location.origin !== "null"
+      ? self.location.origin
+      : "");
+  if (!base) return url;
+  return url.startsWith("/") ? `${base}${url}` : `${base}/${url}`;
+}
+
 export class ShaderToyRuntime {
   private gl: WebGL2RenderingContext;
   private spec: ShaderSpec;
+  private origin?: string;
   private quad: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
   private passes: CompiledPass[] = [];
@@ -159,7 +173,8 @@ export class ShaderToyRuntime {
     quad: WebGLBuffer,
     vao: WebGLVertexArrayObject,
     format: number,
-    stateFormat: number
+    stateFormat: number,
+    origin?: string
   ) {
     this.gl = gl;
     this.spec = spec;
@@ -167,12 +182,14 @@ export class ShaderToyRuntime {
     this.vao = vao;
     this.format = format;
     this.stateFormat = stateFormat;
+    this.origin = origin;
   }
 
   static async create(
-    canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement | OffscreenCanvas,
     spec: ShaderSpec,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    origin?: string
   ): Promise<ShaderToyRuntime | null> {
     const gl = canvas.getContext("webgl2", {
       alpha: false,
@@ -181,7 +198,7 @@ export class ShaderToyRuntime {
       stencil: false,
       preserveDrawingBuffer: false,
       powerPreference: "high-performance",
-    });
+    }) as WebGL2RenderingContext | null;
     if (!gl) return null;
 
     // Floating point buffers: these shaders carry values well above 1.0 between
@@ -205,14 +222,15 @@ export class ShaderToyRuntime {
     const canFloat = !!gl.getExtension("EXT_color_buffer_float");
     const canFilterFloat = !!gl.getExtension("OES_texture_float_linear");
     const canHalf = canFloat || !!gl.getExtension("EXT_color_buffer_half_float");
-    const format =
-      canFloat && canFilterFloat
+    // Visual buffers only need 16-bit half-float HDR, cutting texture memory
+    // bandwidth in half compared to RGBA32F across full-screen passes B, C, D.
+    const format = canHalf
+      ? gl.RGBA16F
+      : canFloat && canFilterFloat
         ? gl.RGBA32F
-        : canHalf
-          ? gl.RGBA16F
-          : gl.RGBA8;
-    // State buffers use nearest sampling, so they can keep full float without
-    // OES_texture_float_linear. Visual passes still need a filterable format.
+        : gl.RGBA8;
+    // State buffers (8x8 Buffer A) use nearest sampling and keep full 32-bit
+    // float so the running odometer accumulator never stalls.
     const stateFormat = canFloat ? gl.RGBA32F : canHalf ? gl.RGBA16F : gl.RGBA8;
 
     const quad = gl.createBuffer();
@@ -226,7 +244,15 @@ export class ShaderToyRuntime {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.bindVertexArray(null);
 
-    const runtime = new ShaderToyRuntime(gl, spec, quad, vao, format, stateFormat);
+    const runtime = new ShaderToyRuntime(
+      gl,
+      spec,
+      quad,
+      vao,
+      format,
+      stateFormat,
+      origin
+    );
     const ok = await runtime.load(signal);
     if (!ok) {
       runtime.dispose();
@@ -240,7 +266,7 @@ export class ShaderToyRuntime {
     const spec = this.spec;
 
     const grab = async (url: string) => {
-      const res = await fetch(url, { signal });
+      const res = await fetch(resolveAssetUrl(url, this.origin), { signal });
       if (!res.ok) throw new Error(`${url} -> ${res.status}`);
       return res.text();
     };
@@ -319,12 +345,16 @@ export class ShaderToyRuntime {
       await Promise.all(
         [...urls].map(async (url) => {
           const ch = this.findChannel(url);
-          const image = await loadImage(url, signal);
+          const image = await loadImage(
+            resolveAssetUrl(url, this.origin),
+            signal,
+            ch.vflip !== false
+          );
           this.textures.set(url, this.uploadTexture(image, ch));
         })
       );
     } catch (err) {
-      if (process.env.NODE_ENV !== "production") {
+      if (process.env.NODE_ENV !== "production" && !signal?.aborted) {
         console.error("[shadertoy] texture load failed", err);
       }
       return false;
@@ -370,7 +400,7 @@ export class ShaderToyRuntime {
   }
 
   private uploadTexture(
-    image: HTMLImageElement,
+    image: DecodedImage,
     ch: Channel & { kind: "texture" }
   ) {
     const gl = this.gl;
@@ -378,9 +408,11 @@ export class ShaderToyRuntime {
     gl.bindTexture(gl.TEXTURE_2D, tex);
     // Shadertoy flips its texture inputs by default; the metadata on both of
     // these shaders says vflip, and the noise lookups care.
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ch.vflip === false ? 0 : 1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    const needsUnpackFlip = !image.preflipped && ch.vflip !== false;
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, needsUnpackFlip ? 1 : 0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image.source);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
+    image.close?.();
 
     const wrap = ch.wrap === "clamp" ? gl.CLAMP_TO_EDGE : gl.REPEAT;
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
@@ -395,7 +427,7 @@ export class ShaderToyRuntime {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f);
     }
-    return { tex, w: image.naturalWidth, h: image.naturalHeight };
+    return { tex, w: image.width, h: image.height };
   }
 
   private makeKeyboardTexture() {
@@ -599,6 +631,10 @@ export class ShaderToyRuntime {
     return true;
   }
 
+  get context() {
+    return this.gl;
+  }
+
   get isDead() {
     return this.dead;
   }
@@ -628,11 +664,44 @@ export class ShaderToyRuntime {
   }
 }
 
-function loadImage(url: string, signal?: AbortSignal): Promise<HTMLImageElement> {
+type DecodedImage = {
+  source: TexImageSource;
+  width: number;
+  height: number;
+  preflipped?: boolean;
+  close?: () => void;
+};
+
+async function loadImage(
+  url: string,
+  signal?: AbortSignal,
+  vflip = true
+): Promise<DecodedImage> {
+  if (typeof createImageBitmap === "function") {
+    const res = await fetch(url, { signal });
+    if (!res.ok) throw new Error(`image ${url} -> ${res.status}`);
+    const blob = await res.blob();
+    const bitmap = await createImageBitmap(blob, {
+      imageOrientation: vflip ? "flipY" : "none",
+      premultiplyAlpha: "none",
+    });
+    return {
+      source: bitmap,
+      width: bitmap.width,
+      height: bitmap.height,
+      preflipped: true,
+      close: () => bitmap.close(),
+    };
+  }
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
+    img.onload = () =>
+      resolve({
+        source: img,
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
     img.onerror = () => reject(new Error(`image ${url}`));
     img.src = url;
     signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true });

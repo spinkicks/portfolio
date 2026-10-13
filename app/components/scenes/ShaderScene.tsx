@@ -11,6 +11,7 @@ import {
   synthwaveRenderIntervalMs,
 } from "./shadertoy/scrollClock";
 import { RafScheduler, ShaderLoadAttempt } from "./shadertoy/loopControl";
+import type { WorkerInMessage, WorkerOutMessage } from "./shadertoy/worker";
 import { useSceneScroll } from "./useSceneScroll";
 
 /**
@@ -25,14 +26,111 @@ import { useSceneScroll } from "./useSceneScroll";
 const BASE = "#12021f";
 
 /** Raymarching at native resolution on a high-DPI display is not worth it. */
-const MAX_DPR = 1.5;
-const MAX_WIDTH = 1920;
+const MAX_DPR = 1.15;
+const MAX_WIDTH = 1600;
+const SCROLL_ACTIVE_WINDOW_MS = 140;
 
 /** Frames to settle before freezing, when the visitor asked for no motion. */
 const SETTLE_FRAMES = SHADER_SETTLE_FRAMES;
 
 /** Dev/test hook for Playwright liveness checks; stripped from production bundles. */
 const TRACK_SHADER_FRAMES = process.env.NODE_ENV !== "production";
+
+type WorkerBridge = {
+  worker: Worker;
+  disposeTimer: ReturnType<typeof setTimeout> | null;
+  onMessage: ((msg: WorkerOutMessage) => void) | null;
+};
+
+const canvasWorkerBridges = new WeakMap<HTMLCanvasElement, WorkerBridge>();
+
+function computeCanvasSize(canvas: HTMLCanvasElement, scale: number) {
+  const cssWidth = canvas.clientWidth;
+  const cssHeight = canvas.clientHeight;
+  if (cssWidth === 0 || cssHeight === 0) return { width: 0, height: 0 };
+  const dpr =
+    Math.min(window.devicePixelRatio || 1, MAX_DPR, MAX_WIDTH / cssWidth) *
+    scale;
+  return {
+    width: Math.max(1, Math.round(cssWidth * dpr)),
+    height: Math.max(1, Math.round(cssHeight * dpr)),
+  };
+}
+
+function getOrCreateWorkerBridge(canvas: HTMLCanvasElement): WorkerBridge | null {
+  const existing = canvasWorkerBridges.get(canvas);
+  if (existing) {
+    if (existing.disposeTimer !== null) {
+      clearTimeout(existing.disposeTimer);
+      existing.disposeTimer = null;
+    }
+    return existing;
+  }
+
+  if (
+    typeof Worker === "undefined" ||
+    typeof canvas.transferControlToOffscreen !== "function"
+  ) {
+    return null;
+  }
+
+  try {
+    const offscreen = canvas.transferControlToOffscreen();
+    const worker = new Worker(new URL("./shadertoy/worker.ts", import.meta.url), {
+      type: "module",
+    });
+
+    const bridge: WorkerBridge = {
+      worker,
+      disposeTimer: null,
+      onMessage: null,
+    };
+
+    worker.onmessage = (event: MessageEvent<WorkerOutMessage>) => {
+      bridge.onMessage?.(event.data);
+    };
+
+    const initMsg: WorkerInMessage = {
+      type: "init",
+      canvas: offscreen,
+      trackFrames: TRACK_SHADER_FRAMES,
+      origin: window.location.origin,
+    };
+    worker.postMessage(initMsg, [offscreen]);
+
+    // Preserve WebGL context loss testability on the transferred canvas element.
+    Object.defineProperty(canvas, "getContext", {
+      configurable: true,
+      value: (contextId: string) => {
+        if (contextId === "webgl2") {
+          return {
+            getExtension(name: string) {
+              if (name === "WEBGL_lose_context") {
+                return {
+                  loseContext() {
+                    worker.postMessage({ type: "loseContext" } satisfies WorkerInMessage);
+                  },
+                  restoreContext() {
+                    worker.postMessage({
+                      type: "restoreContext",
+                    } satisfies WorkerInMessage);
+                  },
+                };
+              }
+              return null;
+            },
+          };
+        }
+        return null;
+      },
+    });
+
+    canvasWorkerBridges.set(canvas, bridge);
+    return bridge;
+  } catch {
+    return null;
+  }
+}
 
 export default function ShaderScene({
   spec,
@@ -65,6 +163,86 @@ export default function ShaderScene({
     if (!canvasNode) return;
     const canvas: HTMLCanvasElement = canvasNode;
 
+    const bridge = getOrCreateWorkerBridge(canvas);
+    if (bridge) {
+      const post = (msg: WorkerInMessage) => bridge.worker.postMessage(msg);
+
+      bridge.onMessage = (msg) => {
+        if (msg.type === "running") {
+          setRunning(msg.running);
+        } else if (msg.type === "frames") {
+          if (msg.frames === null) {
+            canvas.removeAttribute("data-shader-frames");
+          } else {
+            canvas.setAttribute("data-shader-frames", String(msg.frames));
+          }
+        }
+      };
+
+      const remeasure = () => {
+        const { width, height } = computeCanvasSize(canvas, scale);
+        if (width === 0 || height === 0) return;
+        post({
+          type: "resize",
+          width,
+          height,
+          vh: window.innerHeight,
+        });
+      };
+
+      const onVisibility = () => {
+        post({
+          type: "visibility",
+          hidden: document.hidden,
+        });
+      };
+
+      const onScrollChange = () => {
+        post({
+          type: "scroll",
+          scrollY: scrollY.get(),
+          vh: window.innerHeight,
+        });
+      };
+
+      const initialSize = computeCanvasSize(canvas, scale);
+      post({
+        type: "load",
+        spec,
+        width: initialSize.width,
+        height: initialSize.height,
+        animate: live.current.animate,
+        scrollY: scrollY.get(),
+        vh: window.innerHeight,
+        hidden: document.hidden,
+      });
+
+      const observer = new ResizeObserver(remeasure);
+      observer.observe(canvas);
+      window.addEventListener("resize", remeasure);
+      document.addEventListener("visibilitychange", onVisibility);
+      const unsubScroll = scrollY.on("change", onScrollChange);
+
+      return () => {
+        bridge.onMessage = null;
+        unsubScroll();
+        observer.disconnect();
+        window.removeEventListener("resize", remeasure);
+        document.removeEventListener("visibilitychange", onVisibility);
+
+        bridge.disposeTimer = setTimeout(() => {
+          if (!canvas.isConnected) {
+            post({ type: "dispose" });
+            bridge.worker.terminate();
+            canvasWorkerBridges.delete(canvas);
+          } else {
+            post({ type: "stop" });
+          }
+        }, 50);
+      };
+    }
+
+    // Main-thread fallback when OffscreenCanvas is unavailable
     const load = new ShaderLoadAttempt();
     const frames = new RafScheduler();
     let runtime: ShaderToyRuntime | null = null;
@@ -75,6 +253,7 @@ export default function ShaderScene({
     let driveTime = 0;
     let lastFrame = 0;
     let lastRender = 0;
+    let lastScrollAt = 0;
     const isDrive = spec.name === "sunset-drive";
 
     const resetClock = () => {
@@ -88,15 +267,9 @@ export default function ShaderScene({
     };
 
     const applySize = () => {
-      const cssWidth = canvas.clientWidth;
-      const cssHeight = canvas.clientHeight;
-      if (!runtime || cssWidth === 0 || cssHeight === 0) return;
+      const { width, height } = computeCanvasSize(canvas, scale);
+      if (!runtime || width === 0 || height === 0) return;
 
-      const dpr =
-        Math.min(window.devicePixelRatio || 1, MAX_DPR, MAX_WIDTH / cssWidth) *
-        scale;
-      const width = Math.max(1, Math.round(cssWidth * dpr));
-      const height = Math.max(1, Math.round(cssHeight * dpr));
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -156,6 +329,7 @@ export default function ShaderScene({
 
       const currentScrollY = scrollY.get();
       const vh = window.innerHeight;
+      const isScrolling = now - lastScrollAt < SCROLL_ACTIVE_WINDOW_MS;
 
       realTime += delta;
       if (isDrive) {
@@ -164,7 +338,12 @@ export default function ShaderScene({
         driveTime = realTime;
       }
 
-      const renderIntervalMs = synthwaveRenderIntervalMs(spec.name);
+      const renderIntervalMs = synthwaveRenderIntervalMs(
+        spec.name,
+        currentScrollY,
+        vh,
+        isScrolling
+      );
       const elapsedSinceRender = lastRender === 0 ? renderIntervalMs : now - lastRender;
       if (renderIntervalMs > 0 && elapsedSinceRender < renderIntervalMs) {
         return shouldContinue();
@@ -224,13 +403,18 @@ export default function ShaderScene({
       else wake();
     };
 
+    const onScrollChange = () => {
+      lastScrollAt = performance.now();
+      wake();
+    };
+
     const observer = new ResizeObserver(remeasure);
     observer.observe(canvas);
     window.addEventListener("resize", remeasure);
     document.addEventListener("visibilitychange", onVisibility);
     canvas.addEventListener("webglcontextlost", onContextLost);
     canvas.addEventListener("webglcontextrestored", onContextRestored);
-    const unsubScroll = scrollY.on("change", wake);
+    const unsubScroll = scrollY.on("change", onScrollChange);
 
     startRuntime();
 
@@ -247,6 +431,16 @@ export default function ShaderScene({
       runtime?.dispose();
     };
   }, [scale, spec, scrollY]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const bridge = canvasWorkerBridges.get(canvas);
+    bridge?.worker.postMessage({
+      type: "animate",
+      animate: !reduceMotion,
+    } satisfies WorkerInMessage);
+  }, [reduceMotion]);
 
   return (
     <div aria-hidden="true" className={className} style={{ background: base }}>
@@ -276,3 +470,4 @@ export default function ShaderScene({
     </div>
   );
 }
+

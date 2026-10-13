@@ -49,7 +49,7 @@ export const SYNTHWAVE_THEME: ShaderSpec = {
   ],
   // The march runs 200 steps a pixel and the temporal pass hides the shortfall,
   // so resolution is the cheapest thing to give up here.
-  bufferScale: 0.75,
+  bufferScale: 0.6,
 };
 
 /**
@@ -139,7 +139,7 @@ export const SUNSET_DRIVE: ShaderSpec = {
     "#undef FORCED_RATIO",
     "#undef FPS_COUNTER",
   ],
-  bufferScale: 0.7,
+  bufferScale: 0.55,
 };
 
 /**

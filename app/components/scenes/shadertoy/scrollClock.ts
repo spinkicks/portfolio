@@ -7,8 +7,11 @@ export const DRIVE_SLOWDOWN_VH = 4;
 /** Viewport heights past which non-drive shaders may stop rendering. */
 export const DEEP_SCROLL_PAUSE_VH = 1.6;
 
-/** High-refresh cap; rAF quantization keeps common displays around 72-90fps. */
-export const SYNTHWAVE_RENDER_INTERVAL_MS = 1000 / 90;
+/** Cap hero shader rendering at 60fps to leave GPU headroom for scrolling. */
+export const SYNTHWAVE_RENDER_INTERVAL_MS = 1000 / 60;
+
+/** Step down to 30fps when scrolled below the hero or actively scrolling. */
+export const SYNTHWAVE_DEEP_RENDER_INTERVAL_MS = 1000 / 30;
 
 /** Frames to draw before a non-drive scene may freeze. */
 export const SHADER_SETTLE_FRAMES = 45;
@@ -65,9 +68,19 @@ export function shouldPauseShaderAtDeepScroll(
   return scrollY > vh * DEEP_SCROLL_PAUSE_VH;
 }
 
-/** Caps only the two synthwave-side shaders; terminal rain keeps native pacing. */
-export function synthwaveRenderIntervalMs(shaderName: string): number {
-  return shaderName === "sunset-drive" || shaderName === "synthwave-theme"
-    ? SYNTHWAVE_RENDER_INTERVAL_MS
-    : 0;
+/** Caps the two synthwave-side shaders (60fps in hero, 30fps below fold or while scrolling). */
+export function synthwaveRenderIntervalMs(
+  shaderName: string,
+  scrollY = 0,
+  viewportHeight = 900,
+  scrolling = false
+): number {
+  if (shaderName !== "sunset-drive" && shaderName !== "synthwave-theme") {
+    return 0;
+  }
+  const vh = Math.max(1, viewportHeight);
+  if (scrolling || scrollY > vh) {
+    return SYNTHWAVE_DEEP_RENDER_INTERVAL_MS;
+  }
+  return SYNTHWAVE_RENDER_INTERVAL_MS;
 }
