@@ -1,4 +1,5 @@
 import {
+  awards,
   experience,
   facts,
   heroStats,
@@ -29,6 +30,7 @@ export function portfolioKnowledge() {
     },
     languages: factValue("Languages"),
     focus: factValue("Focus"),
+    awards,
     experience,
     projects,
     skills,

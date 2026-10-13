@@ -7,6 +7,7 @@ import { SECTIONS, type ConsoleCtx } from "./commands";
 import ShaderScene from "../scenes/ShaderScene";
 import { MATRIX_RAIN } from "../scenes/shadertoy/specs";
 import {
+  awards,
   experience,
   featuredProjects,
   facts,
@@ -341,6 +342,23 @@ function About() {
           </div>
         ))}
       </dl>
+
+      <div className="mt-7">
+        <h3 className="text-xs text-amber">Awards &amp; Honors</h3>
+        <ul className="mt-2.5 space-y-1.5">
+          {awards.map((award) => (
+            <li
+              key={award}
+              className="flex max-w-[68ch] gap-2.5 text-sm leading-relaxed text-dim"
+            >
+              <span aria-hidden="true" className="shrink-0 text-faint">
+                -
+              </span>
+              {award}
+            </li>
+          ))}
+        </ul>
+      </div>
     </Section>
   );
 }
@@ -353,8 +371,25 @@ function Work() {
       <ol className="space-y-9">
         {experience.map((job) => (
           <li key={job.company} className="border-l border-line-soft pl-5">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-              <h3 className="text-sm text-fg">{job.company}</h3>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h3 className="text-sm text-fg">{job.company}</h3>
+                {job.href ? (
+                  <a
+                    href={job.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-baseline gap-1 text-xs text-lime underline-offset-4 hover:underline"
+                  >
+                    open
+                    <ArrowUpRight
+                      size={11}
+                      aria-hidden="true"
+                      className="translate-y-0.5"
+                    />
+                  </a>
+                ) : null}
+              </div>
               <span className="text-xs text-faint">{job.period}</span>
             </div>
             <p className="mt-1 text-xs text-lime">{job.role}</p>

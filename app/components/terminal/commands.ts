@@ -63,8 +63,11 @@ const SECTION_LABELS: readonly string[] = SECTIONS.map((s) => s.label);
 const SECTION_BY_LABEL = new Map(SECTIONS.map((s) => [s.label, s]));
 
 /** Everything `open` will accept, resolved case-insensitively. Built once. */
-const OPEN_TARGETS: readonly { name: string; url: string }[] = [
+const RAW_OPEN_TARGETS: readonly { name: string; url: string }[] = [
   ...links.map((l) => ({ name: l.label.toLowerCase(), url: l.href })),
+  ...experience
+    .filter((e) => e.href)
+    .map((e) => ({ name: e.company.toLowerCase(), url: e.href as string })),
   ...projects
     .filter((p) => p.href)
     .map((p) => ({ name: p.name.toLowerCase(), url: p.href as string })),
@@ -77,10 +80,14 @@ const OPEN_TARGETS: readonly { name: string; url: string }[] = [
   { name: "email", url: `mailto:${profile.email}` },
 ];
 
+const OPEN_TARGETS: readonly { name: string; url: string }[] = Array.from(
+  new Map(RAW_OPEN_TARGETS.map((target) => [target.name, target])).values()
+);
+
 const OPEN_TARGET_NAMES: readonly string[] = OPEN_TARGETS.map((t) => t.name);
 const OPEN_TARGET_LIST = OPEN_TARGET_NAMES.join(", ");
 
-const pad = (s: string, n: number) => s.padEnd(n, " ");
+const pad = (s: string, n: number) => s.padEnd(Math.max(n, s.length + 2), " ");
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException

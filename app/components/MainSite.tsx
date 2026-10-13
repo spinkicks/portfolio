@@ -21,6 +21,7 @@ import {
 import HeroMarquee from "./hero/HeroMarquee";
 import TypingTest from "./TypingTest";
 import {
+  awards,
   experience,
   facts,
   featuredProjects,
@@ -191,9 +192,25 @@ function About() {
   return (
     <Section id="about" title="About">
       <div className="grid gap-12 md:grid-cols-[1.35fr_1fr]">
-        <p className="max-w-[60ch] text-base leading-relaxed text-dim sm:text-lg">
-          {profile.bio}
-        </p>
+        <div>
+          <p className="max-w-[60ch] text-base leading-relaxed text-dim sm:text-lg">
+            {profile.bio}
+          </p>
+
+          <div className="mt-8 border-t border-line-soft pt-6">
+            <h3 className="label text-cyan">Awards &amp; Honors</h3>
+            <ul className="mt-3 space-y-1.5">
+              {awards.map((award) => (
+                <li
+                  key={award}
+                  className="relative pl-4 text-sm leading-relaxed text-dim before:absolute before:left-0 before:top-[0.65em] before:size-1 before:bg-violet"
+                >
+                  {award}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
         <dl className="divide-y divide-line-soft border-t border-line-soft">
           {facts.map((fact) => (
@@ -311,7 +328,21 @@ function ExperiencePanel({ job }: { job: Experience }) {
   return (
     <article>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="display text-2xl text-fg sm:text-3xl">{job.company}</h3>
+        <h3 className="display text-2xl text-fg sm:text-3xl">
+          {job.href ? (
+            <a
+              href={job.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 transition-colors duration-200 hover:text-magenta"
+            >
+              {job.company}
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </a>
+          ) : (
+            job.company
+          )}
+        </h3>
         <span className="label">{job.period}</span>
       </div>
       <p className="mt-2 font-mono text-sm text-cyan">{job.role}</p>

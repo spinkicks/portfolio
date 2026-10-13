@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { portfolioKnowledge } from "../app/api/ask/knowledge";
 import {
+  awards,
   experience,
   facts,
   heroStats,
@@ -15,18 +16,25 @@ const baseUrl = process.env.PORTFOLIO_URL ?? "http://127.0.0.1:8422";
 
 const expectedProjectContract = [
   ["Subwoofer Central", "featured", "live"],
-  ["Small Learning Model", "featured", "development-only"],
-  ["GT100K", "featured", "pre-production"],
-  ["Agentic Software Factory v1", "featured", "development-only"],
+  ["Audio SLM", "featured", "development-only"],
   ["Blazing Audio", "featured", "live"],
-  ["Univyrse", "featured", "live"],
-  ["NeuroBaseline", "featured", "prototype"],
   ["Speedrun", "featured", "early release"],
+  ["GT100K", "featured", "pre-production"],
+  ["Agentic Factory v1", "featured", "development-only"],
+  ["Turing Machine Runtime Ranking Engine", "featured", "development-only"],
+  ["UTMAX", "featured", "live"],
+  ["UTMap", "featured", "live"],
+  ["keyAC", "featured", "development-only"],
+  [
+    "Graphics API Telemetry & Energy Efficiency Benchmark",
+    "more",
+    "development-only",
+  ],
+  ["Univyrse", "more", "live"],
+  ["NeuroBaseline", "more", "prototype"],
+  ["Short-Video MVP", "more", "prototype"],
   ["Virgilio Acoustics", "more", "live"],
-  ["UTMAX", "more", "live"],
-  ["UTMap", "more", "live"],
   ["Illuminate", "more", "live"],
-  ["Short-video MVP", "more", "prototype"],
 ] as const;
 
 type RichProject = {
@@ -133,6 +141,12 @@ async function expectTerminalExperienceContent(page: Page) {
         `${job.company} is missing stack item: ${tech}`
       ).toBeVisible();
     }
+    if (job.href) {
+      await expect(
+        record.locator(`a[href="${job.href}"]`),
+        `${job.company} is missing company href: ${job.href}`
+      ).toHaveAttribute("href", job.href);
+    }
   }
 }
 
@@ -190,6 +204,12 @@ async function expectSynthwaveExperienceTabs(page: Page) {
     await expect(
       panel.getByRole("heading", { name: job.company, exact: true })
     ).toBeVisible();
+    if (job.href) {
+      await expect(
+        panel.locator(`a[href="${job.href}"]`),
+        `${job.company} is missing company href: ${job.href}`
+      ).toHaveAttribute("href", job.href);
+    }
     for (const value of [job.role, job.period, job.summary]) {
       await expect(panel, `${job.company} is missing: ${value}`).toContainText(
         matchingText(value)
@@ -260,6 +280,12 @@ async function expectCanonicalContent(page: Page, terminal: boolean) {
       record.getByText(exactText(fact.value)),
       `missing fact: ${fact.label}`
     ).toBeVisible();
+  }
+
+  for (const award of awards) {
+    await expect(about, `missing award: ${award}`).toContainText(
+      matchingText(award)
+    );
   }
 
   if (terminal) {
@@ -388,77 +414,66 @@ test("heroStats exposes exactly one UT Austin credential", () => {
   expect(heroStats).toEqual([...expectedHeroStats]);
 });
 
-test("factory project uses generic identity without public URL", () => {
+test("Agentic Factory v1 uses Master Resume identity without public URL", () => {
   const factory = richProjects.find(
-    (project) => project.name === "Agentic Software Factory v1"
+    (project) => project.name === "Agentic Factory v1"
   );
 
-  expect(factory, "missing Agentic Software Factory v1 project").toBeDefined();
+  expect(factory, "missing Agentic Factory v1 project").toBeDefined();
   expect(factory?.href, "factory must not expose a public URL").toBeUndefined();
-});
-
-test("Agentic Software Factory v1 summary and details describe loop harnesses and self-QA agents", () => {
-  const factory = richProjects.find(
-    (project) => project.name === "Agentic Software Factory v1"
-  );
-
-  expect(factory, "missing Agentic Software Factory v1 project").toBeDefined();
-  expect(factory?.summary).toMatch(/loop harnesses/i);
-  expect(factory?.summary).toMatch(/self-QA agents/i);
-  expect(factory?.summary).toBe(
-    "Cross-project agentic software factory built around bounded Claude and Codex loop harnesses, self-QA agents, deterministic gates, recovery, browser QA, and pull-request delivery."
-  );
-  expect(factory?.details).toEqual([
-    "Runs repeated builder-review loops in isolated worktrees with file-backed cross-turn state, time and no-progress caps, and stranded-run recovery.",
-    "Self-QA agents combine semantic browser walks, screenshot and pixel checks, model and deterministic graders, and specialized review panels.",
-    "Used across GT100K and Subwoofer Central with host-side Git controls and pull-request delivery; the repository remains private.",
-  ]);
   expect(factory?.status).toBe("development-only");
   expect(factory?.year).toBe("2026");
-  expect(factory?.stack).toEqual(["Python", "Bash", "Claude", "Codex"]);
+  expect(factory?.stack).toEqual([
+    "Python",
+    "Bash",
+    "Claude Code",
+    "Codex",
+    "Playwright",
+    "systemd",
+  ]);
+  const detailText = (factory?.details ?? []).join(" ");
+  expect(detailText).toMatch(/isolated Git worktrees/);
+  expect(detailText).toMatch(/adversarial Playwright QA suite/);
+  expect(detailText).toMatch(/systemd Socket-Mode Slack daemon/);
 });
 
-test("Small Learning Model exposes dataset secondary link and download metrics", () => {
-  const slm = richProjects.find((project) => project.name === "Small Learning Model");
+test("Audio SLM exposes dataset secondary link and Master Resume evaluation metrics", () => {
+  const slm = richProjects.find((project) => project.name === "Audio SLM");
 
-  expect(slm, "missing Small Learning Model project").toBeDefined();
+  expect(slm, "missing Audio SLM project").toBeDefined();
   expect(slm?.secondary).toEqual({
     label: "Dataset",
     href: slmDatasetUrl,
   });
 
   const detailText = (slm?.details ?? []).join(" ");
-  expect(detailText).toMatch(/434.*model downloads/);
-  expect(detailText).toMatch(/400\+\s*downloads/);
-  expect(detailText).toMatch(/54.*dataset downloads/);
-  expect(detailText).toMatch(/50\+\s*downloads/);
+  expect(detailText).toMatch(/94\.4% headline accuracy/);
+  expect(detailText).toMatch(/98\.12% argument validity/);
+  expect(detailText).toMatch(/400\+ model downloads/);
+  expect(detailText).toMatch(/60\+ dataset downloads/);
 });
 
-test("Virgilio Acoustics summary states founder ownership and revenue", () => {
-  const virgilio = richProjects.find(
+test("Virgilio Acoustics appears in Experience with company link and in More Projects", () => {
+  const virgilioExp = experience.find(
+    (job) => job.company === "Virgilio Acoustics"
+  );
+  expect(virgilioExp, "missing Virgilio Acoustics in experience").toBeDefined();
+  expect(virgilioExp?.href).toBe("https://www.virgilio.systems/");
+  expect(virgilioExp?.highlights.join(" ")).toMatch(/\$14K revenue/);
+
+  const virgilioProj = richProjects.find(
     (project) => project.name === "Virgilio Acoustics"
   );
-
-  expect(virgilio, "missing Virgilio Acoustics project").toBeDefined();
-  expect(virgilio?.summary).toMatch(/founded/i);
-  expect(virgilio?.summary).toMatch(/virgilio acoustics/i);
-  expect(virgilio?.summary).toMatch(/\$14,000 in revenue/);
-  expect(virgilio?.summary).toMatch(/\$5,000 in net profit/);
-  expect(virgilio?.summary).toMatch(/10\+ clients/);
-
-  const detailText = (virgilio?.details ?? []).join(" ");
-  expect(detailText).toMatch(/\$14,000 in revenue/);
-  expect(detailText).toMatch(/\$5,000 in net profit/);
-  expect(detailText).toMatch(/\$9,000 in costs/);
-  expect(detailText).toMatch(/500\+ site visitors/);
+  expect(virgilioProj, "missing Virgilio Acoustics project").toBeDefined();
+  expect(virgilioProj?.href).toBe("https://www.virgilio.systems/");
 });
 
-test("Short-video MVP links to the short-form-video-app repository", () => {
+test("Short-Video MVP links to the short-form-video-app repository", () => {
   const shortVideo = richProjects.find(
-    (project) => project.name === "Short-video MVP"
+    (project) => project.name === "Short-Video MVP"
   );
 
-  expect(shortVideo, "missing Short-video MVP project").toBeDefined();
+  expect(shortVideo, "missing Short-Video MVP project").toBeDefined();
   expect(shortVideo?.href).toBe(
     "https://github.com/spinkicks/short-form-video-app"
   );
@@ -512,7 +527,7 @@ for (const layout of [
     const section = page.locator("#projects");
 
     const featuredRecord = section
-      .getByRole("heading", { name: "Small Learning Model", exact: true })
+      .getByRole("heading", { name: "Audio SLM", exact: true })
       .locator("xpath=ancestor::*[self::article or self::li][1]");
     const featuredDetails = featuredRecord.locator("details");
     await expect(
@@ -522,7 +537,7 @@ for (const layout of [
     await expect(featuredDetails).toHaveAttribute("open", "");
 
     const moreRecord = section
-      .getByRole("heading", { name: "UTMAX", exact: true })
+      .getByRole("heading", { name: "Univyrse", exact: true })
       .locator("xpath=ancestor::*[self::article or self::li][1]");
     const moreDetails = moreRecord.locator("details");
     await expect(
@@ -543,27 +558,36 @@ test("terminal projects command lists featured and more work", async ({ page }) 
   expect(output).toContain("Featured work");
   expect(output).toContain("More projects");
   expect(output).toMatch(/development-only/);
-  expect(output).toContain("Agentic Software Factory v1");
-  expect(output).not.toContain("GT100K Factory");
-  expect(output).not.toMatch(
-    /agentic[\s-]*software[\s-]*factory.*https?:\/\//i
+  expect(output).toContain("Agentic Factory v1");
+  expect(output).toContain("Turing Machine Runtime Ranking Engine");
+  expect(output).toContain("keyAC");
+  expect(output).toContain(
+    "Graphics API Telemetry & Energy Efficiency Benchmark"
   );
 });
 
-test("terminal open command resolves small learning model dataset", async ({
+test("terminal open command resolves audio slm dataset and iexdevs", async ({
   page,
 }) => {
   await openLayout(page, true);
 
-  const popupPromise = page.waitForEvent("popup");
-  const log = await submitTerminalCommand(page, "open small learning model dataset");
-  const output = await log.innerText();
+  const popupPromise1 = page.waitForEvent("popup");
+  const log1 = await submitTerminalCommand(page, "open audio slm dataset");
+  const output1 = await log1.innerText();
 
-  expect(output).toContain(slmDatasetUrl);
-  expect(output.toLowerCase()).not.toMatch(/\berror\b/);
+  expect(output1).toContain(slmDatasetUrl);
+  expect(output1.toLowerCase()).not.toMatch(/\berror\b/);
 
-  const popup = await popupPromise;
-  await popup.close();
+  const popup1 = await popupPromise1;
+  await popup1.close();
+
+  const popupPromise2 = page.waitForEvent("popup");
+  const log2 = await submitTerminalCommand(page, "open iexdevs");
+  const output2 = await log2.innerText();
+
+  expect(output2).toContain("https://iexdevs.com/");
+  const popup2 = await popupPromise2;
+  await popup2.close();
 });
 
 test("terminal renders every hero stat", async ({ page }) => {
@@ -639,63 +663,59 @@ test("synthwave renders complete navigation and project years", async ({ page })
   }
 });
 
-test("Mercor highlights frame 0.5% as problem-set coverage, not accuracy gain", () => {
-  const mercor = experience.find((job) => job.company === "Mercor Intelligence");
+test("Experience roster matches Master Resume with 7 entries", () => {
+  expect(experience.map((job) => job.company)).toEqual([
+    "IEXDevs",
+    "Alpha AI",
+    "Mercor",
+    "Chakra Labs",
+    "Virgilio Acoustics",
+    "Project: Empower",
+    "University of Houston",
+  ]);
 
-  expect(mercor, "missing Mercor Intelligence experience").toBeDefined();
-  const text = mercor!.highlights.join(" ");
-  expect(text).toMatch(/80,000/);
-  expect(text).toMatch(/400/);
-  expect(text).toMatch(/0\.5%/);
-  expect(text.toLowerCase()).toMatch(/share of problems corrected/);
-  expect(text.toLowerCase()).not.toMatch(/accuracy/);
-  expect(mercor!.stack).toContain("Python");
-});
+  const iex = experience.find((job) => job.company === "IEXDevs");
+  expect(iex?.href).toBe("https://iexdevs.com/");
+  expect(iex?.highlights).toHaveLength(6);
 
-test("Empower highlights retain scale metrics and Illuminate delivery context", () => {
+  const mercor = experience.find((job) => job.company === "Mercor");
+  expect(mercor?.highlights).toHaveLength(2);
+  expect(mercor?.highlights.join(" ")).toMatch(/95\.5% reviewer acceptance rate/);
+  expect(mercor?.highlights.join(" ")).toMatch(/multi-candidate frontier model outputs/);
+
+  const chakra = experience.find((job) => job.company === "Chakra Labs");
+  expect(chakra?.highlights).toHaveLength(2);
+  expect(chakra?.highlights.join(" ")).toMatch(/70 completed multi-application trajectories/);
+  expect(chakra?.highlights.join(" ")).toMatch(/98% acceptance rate/);
+
   const empower = experience.find((job) => job.company === "Project: Empower");
+  expect(empower?.highlights.join(" ")).toMatch(/1M\+ cumulative pageviews/);
+  expect(empower?.highlights.join(" ")).toMatch(/\$112,750/);
 
-  expect(empower, "missing Project: Empower experience").toBeDefined();
-  const text = [...empower!.highlights, empower!.summary].join(" ");
-  expect(text).toMatch(/60\+ chapters/);
-  expect(text).toMatch(/10 countries/);
-  expect(text).toMatch(/621/);
-  expect(text).toMatch(/\$112,750/);
-  expect(text).toMatch(/1M/);
-  expect(text).toMatch(/GA4/);
-  expect(text).toMatch(/Tailwind/);
-  expect(text).toMatch(/team of five/i);
-  expect(empower!.stack).toContain("Node.js");
-  expect(empower!.stack).toContain("Tailwind CSS");
-});
-
-test("University of Houston highlights cover simulation and TraCI automation context", () => {
   const uh = experience.find((job) => job.company === "University of Houston");
-
-  expect(uh, "missing University of Houston experience").toBeDefined();
-  const text = [...uh!.highlights, uh!.summary].join(" ");
-  expect(text).toMatch(/SUMO/i);
-  expect(text).toMatch(/TraCI/i);
-  expect(text).toMatch(/traffic-flow phenomena/i);
-  expect(text.toLowerCase()).not.toMatch(/publication/);
-  expect(text.toLowerCase()).not.toMatch(/trained model/);
+  expect(uh?.highlights.join(" ")).toMatch(/12 simulated traffic networks/);
+  expect(uh?.highlights.join(" ")).toMatch(/TraCI/);
 });
 
-test("experience uses the Alpha AI organization name", () => {
-  expect(experience.some((job) => job.company === "Alpha AI")).toBe(true);
-});
+test("new systems projects contain vetted Master Resume bullets", () => {
+  const tmc = richProjects.find(
+    (project) => project.name === "Turing Machine Runtime Ranking Engine"
+  );
+  expect(tmc?.details).toHaveLength(5);
+  expect(tmc?.details.join(" ")).toMatch(/90\.1% pairwise accuracy/);
+  expect(tmc?.details.join(" ")).toMatch(/99\.67%/);
 
-test("project summaries include verified user adoption metrics", () => {
-  const subwoofer = richProjects.find((project) => project.name === "Subwoofer Central");
-  const utmax = richProjects.find((project) => project.name === "UTMAX");
-  const utmap = richProjects.find((project) => project.name === "UTMap");
+  const keyAc = richProjects.find((project) => project.name === "keyAC");
+  expect(keyAc?.details).toHaveLength(4);
+  expect(keyAc?.details.join(" ")).toMatch(/PreciseWaiter/);
+  expect(keyAc?.details.join(" ")).toMatch(/Ornstein-Uhlenbeck/);
 
-  expect(subwoofer?.summary).toMatch(/1,000\+ users/i);
-  expect(subwoofer?.summary).toMatch(/growing/i);
-  expect(utmax?.summary).toMatch(/200\+ UT Austin students/i);
-  expect(utmap?.summary).toMatch(/200\+ UT Austin students/i);
-  expect(utmax?.summary).toMatch(/before the 2026-27 school year began/i);
-  expect(utmap?.summary).toMatch(/before the 2026-27 school year began/i);
+  const gfx = richProjects.find(
+    (project) =>
+      project.name === "Graphics API Telemetry & Energy Efficiency Benchmark"
+  );
+  expect(gfx?.details).toHaveLength(3);
+  expect(gfx?.details.join(" ")).toMatch(/0\.727 FPS\/W/);
 });
 
 test("Devpost is available in shared links and the synthwave social rail", async ({ page }) => {
@@ -775,6 +795,7 @@ test("Gemini knowledge includes compact canonical fields", () => {
     },
     languages: factValue("Languages"),
     focus: factValue("Focus"),
+    awards,
     experience,
     projects,
     skills,
