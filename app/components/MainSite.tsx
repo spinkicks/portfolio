@@ -1,8 +1,9 @@
 "use client";
 
-import { ReactNode, useRef, useState, useSyncExternalStore } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Mail, Terminal } from "lucide-react";
+import { ReactNode, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Mail, Terminal, X } from "lucide-react";
 import {
   Backdrop,
   BackdropSwitch,
@@ -19,9 +20,11 @@ import {
   SocialRail,
 } from "./hero/Chrome";
 import HeroMarquee from "./hero/HeroMarquee";
+import CircularCarousel, { type CircularCarouselItem } from "./CircularCarousel";
 import TypingTest from "./TypingTest";
 import {
   awards,
+  carouselProjects,
   experience,
   facts,
   featuredProjects,
@@ -225,7 +228,7 @@ function About() {
             {profile.bio}
           </p>
 
-          <div className="mt-8 border-t border-line-soft pt-6">
+          <div className="mt-8">
             <h3 className="label text-cyan">Awards &amp; Honors</h3>
             <ul className="mt-3 space-y-1.5">
               {awards.map((award) => (
@@ -240,9 +243,9 @@ function About() {
           </div>
         </div>
 
-        <dl className="divide-y divide-line-soft border-t border-line-soft">
+        <dl className="space-y-4">
           {facts.map((fact) => (
-            <div key={fact.label} className="grid grid-cols-[7rem_1fr] gap-4 py-3">
+            <div key={fact.label} className="grid grid-cols-[7rem_1fr] gap-4">
               <dt className="label pt-0.5">{fact.label}</dt>
               <dd className="text-sm text-fg">{fact.value}</dd>
             </div>
@@ -343,7 +346,6 @@ function Work() {
           id={panelId}
           role="tabpanel"
           aria-labelledby={`experience-tab-${activeIndex}`}
-          className="border-t border-line-soft pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0"
         >
           <ExperiencePanel key={activeJob.company} job={activeJob} />
         </div>
@@ -400,28 +402,297 @@ function ExperiencePanel({ job }: { job: Experience }) {
 
 /* ------------------------------------------------------------ Projects */
 
+function projectAnchorId(name: string): string {
+  return `project-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`;
+}
+
+const CAROUSEL_ITEMS: CircularCarouselItem[] = carouselProjects.map(
+  (project) => ({
+    src: project.image!,
+    alt: `${project.name} — ${project.summary}`,
+    title: project.name,
+    subtitle: `${project.status} · ${project.year}`,
+    aspectRatio: project.imageAspect,
+    href: project.status === "live" ? project.href : undefined,
+  })
+);
+
+const SYNTHWAVE_LIST_PROJECTS: Project[] = [
+  ...featuredProjects,
+  ...moreProjects,
+].filter((project) => !project.image);
+
+function formatHostLabel(href: string): string {
+  try {
+    const url = new URL(href);
+    return url.hostname.replace(/^www\./, "");
+  } catch {
+    return "Open link";
+  }
+}
+
 function Projects() {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const selectedProject =
+    selectedIndex !== null ? carouselProjects[selectedIndex] ?? null : null;
+
+  useEffect(() => {
+    if (selectedIndex === null) return;
+    const total = carouselProjects.length;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setSelectedIndex(null);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setSelectedIndex((prev) => (prev === null ? 0 : (prev + 1) % total));
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setSelectedIndex((prev) =>
+          prev === null ? 0 : (prev - 1 + total) % total
+        );
+      } else if (
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown" ||
+        event.key === "PageUp" ||
+        event.key === "PageDown" ||
+        event.key === "Home" ||
+        event.key === "End" ||
+        event.key === " "
+      ) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, [selectedIndex]);
+
+  const stepProject = (delta: number) => {
+    const total = carouselProjects.length;
+    setSelectedIndex((prev) =>
+      prev === null ? 0 : (prev + delta + total) % total
+    );
+  };
+
   return (
     <Section id="projects" title="Featured Work">
-      <ol className="grid border-y border-line-soft md:grid-cols-2">
-        {featuredProjects.map((project) => (
-          <ProjectEntry key={project.name} project={project} heading="h3" />
-        ))}
-      </ol>
-
-      <div className="mt-16 sm:mt-20">
-        <div className="mb-6 flex items-baseline justify-between gap-6">
-          <h3 className="display text-2xl text-fg sm:text-3xl">More Projects</h3>
-          <span className="font-mono text-xs text-faint">
-            {String(moreProjects.length).padStart(2, "0")} entries
-          </span>
+      <div className="relative left-1/2 mb-14 h-[456px] w-[min(120%,calc(100vw-2rem))] -translate-x-1/2 sm:mb-16 sm:h-[528px]">
+        <div
+          className={`h-full w-full transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            selectedProject
+              ? "pointer-events-none scale-[1.06] opacity-25"
+              : "scale-100 opacity-100"
+          }`}
+        >
+          <CircularCarousel
+            items={CAROUSEL_ITEMS}
+            preset="cylinder"
+            intro="rise"
+            cardWidth={336}
+            aspectRatio={1.5}
+            gap={29}
+            autoplay="drift"
+            speed={10}
+            fadeColor="#07020f"
+            cornerRadius={14}
+            captions
+            zoomedIndex={selectedIndex}
+            onItemClick={(_, index) => setSelectedIndex(index)}
+          />
         </div>
+      </div>
+
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {selectedProject && selectedIndex !== null && (
+              <motion.div
+                key="carousel-inspector-stage"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.22 }}
+                className="fixed inset-0 z-[42] flex items-center justify-center bg-ink-900/55 p-4 backdrop-blur-md sm:p-6"
+                onClick={(event) => {
+                  if (event.target === event.currentTarget) {
+                    setSelectedIndex(null);
+                  }
+                }}
+              >
+                <motion.article
+                  key={selectedProject.name}
+                  initial={{ opacity: 0, scale: 0.9, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: 8 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 340,
+                    damping: 30,
+                    mass: 0.85,
+                  }}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={`${selectedProject.name} details`}
+                  className="relative mx-auto max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto border border-line-soft bg-ink-900/92 p-5 shadow-[0_32px_90px_-20px_rgba(0,0,0,0.88)] backdrop-blur-xl sm:p-7"
+                >
+                  {/* Top bar: status / year / navigation / close X (no dividing line, no blue dot, no 01/08 counter) */}
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-2.5 font-mono text-xs">
+                      <span className="text-cyan">{selectedProject.status}</span>
+                      <span className="text-line-soft">·</span>
+                      <span className="text-faint">{selectedProject.year}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => stepProject(-1)}
+                        aria-label="Previous project"
+                        className="inline-flex h-8 w-8 items-center justify-center border border-line-soft text-dim transition-colors duration-150 hover:border-cyan hover:text-fg"
+                      >
+                        <ChevronLeft size={15} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => stepProject(1)}
+                        aria-label="Next project"
+                        className="inline-flex h-8 w-8 items-center justify-center border border-line-soft text-dim transition-colors duration-150 hover:border-cyan hover:text-fg"
+                      >
+                        <ChevronRight size={15} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedIndex(null)}
+                        aria-label="Close project inspector"
+                        className="ml-2 inline-flex h-8 items-center gap-1.5 border border-line-soft px-2.5 font-mono text-xs text-dim transition-colors duration-150 hover:border-magenta hover:bg-magenta/10 hover:text-fg"
+                      >
+                        <span className="hidden text-[0.65rem] text-faint sm:inline">
+                          ESC
+                        </span>
+                        <X size={15} aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Main split body: uncropped screenshot without outline on left, full specs on right */}
+                  <div className="mt-4 grid items-start gap-6 lg:grid-cols-[1.02fr_1.28fr] lg:gap-8">
+                    <div className="flex flex-col gap-3">
+                      <div className="relative flex max-h-[380px] items-center justify-center overflow-hidden">
+                        {selectedProject.image && (
+                          <img
+                            src={selectedProject.image}
+                            alt={selectedProject.name}
+                            className="max-h-[360px] w-auto max-w-full rounded-md object-contain"
+                          />
+                        )}
+                      </div>
+
+                      {(selectedProject.href || selectedProject.secondary) && (
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          {selectedProject.href && (
+                            <a
+                              href={selectedProject.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex min-h-9 items-center gap-2 border border-magenta/55 bg-magenta/12 px-3.5 py-1.5 font-mono text-xs text-fg transition-colors duration-200 hover:border-magenta hover:bg-magenta/22"
+                            >
+                              <span>{formatHostLabel(selectedProject.href)}</span>
+                              <ArrowUpRight size={13} aria-hidden="true" />
+                            </a>
+                          )}
+                          {selectedProject.secondary && (
+                            <a
+                              href={selectedProject.secondary.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex min-h-9 items-center gap-1.5 border border-line-soft px-3 py-1.5 font-mono text-xs text-cyan transition-colors duration-200 hover:border-cyan hover:text-fg"
+                            >
+                              <span>{selectedProject.secondary.label}</span>
+                              <ArrowUpRight size={13} aria-hidden="true" />
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex flex-wrap items-baseline justify-between gap-3">
+                        <h3 className="display text-2xl text-fg sm:text-4xl">
+                          {selectedProject.href ? (
+                            <a
+                              href={selectedProject.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 transition-colors duration-200 hover:text-magenta"
+                            >
+                              {selectedProject.name}
+                              <ArrowUpRight size={18} aria-hidden="true" />
+                            </a>
+                          ) : (
+                            selectedProject.name
+                          )}
+                        </h3>
+                      </div>
+
+                      <p className="mt-3 text-pretty text-sm leading-relaxed text-fg/90 sm:text-base">
+                        {selectedProject.summary}
+                      </p>
+
+                      <div className="mt-5 border-t border-line-soft pt-4">
+                        <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-cyan">
+                          Technical Architecture &amp; Specs
+                        </p>
+                        <ul className="mt-3 space-y-2.5">
+                          {selectedProject.details.map((detail) => (
+                            <li
+                              key={detail}
+                              className="relative pl-4 text-xs leading-relaxed text-dim before:absolute before:left-0 before:top-[0.6em] before:size-1 before:bg-violet sm:text-sm"
+                            >
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mt-5 border-t border-line-soft pt-4">
+                        <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-faint">
+                          Related Skills &amp; Stack
+                        </p>
+                        <ul className="mt-2.5 flex flex-wrap gap-2">
+                          {selectedProject.stack.map((tech) => (
+                            <li key={tech} className="chip">
+                              {tech}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </motion.article>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+
+      {SYNTHWAVE_LIST_PROJECTS.length > 0 && (
         <ol className="grid border-y border-line-soft md:grid-cols-2">
-          {moreProjects.map((project) => (
-            <ProjectEntry key={project.name} project={project} heading="h4" />
+          {SYNTHWAVE_LIST_PROJECTS.map((project) => (
+            <ProjectEntry key={project.name} project={project} heading="h3" />
           ))}
         </ol>
-      </div>
+      )}
     </Section>
   );
 }
@@ -456,7 +727,10 @@ function ProjectEntry({
   heading: "h3" | "h4";
 }) {
   return (
-    <li className="border-line-soft py-6 [contain:layout_style] md:odd:border-r md:odd:pr-8 md:even:pl-8">
+    <li
+      id={projectAnchorId(project.name)}
+      className="scroll-mt-28 border-line-soft py-6 [contain:layout_style] md:odd:border-r md:odd:pr-8 md:even:pl-8"
+    >
       <article>
         <div className="flex items-start justify-between gap-5">
           <div>
@@ -535,7 +809,7 @@ function Skills() {
     <Section id="skills" title="Toolkit">
       <div className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
         {skills.map((category) => (
-          <div key={category.group} className="border-t border-line-soft pt-4">
+          <div key={category.group}>
             <h3 className="font-mono text-xs text-cyan">{category.group}</h3>
             <ul className="mt-4 flex flex-wrap gap-2">
               {category.items.map((item) => (
@@ -563,9 +837,7 @@ function Contact({ backdrop }: { backdrop: BackdropId }) {
   return (
     <Reveal>
       <footer id="contact" className="border-t border-line-soft pt-12">
-        <p className="label text-magenta">Contact</p>
-
-        <h2 className="display mt-4 max-w-[16ch] text-4xl text-fg sm:text-6xl">
+        <h2 className="display max-w-[16ch] text-4xl text-fg sm:text-6xl">
           Let&apos;s build something.
         </h2>
 

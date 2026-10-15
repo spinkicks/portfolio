@@ -214,6 +214,8 @@ export type Project = {
   stack: string[];
   href?: string;
   secondary?: { label: string; href: string };
+  image?: string;
+  imageAspect?: number;
   year: string;
 };
 
@@ -240,6 +242,8 @@ export const projects: Project[] = [
       "Vitest",
     ],
     href: "https://www.subwoofer.live/",
+    image: "/projects/subwoofercentral.png",
+    imageAspect: 2854 / 1622,
     year: "2026",
   },
   {
@@ -259,6 +263,8 @@ export const projects: Project[] = [
       label: "Dataset",
       href: "https://huggingface.co/datasets/audiuphile/blazing-audio-slm-v7-4-dataset-dev",
     },
+    image: "/projects/audioSLM.png",
+    imageAspect: 2842 / 1552,
     year: "2026",
   },
   {
@@ -282,6 +288,8 @@ export const projects: Project[] = [
       "Firebase",
     ],
     href: "https://blazing-audio-alpha.web.app/",
+    image: "/projects/blazingaudio.png",
+    imageAspect: 2832 / 1556,
     year: "2026",
   },
   {
@@ -363,6 +371,8 @@ export const projects: Project[] = [
       "MCP",
     ],
     href: "https://www.utmax.tech/",
+    image: "/projects/utmax.png",
+    imageAspect: 2878 / 1510,
     year: "2026",
   },
   {
@@ -384,6 +394,8 @@ export const projects: Project[] = [
       "GeoJSON",
     ],
     href: "https://www.utmap.app/",
+    image: "/projects/utmap.png",
+    imageAspect: 2880 / 1620,
     year: "2026",
   },
   {
@@ -406,6 +418,8 @@ export const projects: Project[] = [
       "Multithreading",
       "MSVC",
     ],
+    image: "/projects/keyac.png",
+    imageAspect: 996 / 1338,
     year: "2026",
   },
   {
@@ -425,15 +439,14 @@ export const projects: Project[] = [
   {
     name: "Univyrse",
     tier: "more",
-    status: "live",
+    status: "development-only",
     summary:
-      "Co-developed a live college-application marketplace with Stripe Connect multi-party checkout workflows, webhook idempotency, Redis rate limiting, and purchase-gated Firestore rules.",
+      "Co-developed a college-application marketplace with Stripe Connect multi-party checkout workflows, webhook idempotency, Redis rate limiting, and purchase-gated Firestore rules.",
     details: [
-      "Co-developed a live college-application marketplace; engineered Stripe Connect multi-party checkout workflows with webhook idempotency to prevent duplicate charges and race conditions.",
+      "Co-developed a college-application marketplace; engineered Stripe Connect multi-party checkout workflows with webhook idempotency to prevent duplicate charges and race conditions.",
       "Maintained worker stability during concurrent checkout load tests using Redis-backed rate limiting and asynchronous queues; enforced purchase-gated Firestore security rules.",
     ],
     stack: ["Next.js", "Firebase", "Stripe Connect", "Redis"],
-    href: "https://univyrse.ai/",
     year: "2026",
   },
   {
@@ -484,6 +497,8 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "TypeScript", "Neon", "Vercel Blob"],
     href: "https://www.virgilio.systems/",
+    image: "/projects/virgilioacoustics.png",
+    imageAspect: 2880 / 1618,
     year: "2026",
   },
   {
@@ -497,6 +512,8 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "React", "Node.js", "Supabase", "PostgreSQL"],
     href: "https://illuminate.projectempower.io/",
+    image: "/projects/illuminate.png",
+    imageAspect: 2880 / 1550,
     year: "2024",
   },
 ];
@@ -507,6 +524,10 @@ export const featuredProjects = projects.filter(
 
 export const moreProjects = projects.filter(
   (project) => project.tier === "more"
+);
+
+export const carouselProjects = projects.filter((project) =>
+  Boolean(project.image)
 );
 
 export const skills = [

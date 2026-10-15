@@ -129,16 +129,11 @@ export default function TypingTest() {
 
   return (
     <div className="panel p-6 sm:p-8">
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
         <div>
-          <p className="label">Benchmark</p>
-          <h3 className="display mt-2 text-3xl text-fg sm:text-4xl">
-            Beat <span className="text-magenta glow-magenta">200 WPM</span>
+          <h3 className="display text-3xl text-fg sm:text-4xl">
+            Beat my <span className="text-magenta glow-magenta">200 WPM</span>
           </h3>
-          <p className="mt-2 max-w-md text-sm text-dim">
-            Type the passage below. Accuracy counts, so only correct characters
-            score.
-          </p>
         </div>
 
         <div className="flex gap-3">

@@ -24,7 +24,6 @@ type Entry = {
 export const BACKDROPS: Entry[] = [
   { id: "drive", label: "Sunset Drive", credit: SHADERS["sunset-drive"].credit },
   { id: "art", label: "Artwork", credit: null },
-  { id: "synth", label: "Synthwave", credit: SHADERS["synthwave-theme"].credit },
 ];
 
 export const DEFAULT_BACKDROP: BackdropId = BACKDROPS[0].id;
